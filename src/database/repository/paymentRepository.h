@@ -11,13 +11,8 @@ enum class PaymentStatus {
 
 class PaymentRepository {
 public:
-    void saveStatus(int orderId, PaymentStatus status) { payments_[orderId] = status; }
-
-    PaymentStatus status(int orderId) const
-    {
-        const auto found = payments_.find(orderId);
-        return found == payments_.end() ? PaymentStatus::Pending : found->second;
-    }
+    void saveStatus(int orderId, PaymentStatus status);
+    PaymentStatus status(int orderId) const;
 
 private:
     std::map<int, PaymentStatus> payments_;

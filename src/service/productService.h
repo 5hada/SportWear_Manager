@@ -3,32 +3,16 @@
 
 #include "database/repository/productRepository.h"
 
+#include <optional>
+#include <vector>
+
 class ProductService {
 public:
-    explicit ProductService(ProductRepository *products) : products_(products) {}
+    explicit ProductService(ProductRepository *products);
 
-    std::vector<Product> listProducts() const
-    {
-        if (products_ == nullptr) {
-            return {};
-        }
-        return products_->findAll();
-    }
-
-    std::optional<Product> getProduct(int id) const
-    {
-        if (products_ == nullptr) {
-            return std::nullopt;
-        }
-        return products_->findById(id);
-    }
-
-    void saveProduct(const Product &product)
-    {
-        if (products_ != nullptr) {
-            products_->save(product);
-        }
-    }
+    std::vector<Product> listProducts() const;
+    std::optional<Product> getProduct(int id) const;
+    void saveProduct(const Product &product);
 
 private:
     ProductRepository *products_ = nullptr;

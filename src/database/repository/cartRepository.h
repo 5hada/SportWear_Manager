@@ -7,10 +7,10 @@
 
 class CartRepository {
 public:
-    Cart &cartForUser(int userId) { return carts_[userId]; }
-    const Cart &cartForUser(int userId) const { return carts_.at(userId); }
+    Cart &cartForUser(int userId);
+    Cart cartForUser(int userId) const;
 
-    void clear(int userId) { carts_[userId].clear(); }
+    void clear(int userId);
 
 private:
     std::map<int, Cart> carts_;

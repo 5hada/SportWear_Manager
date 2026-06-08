@@ -7,21 +7,10 @@
 
 class ReviewRepository {
 public:
-    const std::vector<Review> &findAll() const { return reviews_; }
-
-    std::vector<Review> findByProductId(int productId) const
-    {
-        std::vector<Review> result;
-        for (const auto &review : reviews_) {
-            if (review.productId() == productId) {
-                result.push_back(review);
-            }
-        }
-        return result;
-    }
-
-    void save(const Review &review) { reviews_.push_back(review); }
-    int nextId() const { return static_cast<int>(reviews_.size()) + 1; }
+    const std::vector<Review> &findAll() const;
+    std::vector<Review> findByProductId(int productId) const;
+    void save(const Review &review);
+    int nextId() const;
 
 private:
     std::vector<Review> reviews_;

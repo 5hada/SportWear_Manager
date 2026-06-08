@@ -7,20 +7,9 @@
 
 class LoginService {
 public:
-    explicit LoginService(UserRepository *users) : users_(users) {}
+    explicit LoginService(UserRepository *users);
 
-    std::optional<User> login(const std::string &name, const std::string &password) const
-    {
-        if (users_ == nullptr) {
-            return std::nullopt;
-        }
-
-        auto user = users_->findByName(name);
-        if (user.has_value() && user->checkPassword(password)) {
-            return user;
-        }
-        return std::nullopt;
-    }
+    std::optional<User> login(const std::string &name, const std::string &password) const;
 
 private:
     UserRepository *users_ = nullptr;

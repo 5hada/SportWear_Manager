@@ -4,15 +4,12 @@
 class OrderItem {
 public:
     OrderItem() = default;
-    OrderItem(int productId, int quantity, int unitPrice)
-        : productId_(productId), quantity_(quantity), unitPrice_(unitPrice)
-    {
-    }
+    OrderItem(int productId, int quantity, int unitPrice);
 
-    int productId() const { return productId_; }
-    int quantity() const { return quantity_; }
-    int unitPrice() const { return unitPrice_; }
-    int totalPrice() const { return quantity_ * unitPrice_; }
+    int productId() const;
+    int quantity() const;
+    int unitPrice() const;
+    int totalPrice() const;
 
 private:
     int productId_ = 0;

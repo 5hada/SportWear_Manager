@@ -6,22 +6,19 @@
 class UserBase {
 public:
     UserBase() = default;
-    UserBase(int id, std::string name, std::string password)
-        : id_(id), name_(std::move(name)), password_(std::move(password))
-    {
-    }
+    UserBase(int id, std::string name, std::string password);
 
     virtual ~UserBase() = default;
 
-    int id() const { return id_; }
-    const std::string &name() const { return name_; }
-    const std::string &password() const { return password_; }
+    int id() const;
+    const std::string &name() const;
+    const std::string &password() const;
 
-    void setId(int id) { id_ = id; }
-    void setName(std::string name) { name_ = std::move(name); }
-    void setPassword(std::string password) { password_ = std::move(password); }
+    void setId(int id);
+    void setName(std::string name);
+    void setPassword(std::string password);
 
-    bool checkPassword(const std::string &password) const { return password_ == password; }
+    bool checkPassword(const std::string &password) const;
 
 private:
     int id_ = 0;

@@ -8,31 +8,21 @@
 class Product {
 public:
     Product() = default;
-    Product(int id, std::string name, Category category, int price, int stock)
-        : id_(id), name_(std::move(name)), category_(category), price_(price), stock_(stock)
-    {
-    }
+    Product(int id, std::string name, Category category, int price, int stock);
 
-    int id() const { return id_; }
-    const std::string &name() const { return name_; }
-    Category category() const { return category_; }
-    int price() const { return price_; }
-    int stock() const { return stock_; }
+    int id() const;
+    const std::string &name() const;
+    Category category() const;
+    int price() const;
+    int stock() const;
 
-    void setName(std::string name) { name_ = std::move(name); }
-    void setCategory(Category category) { category_ = category; }
-    void setPrice(int price) { price_ = price; }
-    void setStock(int stock) { stock_ = stock; }
+    void setName(std::string name);
+    void setCategory(Category category);
+    void setPrice(int price);
+    void setStock(int stock);
 
-    bool hasStock(int count) const { return count > 0 && stock_ >= count; }
-    bool decreaseStock(int count)
-    {
-        if (!hasStock(count)) {
-            return false;
-        }
-        stock_ -= count;
-        return true;
-    }
+    bool hasStock(int count) const;
+    bool decreaseStock(int count);
 
 private:
     int id_ = 0;

@@ -7,23 +7,9 @@
 
 class WishlistRepository {
 public:
-    const std::vector<int> &findProductIds(int userId) const { return wishlists_.at(userId); }
-
-    void add(int userId, int productId)
-    {
-        auto &list = wishlists_[userId];
-        if (std::find(list.begin(), list.end(), productId) == list.end()) {
-            list.push_back(productId);
-        }
-    }
-
-    bool remove(int userId, int productId)
-    {
-        auto &list = wishlists_[userId];
-        const auto originalSize = list.size();
-        list.erase(std::remove(list.begin(), list.end(), productId), list.end());
-        return list.size() != originalSize;
-    }
+    std::vector<int> findProductIds(int userId) const;
+    void add(int userId, int productId);
+    bool remove(int userId, int productId);
 
 private:
     std::map<int, std::vector<int>> wishlists_;

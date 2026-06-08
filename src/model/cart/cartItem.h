@@ -6,13 +6,13 @@
 class CartItem {
 public:
     CartItem() = default;
-    CartItem(Product product, int quantity) : product_(std::move(product)), quantity_(quantity) {}
+    CartItem(Product product, int quantity);
 
-    const Product &product() const { return product_; }
-    int quantity() const { return quantity_; }
-    int totalPrice() const { return product_.price() * quantity_; }
+    const Product &product() const;
+    int quantity() const;
+    int totalPrice() const;
 
-    void setQuantity(int quantity) { quantity_ = quantity; }
+    void setQuantity(int quantity);
 
 private:
     Product product_;

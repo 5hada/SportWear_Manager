@@ -4,17 +4,14 @@
 class Receipt {
 public:
     Receipt() = default;
-    Receipt(int id, int price, int count, int point)
-        : id_(id), price_(price), count_(count), point_(point)
-    {
-    }
+    Receipt(int id, int price, int count, int point);
 
-    int id() const { return id_; }
-    int price() const { return price_; }
-    int count() const { return count_; }
-    int point() const { return point_; }
+    int id() const;
+    int price() const;
+    int count() const;
+    int point() const;
 
-    int totalPrice() const { return price_ * count_; }
+    int totalPrice() const;
 
 private:
     int id_ = 0;

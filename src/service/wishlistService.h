@@ -5,19 +5,10 @@
 
 class WishlistService {
 public:
-    explicit WishlistService(WishlistRepository *wishlist) : wishlist_(wishlist) {}
+    explicit WishlistService(WishlistRepository *wishlist);
 
-    void add(int userId, int productId)
-    {
-        if (wishlist_ != nullptr) {
-            wishlist_->add(userId, productId);
-        }
-    }
-
-    bool remove(int userId, int productId)
-    {
-        return wishlist_ != nullptr && wishlist_->remove(userId, productId);
-    }
+    void add(int userId, int productId);
+    bool remove(int userId, int productId);
 
 private:
     WishlistRepository *wishlist_ = nullptr;

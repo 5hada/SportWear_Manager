@@ -5,19 +5,10 @@
 
 class InventoryService {
 public:
-    explicit InventoryService(InventoryRepository *inventory) : inventory_(inventory) {}
+    explicit InventoryService(InventoryRepository *inventory);
 
-    void setStock(int productId, int quantity)
-    {
-        if (inventory_ != nullptr) {
-            inventory_->save(Inventory(productId, quantity));
-        }
-    }
-
-    bool removeStock(int productId, int quantity)
-    {
-        return inventory_ != nullptr && inventory_->removeStock(productId, quantity);
-    }
+    void setStock(int productId, int quantity);
+    bool removeStock(int productId, int quantity);
 
 private:
     InventoryRepository *inventory_ = nullptr;

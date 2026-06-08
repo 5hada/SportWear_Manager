@@ -6,7 +6,7 @@
 class Guest : public UserBase {
 public:
     Guest() = default;
-    explicit Guest(int id = 0) : UserBase(id, "guest", "") {}
+    explicit Guest(int id);
 };
 
 #endif // GUEST_H

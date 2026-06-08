@@ -6,16 +6,13 @@
 class Review {
 public:
     Review() = default;
-    Review(int id, int userId, int productId, int rating, std::string comment)
-        : id_(id), userId_(userId), productId_(productId), rating_(rating), comment_(std::move(comment))
-    {
-    }
+    Review(int id, int userId, int productId, int rating, std::string comment);
 
-    int id() const { return id_; }
-    int userId() const { return userId_; }
-    int productId() const { return productId_; }
-    int rating() const { return rating_; }
-    const std::string &comment() const { return comment_; }
+    int id() const;
+    int userId() const;
+    int productId() const;
+    int rating() const;
+    const std::string &comment() const;
 
 private:
     int id_ = 0;

@@ -13,16 +13,13 @@ enum class DeliveryStatus {
 class Delivery {
 public:
     Delivery() = default;
-    Delivery(std::string address, DeliveryStatus status = DeliveryStatus::Ready)
-        : address_(std::move(address)), status_(status)
-    {
-    }
+    Delivery(std::string address, DeliveryStatus status = DeliveryStatus::Ready);
 
-    const std::string &address() const { return address_; }
-    DeliveryStatus status() const { return status_; }
+    const std::string &address() const;
+    DeliveryStatus status() const;
 
-    void setAddress(std::string address) { address_ = std::move(address); }
-    void setStatus(DeliveryStatus status) { status_ = status; }
+    void setAddress(std::string address);
+    void setStatus(DeliveryStatus status);
 
 private:
     std::string address_;

@@ -8,22 +8,9 @@
 
 class InventoryRepository {
 public:
-    std::optional<Inventory> findByProductId(int productId) const
-    {
-        const auto found = items_.find(productId);
-        if (found == items_.end()) {
-            return std::nullopt;
-        }
-        return found->second;
-    }
-
-    void save(const Inventory &inventory) { items_[inventory.productId()] = inventory; }
-
-    bool removeStock(int productId, int quantity)
-    {
-        auto found = items_.find(productId);
-        return found != items_.end() && found->second.remove(quantity);
-    }
+    std::optional<Inventory> findByProductId(int productId) const;
+    void save(const Inventory &inventory);
+    bool removeStock(int productId, int quantity);
 
 private:
     std::map<int, Inventory> items_;

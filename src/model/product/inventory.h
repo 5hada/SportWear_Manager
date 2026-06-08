@@ -4,22 +4,15 @@
 class Inventory {
 public:
     Inventory() = default;
-    Inventory(int productId, int quantity) : productId_(productId), quantity_(quantity) {}
+    Inventory(int productId, int quantity);
 
-    int productId() const { return productId_; }
-    int quantity() const { return quantity_; }
+    int productId() const;
+    int quantity() const;
 
-    void setQuantity(int quantity) { quantity_ = quantity; }
-    void add(int quantity) { quantity_ += quantity; }
+    void setQuantity(int quantity);
+    void add(int quantity);
 
-    bool remove(int quantity)
-    {
-        if (quantity < 0 || quantity_ < quantity) {
-            return false;
-        }
-        quantity_ -= quantity;
-        return true;
-    }
+    bool remove(int quantity);
 
 private:
     int productId_ = 0;

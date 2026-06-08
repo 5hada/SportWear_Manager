@@ -6,10 +6,7 @@
 class Admin : public UserBase {
 public:
     Admin() = default;
-    Admin(int id, std::string name, std::string password)
-        : UserBase(id, std::move(name), std::move(password))
-    {
-    }
+    Admin(int id, std::string name, std::string password);
 };
 
 #endif // ADMIN_H

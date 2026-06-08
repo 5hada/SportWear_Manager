@@ -4,7 +4,6 @@
 #include "delivery.h"
 #include "orderItem.h"
 
-#include <string>
 #include <vector>
 
 enum class OrderStatus {
@@ -17,28 +16,18 @@ enum class OrderStatus {
 class Order {
 public:
     Order() = default;
-    Order(int id, int userId, std::vector<OrderItem> items, Delivery delivery = {})
-        : id_(id), userId_(userId), items_(std::move(items)), delivery_(std::move(delivery))
-    {
-    }
+    Order(int id, int userId, std::vector<OrderItem> items, Delivery delivery = {});
 
-    int id() const { return id_; }
-    int userId() const { return userId_; }
-    OrderStatus status() const { return status_; }
-    const std::vector<OrderItem> &items() const { return items_; }
-    const Delivery &delivery() const { return delivery_; }
+    int id() const;
+    int userId() const;
+    OrderStatus status() const;
+    const std::vector<OrderItem> &items() const;
+    const Delivery &delivery() const;
 
-    void setStatus(OrderStatus status) { status_ = status; }
-    void setDelivery(Delivery delivery) { delivery_ = std::move(delivery); }
+    void setStatus(OrderStatus status);
+    void setDelivery(Delivery delivery);
 
-    int totalPrice() const
-    {
-        int total = 0;
-        for (const auto &item : items_) {
-            total += item.totalPrice();
-        }
-        return total;
-    }
+    int totalPrice() const;
 
 private:
     int id_ = 0;
