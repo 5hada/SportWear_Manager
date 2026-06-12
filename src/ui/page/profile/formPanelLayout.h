@@ -15,5 +15,7 @@ class FormPanelLayout: public QBoxLayout{
     ElaPushButton* loginButton{nullptr};
     ElaText* statusText{nullptr};
 public:
+    FormPanelLayout();
+    ~FormPanelLayout();
 
 };
