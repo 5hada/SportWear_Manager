@@ -1,5 +1,4 @@
-#ifndef CATEGORY_H
-#define CATEGORY_H
+#pragma once
 
 #include <string>
 
@@ -12,5 +11,3 @@ enum class Category {
 };
 
 std::string categoryToString(Category category);
-
-#endif // CATEGORY_H

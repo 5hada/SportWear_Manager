@@ -1,7 +1,6 @@
 #include "category.h"
 
-std::string categoryToString(Category category)
-{
+std::string categoryToString(Category category) {
     switch (category) {
     case Category::Top:
         return "Top";

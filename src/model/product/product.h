@@ -1,11 +1,15 @@
-#ifndef PRODUCT_H
-#define PRODUCT_H
+#pragma once
 
 #include "category.h"
-
 #include <string>
 
 class Product {
+    int id_ = 0;
+    std::string name_;
+    Category category_ = Category::Unknown;
+    int price_ = 0;
+    int stock_ = 0;
+
 public:
     Product() = default;
     Product(int id, std::string name, Category category, int price, int stock);
@@ -23,13 +27,4 @@ public:
 
     bool hasStock(int count) const;
     bool decreaseStock(int count);
-
-private:
-    int id_ = 0;
-    std::string name_;
-    Category category_ = Category::Unknown;
-    int price_ = 0;
-    int stock_ = 0;
 };
-
-#endif // PRODUCT_H

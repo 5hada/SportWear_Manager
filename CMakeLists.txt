@@ -12,6 +12,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
 
+add_subdirectory(external/ElaWidgetTools)
+
 set(PROJECT_SOURCES
         src/main.cpp
 
@@ -96,8 +98,8 @@ set(PROJECT_SOURCES
         src/ui/page/reviewPage.h
         src/ui/page/reviewPage.cpp
 
-        sqlite3/sqlite3.c
-        sqlite3/sqlite3.h
+        external/sqlite3/sqlite3.c
+        external/sqlite3/sqlite3.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -127,10 +129,13 @@ else()
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 
-target_link_libraries(SportWear_Manager PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(SportWear_Manager PRIVATE
+    Qt${QT_VERSION_MAJOR}::Widgets
+    ElaWidgetTools
+    )
 target_include_directories(SportWear_Manager PRIVATE
     src
-    sqlite3
+    external/sqlite3
 )
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

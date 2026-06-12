@@ -1,0 +1,3 @@
+[submodule "external/ElaWidgetTools"]
+	path = external/ElaWidgetTools
+	url = https://github.com/Liniyous/ElaWidgetTools

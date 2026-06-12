@@ -1,6 +1,3 @@
-#ifndef PAYMENTREPOSITORY_H
-#define PAYMENTREPOSITORY_H
-
 #include <map>
 
 enum class PaymentStatus {
@@ -10,12 +7,9 @@ enum class PaymentStatus {
 };
 
 class PaymentRepository {
+    std::map<int, PaymentStatus> payments_;
+
 public:
     void saveStatus(int orderId, PaymentStatus status);
     PaymentStatus status(int orderId) const;
-
-private:
-    std::map<int, PaymentStatus> payments_;
 };
-
-#endif // PAYMENTREPOSITORY_H

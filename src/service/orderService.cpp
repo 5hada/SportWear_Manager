@@ -4,12 +4,9 @@ OrderService::OrderService(OrderRepository *orders,
                            CartRepository *carts,
                            ProductRepository *products,
                            PaymentRepository *payments)
-    : orders_(orders), carts_(carts), products_(products), payments_(payments)
-{
-}
+    : orders_(orders), carts_(carts), products_(products), payments_(payments) {}
 
-std::optional<Order> OrderService::checkout(int userId, const Delivery &delivery)
-{
+std::optional<Order> OrderService::checkout(int userId, const Delivery &delivery) {
     if (orders_ == nullptr || carts_ == nullptr || products_ == nullptr || payments_ == nullptr) {
         return std::nullopt;
     }
@@ -37,8 +34,7 @@ std::optional<Order> OrderService::checkout(int userId, const Delivery &delivery
     return order;
 }
 
-std::vector<Order> OrderService::ordersForUser(int userId) const
-{
+std::vector<Order> OrderService::ordersForUser(int userId) const {
     if (orders_ == nullptr) {
         return {};
     }

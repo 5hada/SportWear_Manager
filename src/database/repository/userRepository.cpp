@@ -1,17 +1,14 @@
 #include "userRepository.h"
 
-UserRepository::UserRepository()
-{
+UserRepository::UserRepository() {
     save(User(1, "user", "1234", 1000));
 }
 
-const std::vector<User> &UserRepository::findAll() const
-{
+const std::vector<User> &UserRepository::findAll() const {
     return users_;
 }
 
-std::optional<User> UserRepository::findById(int id) const
-{
+std::optional<User> UserRepository::findById(int id) const {
     for (const auto &user : users_) {
         if (user.id() == id) {
             return user;
@@ -20,8 +17,7 @@ std::optional<User> UserRepository::findById(int id) const
     return std::nullopt;
 }
 
-std::optional<User> UserRepository::findByName(const std::string &name) const
-{
+std::optional<User> UserRepository::findByName(const std::string &name) const {
     for (const auto &user : users_) {
         if (user.name() == name) {
             return user;
@@ -30,8 +26,7 @@ std::optional<User> UserRepository::findByName(const std::string &name) const
     return std::nullopt;
 }
 
-void UserRepository::save(const User &user)
-{
+void UserRepository::save(const User &user) {
     for (auto &stored : users_) {
         if (stored.id() == user.id()) {
             stored = user;

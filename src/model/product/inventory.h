@@ -1,7 +1,7 @@
-#ifndef INVENTORY_H
-#define INVENTORY_H
-
 class Inventory {
+    int productId_ = 0;
+    int quantity_ = 0;
+
 public:
     Inventory() = default;
     Inventory(int productId, int quantity);
@@ -13,10 +13,4 @@ public:
     void add(int quantity);
 
     bool remove(int quantity);
-
-private:
-    int productId_ = 0;
-    int quantity_ = 0;
 };
-
-#endif // INVENTORY_H

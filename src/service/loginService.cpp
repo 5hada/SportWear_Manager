@@ -2,8 +2,7 @@
 
 LoginService::LoginService(UserRepository *users) : users_(users) {}
 
-std::optional<User> LoginService::login(const std::string &name, const std::string &password) const
-{
+std::optional<User> LoginService::login(const std::string &name, const std::string &password) const {
     if (users_ == nullptr) {
         return std::nullopt;
     }

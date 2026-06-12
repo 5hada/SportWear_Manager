@@ -1,12 +1,12 @@
-#ifndef USER_H
-#define USER_H
-
 #include "model/order/receipt.h"
 #include "userBase.h"
 
 #include <vector>
 
 class User : public UserBase {
+    int point_ = 0;
+    std::vector<Receipt> receipts_;
+
 public:
     User() = default;
     User(int id, std::string name, std::string password, int point = 0);
@@ -18,10 +18,4 @@ public:
     bool usePoint(int point);
 
     void addReceipt(const Receipt &receipt);
-
-private:
-    int point_ = 0;
-    std::vector<Receipt> receipts_;
 };
-
-#endif // USER_H

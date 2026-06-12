@@ -2,8 +2,7 @@
 
 ReviewService::ReviewService(ReviewRepository *reviews) : reviews_(reviews) {}
 
-bool ReviewService::addReview(int userId, int productId, int rating, const std::string &comment)
-{
+bool ReviewService::addReview(int userId, int productId, int rating, const std::string &comment) {
     if (reviews_ == nullptr || rating < 1 || rating > 5) {
         return false;
     }
@@ -11,8 +10,7 @@ bool ReviewService::addReview(int userId, int productId, int rating, const std::
     return true;
 }
 
-std::vector<Review> ReviewService::reviewsForProduct(int productId) const
-{
+std::vector<Review> ReviewService::reviewsForProduct(int productId) const {
     if (reviews_ == nullptr) {
         return {};
     }

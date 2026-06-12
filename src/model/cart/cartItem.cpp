@@ -1,25 +1,21 @@
 #include "cartItem.h"
-
 #include <utility>
 
-CartItem::CartItem(Product product, int quantity) : product_(std::move(product)), quantity_(quantity) {}
+CartItem::CartItem(Product product, int quantity)
+    : product_(std::move(product)), quantity_(quantity) {}
 
-const Product &CartItem::product() const
-{
+const Product &CartItem::product() const {
     return product_;
 }
 
-int CartItem::quantity() const
-{
+int CartItem::quantity() const {
     return quantity_;
 }
 
-int CartItem::totalPrice() const
-{
+int CartItem::totalPrice() const {
     return product_.price() * quantity_;
 }
 
-void CartItem::setQuantity(int quantity)
-{
+void CartItem::setQuantity(int quantity) {
     quantity_ = quantity;
 }

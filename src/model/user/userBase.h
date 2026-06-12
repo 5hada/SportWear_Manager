@@ -1,9 +1,10 @@
-#ifndef USERBASE_H
-#define USERBASE_H
-
 #include <string>
 
 class UserBase {
+    int id_ = 0;
+    std::string name_;
+    std::string password_;
+
 public:
     UserBase() = default;
     UserBase(int id, std::string name, std::string password);
@@ -19,11 +20,4 @@ public:
     void setPassword(std::string password);
 
     bool checkPassword(const std::string &password) const;
-
-private:
-    int id_ = 0;
-    std::string name_;
-    std::string password_;
 };
-
-#endif // USERBASE_H

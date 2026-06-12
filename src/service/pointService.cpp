@@ -2,8 +2,7 @@
 
 PointService::PointService(UserRepository *users) : users_(users) {}
 
-bool PointService::addPoint(int userId, int point)
-{
+bool PointService::addPoint(int userId, int point) {
     if (users_ == nullptr || point < 0) {
         return false;
     }
@@ -16,8 +15,7 @@ bool PointService::addPoint(int userId, int point)
     return true;
 }
 
-bool PointService::usePoint(int userId, int point)
-{
+bool PointService::usePoint(int userId, int point) {
     if (users_ == nullptr) {
         return false;
     }

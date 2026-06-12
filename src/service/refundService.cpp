@@ -1,12 +1,9 @@
 #include "refundService.h"
 
 RefundService::RefundService(OrderRepository *orders, PaymentRepository *payments)
-    : orders_(orders), payments_(payments)
-{
-}
+    : orders_(orders), payments_(payments) {}
 
-bool RefundService::refund(int orderId)
-{
+bool RefundService::refund(int orderId) {
     if (orders_ == nullptr || payments_ == nullptr) {
         return false;
     }

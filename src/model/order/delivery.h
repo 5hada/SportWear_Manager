@@ -1,6 +1,3 @@
-#ifndef DELIVERY_H
-#define DELIVERY_H
-
 #include <string>
 
 enum class DeliveryStatus {
@@ -11,6 +8,9 @@ enum class DeliveryStatus {
 };
 
 class Delivery {
+    std::string address_;
+    DeliveryStatus status_ = DeliveryStatus::Ready;
+
 public:
     Delivery() = default;
     Delivery(std::string address, DeliveryStatus status = DeliveryStatus::Ready);
@@ -20,10 +20,4 @@ public:
 
     void setAddress(std::string address);
     void setStatus(DeliveryStatus status);
-
-private:
-    std::string address_;
-    DeliveryStatus status_ = DeliveryStatus::Ready;
 };
-
-#endif // DELIVERY_H
