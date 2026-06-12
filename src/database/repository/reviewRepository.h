@@ -1,19 +1,26 @@
-#ifndef REVIEWREPOSITORY_H
-#define REVIEWREPOSITORY_H
+#pragma once
 
+#include "database/databaseManager.h"
 #include "model/review.h"
 
 #include <vector>
 
-class ReviewRepository {
+class ReviewRepository
+{
 public:
-    const std::vector<Review> &findAll() const;
+    explicit ReviewRepository(DataBaseManager* database = nullptr);
+
+    void setDatabase(DataBaseManager* database);
+
+    const std::vector<Review>& findAll() const;
     std::vector<Review> findByProductId(int productId) const;
-    void save(const Review &review);
+    void save(const Review& review);
     int nextId() const;
 
 private:
-    std::vector<Review> reviews_;
-};
+    bool hasDatabase() const;
+    static Review reviewFromStatement(sqlite3_stmt* statement);
 
-#endif // REVIEWREPOSITORY_H
+    DataBaseManager* database{nullptr};
+    mutable std::vector<Review> reviews;
+};

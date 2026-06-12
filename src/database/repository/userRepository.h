@@ -1,22 +1,27 @@
-#ifndef USERREPOSITORY_H
-#define USERREPOSITORY_H
+#pragma once
 
+#include "database/databaseManager.h"
 #include "model/user/user.h"
 
 #include <optional>
 #include <vector>
 
-class UserRepository {
+class UserRepository
+{
 public:
-    UserRepository();
+    explicit UserRepository(DataBaseManager* database = nullptr);
 
-    const std::vector<User> &findAll() const;
+    void setDatabase(DataBaseManager* database);
+
+    const std::vector<User>& findAll() const;
     std::optional<User> findById(int id) const;
-    std::optional<User> findByName(const std::string &name) const;
-    void save(const User &user);
+    std::optional<User> findByName(const std::string& name) const;
+    void save(const User& user);
 
 private:
-    std::vector<User> users_;
-};
+    bool hasDatabase() const;
+    static User userFromStatement(sqlite3_stmt* statement);
 
-#endif // USERREPOSITORY_H
+    DataBaseManager* database{nullptr};
+    mutable std::vector<User> users;
+};

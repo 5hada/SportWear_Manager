@@ -1,6 +1,10 @@
 #include "databaseManager.h"
 
-DataBaseManager::DataBaseManager(const std::string &path)
+#include <fstream>
+#include <sstream>
+#include <utility>
+
+DataBaseManager::DataBaseManager(std::string path)
 {
     open(path);
 }
@@ -10,47 +14,101 @@ DataBaseManager::~DataBaseManager()
     close();
 }
 
-bool DataBaseManager::open(const std::string &path)
+DataBaseManager::DataBaseManager(DataBaseManager&& other) noexcept
+    : db(std::exchange(other.db, nullptr)),
+      lastErrorMessage(std::move(other.lastErrorMessage))
+{
+}
+
+DataBaseManager& DataBaseManager::operator=(DataBaseManager&& other) noexcept
+{
+    if (this != &other) {
+        close();
+        db = std::exchange(other.db, nullptr);
+        lastErrorMessage = std::move(other.lastErrorMessage);
+    }
+    return *this;
+}
+
+bool DataBaseManager::open(const std::string& path)
 {
     close();
-    return sqlite3_open(path.c_str(), &db_) == SQLITE_OK;
+
+    const int result = sqlite3_open(path.c_str(), &db);
+    if (result != SQLITE_OK) {
+        setErrorFromSqlite(result);
+        close();
+        return false;
+    }
+
+    return execute("PRAGMA foreign_keys = ON;");
 }
 
 void DataBaseManager::close()
 {
-    if (db_ != nullptr) {
-        sqlite3_close(db_);
-        db_ = nullptr;
+    if (db != nullptr) {
+        sqlite3_close(db);
+        db = nullptr;
     }
 }
 
 bool DataBaseManager::isOpen() const
 {
-    return db_ != nullptr;
+    return db != nullptr;
 }
 
-sqlite3 *DataBaseManager::handle() const
+sqlite3* DataBaseManager::handle() const
 {
-    return db_;
+    return db;
 }
 
-bool DataBaseManager::execute(const std::string &sql, std::string *errorMessage)
+const std::string& DataBaseManager::lastError() const
 {
-    if (db_ == nullptr) {
-        if (errorMessage != nullptr) {
-            *errorMessage = "database is not open";
-        }
+    return lastErrorMessage;
+}
+
+bool DataBaseManager::execute(const std::string& sql)
+{
+    if (db == nullptr) {
+        lastErrorMessage = "database is not open";
         return false;
     }
 
-    char *rawError = nullptr;
-    const int result = sqlite3_exec(db_, sql.c_str(), nullptr, nullptr, &rawError);
+    char* rawError = nullptr;
+    const int result = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &rawError);
     if (result != SQLITE_OK) {
-        if (errorMessage != nullptr && rawError != nullptr) {
-            *errorMessage = rawError;
-        }
+        lastErrorMessage = rawError != nullptr ? rawError : sqlite3_errmsg(db);
         sqlite3_free(rawError);
         return false;
     }
+
+    lastErrorMessage.clear();
     return true;
+}
+
+bool DataBaseManager::executeFile(const std::string& path)
+{
+    std::ifstream file(path);
+    if (!file.is_open()) {
+        lastErrorMessage = "failed to open SQL file: " + path;
+        return false;
+    }
+
+    std::ostringstream buffer;
+    buffer << file.rdbuf();
+    return execute(buffer.str());
+}
+
+bool DataBaseManager::initialize(const std::string& databasePath, const std::string& schemaPath)
+{
+    return open(databasePath) && executeFile(schemaPath);
+}
+
+void DataBaseManager::setErrorFromSqlite(int resultCode)
+{
+    if (db != nullptr) {
+        lastErrorMessage = sqlite3_errmsg(db);
+        return;
+    }
+    lastErrorMessage = sqlite3_errstr(resultCode);
 }

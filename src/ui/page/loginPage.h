@@ -1,11 +1,26 @@
-#ifndef LOGINPAGE_H
-#define LOGINPAGE_H
+#pragma once
 
-#include <QWidget>
+#include <ElaWidgetTools/ElaScrollPage.h>
 
-class LoginPage : public QWidget {
+class ElaLineEdit;
+class ElaPushButton;
+class ElaText;
+
+class LoginPage : public ElaScrollPage{
+    Q_OBJECT
+
 public:
-    explicit LoginPage(QWidget *parent = nullptr);
-};
+    explicit LoginPage(QWidget* parent = nullptr);
+    ~LoginPage() override;
 
-#endif // LOGINPAGE_H
+    void setStatus(const QString& status);
+
+Q_SIGNALS:
+    void loginRequested(const QString& name, const QString& password);
+
+private:
+    ElaLineEdit* idEdit{nullptr};
+    ElaLineEdit* passwordEdit{nullptr};
+    ElaPushButton* loginButton{nullptr};
+    ElaText* statusText{nullptr};
+};

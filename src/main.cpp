@@ -4,9 +4,12 @@
 #include <QLocale>
 #include <QTranslator>
 
-int main(int argc, char *argv[])
-{
+#include <ElaApplication.h>
+
+int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
+
+    ElaApplication::getInstance()->init();
 
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
@@ -17,7 +20,9 @@ int main(int argc, char *argv[])
             break;
         }
     }
+
     MainWindow w;
     w.show();
-    return QCoreApplication::exec();
+
+    return a.exec();
 }

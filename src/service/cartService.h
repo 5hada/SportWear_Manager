@@ -1,10 +1,10 @@
-#ifndef CARTSERVICE_H
-#define CARTSERVICE_H
-
 #include "database/repository/cartRepository.h"
 #include "database/repository/productRepository.h"
 
 class CartService {
+    CartRepository *carts_ = nullptr;
+    ProductRepository *products_ = nullptr;
+    
 public:
     CartService(CartRepository *carts, ProductRepository *products);
 
@@ -12,10 +12,4 @@ public:
     bool removeProduct(int userId, int productId);
     Cart cart(int userId) const;
     void clear(int userId);
-
-private:
-    CartRepository *carts_ = nullptr;
-    ProductRepository *products_ = nullptr;
 };
-
-#endif // CARTSERVICE_H

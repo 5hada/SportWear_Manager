@@ -1,29 +1,24 @@
-#ifndef USERBASE_H
-#define USERBASE_H
+#pragma once
 
 #include <string>
 
-class UserBase {
+class UserBase{
+    int id;
+    std::string name;
+    std::string password;
+
 public:
-    UserBase() = default;
     UserBase(int id, std::string name, std::string password);
 
     virtual ~UserBase() = default;
 
-    int id() const;
-    const std::string &name() const;
-    const std::string &password() const;
+    int getId() const { return id; }
+    const std::string &getName() const { return name; }
+    const std::string &getPassword() const { return password; }
 
-    void setId(int id);
-    void setName(std::string name);
-    void setPassword(std::string password);
+    void setId(int id) { this->id = id; }
+    void setName(std::string name) { this->name = name; }
+    void setPassword(std::string password) { this->password = password; }
 
     bool checkPassword(const std::string &password) const;
-
-private:
-    int id_ = 0;
-    std::string name_;
-    std::string password_;
 };
-
-#endif // USERBASE_H

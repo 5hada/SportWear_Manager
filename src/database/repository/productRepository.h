@@ -1,22 +1,29 @@
-#ifndef PRODUCTREPOSITORY_H
-#define PRODUCTREPOSITORY_H
+#pragma once
 
+#include "database/databaseManager.h"
 #include "model/product/product.h"
 
 #include <optional>
 #include <vector>
 
-class ProductRepository {
+class ProductRepository
+{
 public:
-    ProductRepository();
+    explicit ProductRepository(DataBaseManager* database = nullptr);
 
-    const std::vector<Product> &findAll() const;
+    void setDatabase(DataBaseManager* database);
+
+    const std::vector<Product>& findAll() const;
     std::optional<Product> findById(int id) const;
-    void save(const Product &product);
+
+    void save(const Product& product);
+    void update(const Product& product);
     bool remove(int id);
 
 private:
-    std::vector<Product> products_;
-};
+    bool hasDatabase() const;
+    static Product productFromStatement(sqlite3_stmt* statement);
 
-#endif // PRODUCTREPOSITORY_H
+    DataBaseManager* database{nullptr};
+    mutable std::vector<Product> products;
+};

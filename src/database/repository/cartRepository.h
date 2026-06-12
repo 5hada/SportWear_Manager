@@ -1,19 +1,28 @@
-#ifndef CARTREPOSITORY_H
-#define CARTREPOSITORY_H
+#pragma once
 
-#include "model/cart/cart.h"
+#include "database/databaseManager.h"
+#include "model/product/cart.h"
 
 #include <map>
 
-class CartRepository {
+class CartRepository
+{
 public:
-    Cart &cartForUser(int userId);
-    Cart cartForUser(int userId) const;
+    explicit CartRepository(DataBaseManager* database = nullptr);
 
+    void setDatabase(DataBaseManager* database);
+
+    Cart& cartForUser(int userId);
+    Cart cartForUser(int userId) const;
+    Cart getCart(int userId) const;
+
+    void addItem(int userId, int productId, int quantity);
+    bool removeItem(int userId, int productId);
     void clear(int userId);
 
 private:
-    std::map<int, Cart> carts_;
-};
+    bool hasDatabase() const;
 
-#endif // CARTREPOSITORY_H
+    DataBaseManager* database{nullptr};
+    std::map<int, Cart> carts;
+};

@@ -2,7 +2,5 @@
 
 #include <utility>
 
-Admin::Admin(int id, std::string name, std::string password)
-    : UserBase(id, std::move(name), std::move(password))
-{
-}
+Admin::Admin(std::string name, std::string password)
+    : UserBase(1, std::move(name), std::move(password)) {}
