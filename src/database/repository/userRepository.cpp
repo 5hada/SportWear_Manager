@@ -120,7 +120,7 @@ bool UserRepository::save(const User& user)
     sqlite3_bind_int(statement, 4, user.getPoint());
     sqlite3_step(statement);
     sqlite3_finalize(statement);
-    return true;
+    return true; 
 }
 
 bool UserRepository::hasDatabase() const

@@ -117,7 +117,7 @@ void MainWindow::initAlertDialog(){
 void MainWindow::connectPages()
 {
     connect(loginPage, &LoginPage::loginRequested, this, [this](const QString& name, const QString& password) {
-        const auto user = app.services.login.login(name.toStdString(), password.toStdString());
+        const auto user = app.services.account.login(name.toStdString(), password.toStdString());
         if (!user.has_value()) {
             loginPage->setStatus("Login failed.");
             return;
