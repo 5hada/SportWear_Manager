@@ -9,6 +9,7 @@ class UserBase{
 
 public:
     UserBase(int id, std::string name, std::string password);
+    UserBase(std::string name, std::string password);
 
     virtual ~UserBase() = default;
 

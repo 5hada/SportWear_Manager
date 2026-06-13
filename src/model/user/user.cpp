@@ -5,6 +5,9 @@
 User::User(int id, std::string name, std::string password, int point)
     : UserBase(id, std::move(name), std::move(password)), point(point) {}
 
+User::User(std::string name, std::string password, int point)
+    : UserBase(std::move(name), std::move(password)), point(point) {}
+
 int User::getPoint() const {
     return point;
 }

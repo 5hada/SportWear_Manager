@@ -39,9 +39,12 @@ set(PROJECT_SOURCES
         src/model/product/category.cpp
         src/model/product/cart.h
         src/model/product/cart.cpp
+        src/model/product/cartAction.h
+        src/model/product/cartItem.h
         src/model/product/item.h
         src/model/product/product.h
         src/model/product/product.cpp
+        src/model/product/productItem.h
         src/model/product/receipt.h
         src/model/product/receipt.cpp
         src/model/review.h
@@ -50,6 +53,7 @@ set(PROJECT_SOURCES
         src/model/user/userBase.cpp
         src/model/user/user.h
         src/model/user/user.cpp
+        src/model/user/sessionInfo.h
 
         src/service/cartService.h
         src/service/cartService.cpp
@@ -62,8 +66,8 @@ set(PROJECT_SOURCES
         src/service/wishService.h
         src/service/wishService.cpp
 
-        src/ui/mainwindow.cpp
         src/ui/mainwindow.h
+        src/ui/mainwindow.cpp
         src/ui/page/loginPage.h
         src/ui/page/loginPage.cpp
         src/ui/page/productDetailPage.h
@@ -79,6 +83,10 @@ set(PROJECT_SOURCES
         src/ui/page/cart/cartList.h
         src/ui/page/cart/cartWidget.h
         src/ui/page/cart/cartWidget.cpp
+        src/ui/page/profile/formPanelWidget.h
+        src/ui/page/profile/formPanelWidget.cpp
+        src/ui/page/alertDialog.h
+        src/ui/page/alertDialog.cpp
 
         external/sqlite3/sqlite3.c
         external/sqlite3/sqlite3.h

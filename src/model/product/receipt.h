@@ -25,6 +25,14 @@ public:
         std::string date,
         bool isCanceled = false
     );
+    Receipt(
+        int userId,
+        std::vector<Item> items,
+        int point,
+        int paid,
+        std::string date,
+        bool isCanceled = false
+    );
 
     int getId() const { return id; }
     int getUserId() const { return userId; }

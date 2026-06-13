@@ -43,7 +43,7 @@ std::vector<Review> ReviewRepository::findByProductId(int productId) const
     if (!hasDatabase()) {
         std::vector<Review> result;
         for (const auto& review : reviews) {
-            if (review.productId() == productId) {
+            if (review.getProductId() == productId) {
                 result.push_back(review);
             }
         }
@@ -73,7 +73,7 @@ void ReviewRepository::save(const Review& review)
     }
 
     sqlite3_stmt* statement = nullptr;
-    if (review.id() > 0) {
+    if (review.getId() > 0) {
         constexpr auto sql =
             "INSERT INTO reviews (id, user_id, product_id, rating, comment) VALUES (?, ?, ?, ?, ?) "
             "ON CONFLICT(id) DO UPDATE SET user_id = excluded.user_id, product_id = excluded.product_id, "
@@ -81,20 +81,20 @@ void ReviewRepository::save(const Review& review)
         if (sqlite3_prepare_v2(database->handle(), sql, -1, &statement, nullptr) != SQLITE_OK) {
             return;
         }
-        sqlite3_bind_int(statement, 1, review.id());
-        sqlite3_bind_int(statement, 2, review.userId());
-        sqlite3_bind_int(statement, 3, review.productId());
-        sqlite3_bind_int(statement, 4, review.rating());
-        sqlite3_bind_text(statement, 5, review.comment().c_str(), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_int(statement, 1, review.getId());
+        sqlite3_bind_int(statement, 2, review.getUserId());
+        sqlite3_bind_int(statement, 3, review.getProductId());
+        sqlite3_bind_int(statement, 4, review.getRating());
+        sqlite3_bind_text(statement, 5, review.getComment().c_str(), -1, SQLITE_TRANSIENT);
     } else {
         constexpr auto sql = "INSERT INTO reviews (user_id, product_id, rating, comment) VALUES (?, ?, ?, ?)";
         if (sqlite3_prepare_v2(database->handle(), sql, -1, &statement, nullptr) != SQLITE_OK) {
             return;
         }
-        sqlite3_bind_int(statement, 1, review.userId());
-        sqlite3_bind_int(statement, 2, review.productId());
-        sqlite3_bind_int(statement, 3, review.rating());
-        sqlite3_bind_text(statement, 4, review.comment().c_str(), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_int(statement, 1, review.getUserId());
+        sqlite3_bind_int(statement, 2, review.getProductId());
+        sqlite3_bind_int(statement, 3, review.getRating());
+        sqlite3_bind_text(statement, 4, review.getComment().c_str(), -1, SQLITE_TRANSIENT);
     }
 
     sqlite3_step(statement);

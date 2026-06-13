@@ -1,7 +1,7 @@
 
-#include"formPanelLayout.h"
+#include"formPanelWidget.h"
 
 
-class SignUpPanelLayout: public FormPanelLayout{
+class SignUpPanelWidget: public FormPanelWidget{
 
 };

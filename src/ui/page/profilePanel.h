@@ -1,11 +1,14 @@
 
 #include<ElaDialog.h>
 
-#include"model/user/sessionInfo.h"
+
+
+class QStackedWidget;
 
 class ProfilePanel: public ElaDialog{
     Q_OBJECT
 
+    QStackedWidget* widgets{nullptr};
     std::string name;
     bool isLoggedIn;
 
@@ -15,7 +18,4 @@ public:
 
 
     void initPanel();
-    void defaultPanelConfig();
-
-    void updateUser(SessionInfo info);
 };

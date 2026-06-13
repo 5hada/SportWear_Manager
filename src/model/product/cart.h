@@ -1,24 +1,24 @@
 #pragma once
 
-#include "item.h"
+#include "cartItem.h"
 #include <vector>
 
 class Cart {
-    int userId = 0;
-    std::vector<Item> items;
+    std::vector<CartItem> items;
 
 public:
     Cart() = default;
-    Cart(int userId) { this->userId = userId; }
+    Cart(std::vector<CartItem>& items) { this->items = items; }
     // ~Cart();
 
-    const std::vector<Item> &getItems() const;
+    std::vector<CartItem> &getItems() { return items;}
+    const std::vector<CartItem> &getItems() const{ return items;}
 
     void addItem(int productId, int count);
-    void addItem(int productId, int count, int price);
-    bool subItem(int productId, int count);
-    bool removeItem(int productId);
-    void clear();
+    // bool subItem(int productId, int count);
+    // bool removeItem(int productId);
+    // void clear();
 
     int getTotalPrice() const;
+    int getTotalCount() const;
 };

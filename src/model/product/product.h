@@ -1,19 +1,20 @@
 #pragma once
 
 #include "category.h"
-#include "item.h"
+#include "productItem.h"
 #include <string>
 
 class Product {
-    Item item;
+    ProductItem item;
     std::string name;
     std::string detail;
     Category category = Category::Unknown;
 
 public:
-    Product() = default;
-    Product(Item item, std::string name, Category category)
+    Product(ProductItem item, std::string name, Category category)
         : item(item), name(std::move(name)), category(category) {}
+    Product(int count, int price, std::string name, Category category)
+        : item(count, price), name(std::move(name)), category(category) {}
 
     int getId() const { return item.id; }
     const std::string &getName() const { return name; }

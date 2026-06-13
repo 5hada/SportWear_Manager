@@ -1,39 +1,15 @@
 #include "productRepository.h"
 
-#include <algorithm>
-
 namespace {
 constexpr auto selectProductColumns = "id, name, category, price, stock, detail";
 
-std::string columnText(sqlite3_stmt* statement, int column)
-{
+std::string columnText(sqlite3_stmt* statement, int column) {
     const auto* text = sqlite3_column_text(statement, column);
     return text == nullptr ? std::string() : reinterpret_cast<const char*>(text);
 }
 }
 
-ProductRepository::ProductRepository(DataBaseManager* database)
-    : database(database)
-{
-    if (!hasDatabase()) {
-        save(Product(Item{1, 30, 29000}, "Training T-Shirt", Category::Top));
-        save(Product(Item{2, 20, 49000}, "Running Pants", Category::Bottom));
-        save(Product(Item{3, 12, 89000}, "Court Shoes", Category::Shoes));
-        save(Product(Item{4, 18, 39000}, "Gym Bag", Category::Accessory));
-    }
-}
-
-void ProductRepository::setDatabase(DataBaseManager* database)
-{
-    this->database = database;
-}
-
-const std::vector<Product>& ProductRepository::findAll() const
-{
-    if (!hasDatabase()) {
-        return products;
-    }
-
+const std::vector<Product>& ProductRepository::findAll() const {
     products.clear();
     const std::string sql = std::string("SELECT ") + selectProductColumns + " FROM products ORDER BY id";
     sqlite3_stmt* statement = nullptr;
@@ -48,16 +24,7 @@ const std::vector<Product>& ProductRepository::findAll() const
     return products;
 }
 
-std::optional<Product> ProductRepository::findById(int id) const
-{
-    if (!hasDatabase()) {
-        for (const auto& product : products) {
-            if (product.getId() == id) {
-                return product;
-            }
-        }
-        return std::nullopt;
-    }
+std::optional<Product> ProductRepository::findById(int id) const {
 
     const std::string sql = std::string("SELECT ") + selectProductColumns + " FROM products WHERE id = ?";
     sqlite3_stmt* statement = nullptr;
@@ -74,13 +41,7 @@ std::optional<Product> ProductRepository::findById(int id) const
     return result;
 }
 
-void ProductRepository::save(const Product& product)
-{
-    if (!hasDatabase()) {
-        update(product);
-        return;
-    }
-
+void ProductRepository::save(const Product& product) {
     sqlite3_stmt* statement = nullptr;
     if (product.getId() > 0) {
         constexpr auto sql =
@@ -114,12 +75,7 @@ void ProductRepository::save(const Product& product)
     sqlite3_finalize(statement);
 }
 
-void ProductRepository::update(const Product& product)
-{
-    if (hasDatabase()) {
-        save(product);
-        return;
-    }
+void ProductRepository::update(const Product& product) {
 
     for (auto& stored : products) {
         if (stored.getId() == product.getId()) {
@@ -130,17 +86,7 @@ void ProductRepository::update(const Product& product)
     products.push_back(product);
 }
 
-bool ProductRepository::remove(int id)
-{
-    if (!hasDatabase()) {
-        const auto originalSize = products.size();
-        products.erase(std::remove_if(products.begin(), products.end(), [id](const Product& product) {
-                           return product.getId() == id;
-                       }),
-                       products.end());
-        return products.size() != originalSize;
-    }
-
+bool ProductRepository::remove(int id) {
     sqlite3_stmt* statement = nullptr;
     constexpr auto sql = "DELETE FROM products WHERE id = ?";
     if (sqlite3_prepare_v2(database->handle(), sql, -1, &statement, nullptr) != SQLITE_OK) {
@@ -152,15 +98,10 @@ bool ProductRepository::remove(int id)
     return removed;
 }
 
-bool ProductRepository::hasDatabase() const
-{
-    return database != nullptr && database->isOpen();
-}
-
 Product ProductRepository::productFromStatement(sqlite3_stmt* statement)
 {
     Product product(
-        Item{sqlite3_column_int(statement, 0), sqlite3_column_int(statement, 4), sqlite3_column_int(statement, 3)},
+        ProductItem{sqlite3_column_int(statement, 0), sqlite3_column_int(statement, 4), sqlite3_column_int(statement, 3)},
         columnText(statement, 1),
         categoryFromString(columnText(statement, 2)));
     product.setDetail(columnText(statement, 5));
