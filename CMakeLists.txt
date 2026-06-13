@@ -59,6 +59,8 @@ set(PROJECT_SOURCES
         src/service/cartService.cpp
         src/service/loginService.h
         src/service/loginService.cpp
+        src/service/orderService.h
+        src/service/orderService.cpp
         src/service/productService.h
         src/service/productService.cpp
         src/service/reviewService.h
