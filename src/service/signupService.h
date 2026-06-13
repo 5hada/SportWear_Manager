@@ -8,5 +8,5 @@ public:
     explicit SignupService(UserRepository *users) : userRepo(users) {}
 
 
-    void signup(const std::string &name, const std::string &password);
+    bool signup(const std::string &name, const std::string &password);
 };
