@@ -3,7 +3,7 @@
 Receipt::Receipt(
     int id,
     int userId, 
-    std::vector<Item> items,
+    std::vector<OrderItem> items,
     int points,
     int paid,
     std::string date,
@@ -19,15 +19,11 @@ Receipt::Receipt(
 
 Receipt::Receipt(
     int userId, 
-    std::vector<Item> items,
+    std::vector<OrderItem> items,
     int points,
-    int paid,
-    std::string date,
-    bool isCanceled
+    int paid
 ):
     userId(userId),
     items(items),
     points(points),
-    paid(paid),
-    date(date),
-    isCanceled(isCanceled) {}
+    paid(paid) {}

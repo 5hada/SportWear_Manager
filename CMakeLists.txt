@@ -28,6 +28,8 @@ set(PROJECT_SOURCES
         src/database/repository/cartRepository.cpp
         src/database/repository/productRepository.h
         src/database/repository/productRepository.cpp
+        src/database/repository/receiptRepository.h
+        src/database/repository/receiptRepository.cpp
         src/database/repository/reviewRepository.h
         src/database/repository/reviewRepository.cpp
         src/database/repository/userRepository.h
@@ -35,6 +37,7 @@ set(PROJECT_SOURCES
         src/database/repository/wishRepository.h
         src/database/repository/wishRepository.cpp
 
+        src/model/product/orderItem.h
         src/model/product/category.h
         src/model/product/category.cpp
         src/model/product/cart.h
