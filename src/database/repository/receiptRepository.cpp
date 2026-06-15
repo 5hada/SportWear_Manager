@@ -42,23 +42,31 @@ std::vector<Receipt> ReceiptRepository::findByUser(int userId) const{
 }
 
 
-bool ReceiptRepository::insertReceipt(Receipt& receipt){
+int ReceiptRepository::insertReceipt(Receipt& receipt) {
     sqlite3_stmt* statement = nullptr;
+
     constexpr auto sql =
-        "INSERT INTO receipts (user_id, used_point, total_price) VALUES (?, ?, ? )";
+        "INSERT INTO receipts (user_id, used_point, total_price) "
+        "VALUES (?, ?, ?)";
 
     if (sqlite3_prepare_v2(database->handle(), sql, -1, &statement, nullptr) != SQLITE_OK) {
-        return false;
+        return -1;
     }
 
     sqlite3_bind_int(statement, 1, receipt.getUserId());
     sqlite3_bind_int(statement, 2, receipt.getPoints());
     sqlite3_bind_int(statement, 3, receipt.getPaid());
 
-    bool success = sqlite3_step(statement) == SQLITE_DONE;
+    int receiptId = -1;
+
+    if (sqlite3_step(statement) == SQLITE_DONE) {
+        receiptId = static_cast<int>(
+            sqlite3_last_insert_rowid(database->handle())
+        );
+    }
 
     sqlite3_finalize(statement);
-    return success;
+    return receiptId;
 }
 
 bool ReceiptRepository::updateReceipt(Receipt& receipt) {

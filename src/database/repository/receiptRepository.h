@@ -13,6 +13,6 @@ public:
     std::vector<Receipt> findByUser(int userId) const;
 
 
-    bool insertReceipt(Receipt& receipt);
+    int insertReceipt(Receipt& receipt);
     bool updateReceipt(Receipt& receipt);
 };
