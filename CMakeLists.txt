@@ -62,7 +62,6 @@ set(PROJECT_SOURCES
         src/model/user/admin.h
         src/model/user/admin.cpp
         src/model/user/guest.h
-        src/model/user/guest.cpp
         src/model/user/user.h
         src/model/user/user.cpp
         src/model/user/sessionInfo.h

@@ -42,7 +42,7 @@ public:
 
 private:
     void seedProducts() {
-        if (!databaseReady || !product.findAll()->empty()) {
+        if (!databaseReady || !product.findAll().empty()) {
             return;
         }
 

@@ -18,6 +18,6 @@ std::optional<Product> ProductService::getProduct(int id) const {
 
 void ProductService::saveProduct(const Product &product) {
     if (products != nullptr) {
-        products->save(product);
+        products->insert(product);
     }
 }

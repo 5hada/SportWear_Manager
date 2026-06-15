@@ -13,8 +13,8 @@ Order& OrderService::makeOrder(int userId){
     currentOrder->setUserId(userId);
     int id;
     int price;
-    for(auto& item: cartRepo->getCart(userId).getItems()){
-        if(item.isSelected()){
+    for(auto& item: cartRepo->findByUser(userId).getItems()){
+        if(item.selected()){
             id = item.getId();
             price = productRepo->findById(id)->getPrice();
             OrderItem newItem(id, item.getCount(), price);
@@ -32,9 +32,9 @@ bool OrderService::confirmOrder(int userId, int usedPoint){
     auto& items = currentOrder->getItems();
     Receipt newReceipt(userId, items, usedPoint, totalPrice);
     int receiptId = -1;
-    receiptId = receiptRepo->insertReceipt(newReceipt);
+    receiptId = receiptRepo->insert(newReceipt);
     if(receiptId == -1){return false;}
-    if(!orderRepo->insertOrder(receiptId, items)){return false;}
+    if(!orderRepo->insert(receiptId, items)){return false;}
     addPoint(userId, totalPrice);
     clear();
     return true;
@@ -44,7 +44,7 @@ bool OrderService::refund(int id){
     Receipt* receipt = receiptRepo->findById(id);
     if(receipt == nullptr){return false;}
     receipt->setIsCanceled(true);
-    return receiptRepo->updateReceipt(*receipt);
+    return receiptRepo->update(*receipt);
 }
 
 void OrderService::addPoint(int userId, int totalPrice, int rate){

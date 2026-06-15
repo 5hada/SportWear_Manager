@@ -105,7 +105,7 @@ void MainWindow::initContent() {
 void MainWindow::initAlertDialog(){
     alertDialog = new AlertDialog(this);
     connect(alertDialog, &AlertDialog::exitClicked, this, [=]() {
-        app.currentUserId = 0;
+        app.services.account.logout();
         setUserInfoCardTitle("Guest");
         setUserInfoCardSubTitle("Not signed in");
         loginPage->setStatus("Signed out.");
@@ -117,15 +117,15 @@ void MainWindow::initAlertDialog(){
 void MainWindow::connectPages()
 {
     connect(loginPage, &LoginPage::loginRequested, this, [this](const QString& name, const QString& password) {
-        const auto user = app.services.account.login(name.toStdString(), password.toStdString());
-        if (!user.has_value()) {
+        const auto success = app.services.account.login(name.toStdString(), password.toStdString());
+        if (!success) {
             loginPage->setStatus("Login failed.");
             return;
         }
 
-        app.currentUserId = user->getId();
-        setUserInfoCardTitle(QString::fromStdString(user->getName()));
-        setUserInfoCardSubTitle(QString("Point %1").arg(user->getPoint()));
+        setUserInfoCardTitle(QString::fromStdString(app.services.account.getUserName()));
+        auto point = app.services.account.getUserPoint();
+        setUserInfoCardSubTitle(QString("Point %1").arg(app.services.account.getUserPoint()));
         loginPage->setStatus("Signed in.");
         refreshProducts();
         refreshWishProducts();
@@ -142,7 +142,7 @@ void MainWindow::connectPages()
         if (!requireLogin()) {
             return;
         }
-        if (!app.services.cart.handleCart(CartAction::Add,app.currentUserId, productId, 1)) {
+        if (!app.services.cart.handleCart(CartAction::Add,app.services.account.getUserId(), productId, 1)) {
             QMessageBox::warning(this, "Cart", "Failed to add product to cart.");
             return;
         }
@@ -154,7 +154,7 @@ void MainWindow::connectPages()
         if (!requireLogin()) {
             return;
         }
-        app.services.wish.add(app.currentUserId, productId);
+        app.services.wish.add(app.services.account.getUserId(), productId);
         refreshWishProducts();
         navigation(wishPage->property("ElaPageKey").toString());
     });
@@ -166,8 +166,8 @@ void MainWindow::refreshProducts() {
 
 void MainWindow::refreshWishProducts() {
     std::vector<Product> products;
-    if (app.currentUserId != 0) {
-        for (const int productId : app.repositories.wish.findByUser(app.currentUserId)) {
+    if (app.services.account.getUserId() != 0) {
+        for (const int productId : app.repositories.wish.findByUser(app.services.account.getUserId())) {
             auto product = app.services.product.getProduct(productId);
             if (product.has_value()) {
                 products.push_back(*product);
@@ -178,11 +178,11 @@ void MainWindow::refreshWishProducts() {
 }
 
 void MainWindow::refreshCart() {
-    cartWidget->setCart(app.currentUserId == 0 ? Cart() : app.services.cart.getCart(app.currentUserId));
+    cartWidget->setCart(app.services.account.getUserId() == 0 ? Cart() : app.services.cart.getCart(app.services.account.getUserId()));
 }
 
 bool MainWindow::requireLogin() {
-    if (app.currentUserId != 0) {
+    if (app.services.account.getUserId() != 0) {
         return true;
     }
 

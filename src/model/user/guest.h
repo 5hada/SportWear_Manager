@@ -2,5 +2,5 @@
 
 class Guest : public UserBase {
 public:
-    Guest();
+    Guest(): UserBase(0, "guest", "") {}
 };

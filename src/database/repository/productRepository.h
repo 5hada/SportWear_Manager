@@ -10,7 +10,7 @@ class ProductRepository: public RepositoryBase {
 public:
     ProductRepository(DatabaseManager* db): RepositoryBase(db) {}
 
-    std::vector<Product>* findAll() const;
+    std::vector<Product> findAll() const;
     std::optional<Product> findById(int id) const;
 
     bool insert(const Product& product);

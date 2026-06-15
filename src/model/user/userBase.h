@@ -8,6 +8,7 @@ class UserBase{
     std::string password;
 
 public:
+    UserBase(): id(0), name(""), password("") {}
     UserBase(int id, std::string name, std::string password);
     UserBase(std::string name, std::string password);
 

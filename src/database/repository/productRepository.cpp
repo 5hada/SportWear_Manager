@@ -1,7 +1,7 @@
 #include "productRepository.h"
 
-std::vector<Product>* ProductRepository::findAll() const {
-    std::vector<Product>* products{nullptr};
+std::vector<Product> ProductRepository::findAll() const {
+    std::vector<Product> products;
     sqlite3_stmt* statement = nullptr;
     constexpr auto sql = 
         "SELECT id, name, category, price, stock, detail "
@@ -10,7 +10,7 @@ std::vector<Product>* ProductRepository::findAll() const {
 
     if (sqlOk(sql, statement)) {
         while (sqlite3_step(statement) == SQLITE_ROW) {
-            products->push_back(productFromStatement(statement));
+            products.push_back(productFromStatement(statement));
         }
         sqlite3_finalize(statement);
     }
