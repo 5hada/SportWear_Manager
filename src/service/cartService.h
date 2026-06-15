@@ -24,6 +24,9 @@ public:
         ProductRepository* productRepo
     ): cartRepo(cartRepo), productRepo(productRepo){}
 
+    void setCartRepo(CartRepository* cartRepo) {this->cartRepo = cartRepo;}
+    void setProductRepo(ProductRepository* productRepo) {this->productRepo = productRepo;}
+
     Cart getCart(int userId) const;
 
     bool handleCart(
