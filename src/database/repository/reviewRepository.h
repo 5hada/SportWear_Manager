@@ -4,8 +4,7 @@
 #include "model/review.h"
 #include <vector>
 
-class ReviewRepository
-{
+class ReviewRepository {
 public:
     explicit ReviewRepository(DataBaseManager* database = nullptr);
 

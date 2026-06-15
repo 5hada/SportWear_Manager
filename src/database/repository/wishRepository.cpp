@@ -32,6 +32,7 @@ bool WishRepository::add(int userId, int productId) {
     sqlite3_bind_int(statement, 2, productId);
     sqlite3_step(statement);
     sqlite3_finalize(statement);
+    return true;
 }
 
 bool WishRepository::remove(int userId, int productId) {
