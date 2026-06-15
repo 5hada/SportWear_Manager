@@ -1,4 +1,5 @@
 #include "orderService.h"
+#include "pointService.h"
 #include "model/product/cart.h"
 #include "model/product/orderItem.h"
 #include "model/product/receipt.h"
@@ -35,7 +36,7 @@ bool OrderService::confirmOrder(int userId, int usedPoint){
     receiptId = receiptRepo->insert(newReceipt);
     if(receiptId == -1){return false;}
     if(!orderRepo->insert(receiptId, items)){return false;}
-    addPoint(userId, totalPrice);
+    pointService->reward(userId, totalPrice);
     clear();
     return true;
 }
@@ -44,12 +45,10 @@ bool OrderService::refund(int id){
     Receipt* receipt = receiptRepo->findById(id);
     if(receipt == nullptr){return false;}
     receipt->setIsCanceled(true);
-    return receiptRepo->update(*receipt);
-}
-
-void OrderService::addPoint(int userId, int totalPrice, int rate){
-    if(userId==1 || userId==0){return;}
-    int point = totalPrice*(rate/100);
+    if (receiptRepo->update(*receipt)){
+        return pointService->revert(receipt->getUserId(), receipt->getPoints(), receipt->getPaid());
+    }
+    return false;
 }
 
 

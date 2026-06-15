@@ -16,4 +16,5 @@ public:
     std::optional<User> findByName(const std::string& name) const;
     
     bool insert(const User& user);
+    bool updatePoint(const User& user);
 };

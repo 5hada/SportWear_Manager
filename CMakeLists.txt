@@ -49,6 +49,7 @@ set(PROJECT_SOURCES
         src/model/product/item.h
         src/model/product/order.h
         src/model/product/orderItem.h
+        src/model/product/pointAction.h
         src/model/product/product.h
         src/model/product/product.cpp
         src/model/product/productItem.h

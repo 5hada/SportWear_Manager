@@ -124,8 +124,8 @@ void MainWindow::connectPages()
         }
 
         setUserInfoCardTitle(QString::fromStdString(app.services.account.getUserName()));
-        auto point = app.services.account.getUserPoint();
-        setUserInfoCardSubTitle(QString("Point %1").arg(app.services.account.getUserPoint()));
+        auto point = app.services.point.getPoint(app.services.account.getUserId());
+        setUserInfoCardSubTitle(QString("Point %1").arg(point));
         loginPage->setStatus("Signed in.");
         refreshProducts();
         refreshWishProducts();

@@ -54,11 +54,11 @@ std::optional<User> UserRepository::findByName(const std::string& name) const {
 
 bool UserRepository::insert(const User& user) {
     if (!hasDatabase()) {return false;}
-
+    sqlite3_stmt* statement = nullptr;
     constexpr auto sql =
         "INSERT INTO users (id, name, password, point) VALUES (?, ?, ?, ?) "
         "ON CONFLICT(id) DO UPDATE SET name = excluded.name, password = excluded.password, point = excluded.point";
-    sqlite3_stmt* statement = nullptr;
+
     if (!sqlOk(sql, statement)) {
         return false;
     }
@@ -66,6 +66,22 @@ bool UserRepository::insert(const User& user) {
     sqlBindText(statement, 2, user.getName());
     sqlBindText(statement, 3, user.getPassword());
     sqlite3_bind_int(statement, 4, user.getPoint());
+    return sqlFin(statement);
+}
+
+bool UserRepository::updatePoint(const User& user) {
+    if (!hasDatabase()) {return false;}
+    sqlite3_stmt* statement = nullptr;
+    constexpr auto sql =
+        "UPDATE users "
+        "SET Point = ? "
+        "WHERE id = ?";
+        
+    if (!sqlOk(sql, statement)) {
+        return false;
+    }
+    sqlite3_bind_int(statement, 1, user.getPoint());
+    sqlite3_bind_int(statement, 2, user.getId());
     return sqlFin(statement);
 }
 

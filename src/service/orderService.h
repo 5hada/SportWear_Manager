@@ -4,16 +4,18 @@ class ReceiptRepository;
 class OrderRepository;
 class CartRepository;
 class ProductRepository;
+class PointService;
 
 class OrderService{
     ReceiptRepository* receiptRepo{nullptr};
     OrderRepository* orderRepo{nullptr};
     CartRepository* cartRepo{nullptr};
     ProductRepository* productRepo{nullptr};
+
+    PointService* pointService{nullptr};
+
     Order* currentOrder{nullptr};
 
-    
-    void addPoint(int userId, int totalPrice, int rate = 5);
 public:
     OrderService(
         ReceiptRepository* receiptRepo,
@@ -26,6 +28,8 @@ public:
         cartRepo(cartRepo),
         productRepo(productRepo)
     {}
+
+    void setPointService(PointService* pointService) {this->pointService = pointService;}
 
     Order& makeOrder(int userId);
     bool confirmOrder(int userId, int userPoint);
