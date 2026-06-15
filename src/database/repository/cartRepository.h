@@ -9,9 +9,12 @@ public:
     CartRepository(DatabaseManager* db): RepositoryBase(db){}
 
     Cart findByUser(int userId) const;
+    CartItem findByProduct(int productId) const;
 
-    bool insert(int userId, int productId, bool isSelected, int quantity);
-    bool update(int userId, int productId, bool isSelected, int quantity);
+    bool insert(int userId, int productId, int count, bool isSelected);
+    bool update(int userId, int productId, int count, bool isSelected);
+    bool updateCount(int userId, int productId, int count);
+    bool updateSelected(int userId, int productId, bool isSelected);
     bool remove(int userId, int productId);
 
     bool clear(int userId);

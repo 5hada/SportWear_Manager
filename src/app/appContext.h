@@ -6,7 +6,7 @@
 
 
 
-class AppContext{
+class AppContext {
 public:
     RepositoryProvider repositories;
     ServiceProvider services;

@@ -1,6 +1,7 @@
 
 #include "model/product/cart.h"
 #include "model/product/cartAction.h"
+#include <optional>
 
 class CartRepository;
 class ProductRepository;
@@ -11,18 +12,24 @@ class CartService {
     bool checkReposExist() const;
     bool checkProductExist(int productId) const;
 
-    bool add(int userId, int productId, int count);
-    bool sub(int userId, int productId, int count);
-    bool set(int userId, int productId, int count);
+    bool add(int userId, int productId, int count, std::optional<bool> isSelected);
+    bool sub(int userId, int productId, int count, std::optional<bool> isSelected);
+    bool set(int userId, int productId, int count, std::optional<bool> isSelected);
+    bool toggle(int userId, int productId, std::optional<bool> isSelected);
     bool del(int userId, int productId);
     bool clear(int userId);
 public:
-    explicit CartService(
+    CartService(
         CartRepository* cartRepo,
         ProductRepository* productRepo
     ): cartRepo(cartRepo), productRepo(productRepo){}
 
     Cart getCart(int userId) const;
 
-    bool handleCart(CartAction action, int userId, int productId=0, int count=0);
+    bool handleCart(
+        CartAction action,
+        int userId,
+        int productId = 0,
+        int count = 0,
+        std::optional<bool> isSelected = std::nullopt);
 };

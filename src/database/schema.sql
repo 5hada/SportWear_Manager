@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS order_items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     receipt_id INTEGER NOT NULL,
     product_id INTEGER NOT NULL,
-    quantity INTEGER NOT NULL CHECK(quantity > 0),
+    count INTEGER NOT NULL CHECK(count > 0),
     price_at_added INTEGER NOT NULL CHECK(price_at_added >= 0),
 
     FOREIGN KEY (receipt_id) REFERENCES receipts(id),
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS cart_items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     product_id INTEGER NOT NULL,
-    quantity INTEGER NOT NULL CHECK(quantity > 0),
+    count INTEGER NOT NULL CHECK(count > 0),
     is_selected INTEGER NOT NULL DEFAULT 0,
     UNIQUE(user_id, product_id),
 
