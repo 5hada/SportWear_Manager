@@ -102,6 +102,8 @@ void MainWindow::initContent() {
     navigation(productGridPage->property("ElaPageKey").toString());
 }
 
+void Main
+
 void MainWindow::initAlertDialog(){
     alertDialog = new AlertDialog(this);
     connect(alertDialog, &AlertDialog::exitClicked, this, [=]() {
@@ -161,14 +163,14 @@ void MainWindow::connectPages()
 }
 
 void MainWindow::refreshProducts() {
-    productGridPage->setProducts(app.services.product.listProducts());
+    productGridPage->setProducts(app.services.product.getAll());
 }
 
 void MainWindow::refreshWishProducts() {
     std::vector<Product> products;
     if (app.services.account.getUserId() != 0) {
         for (const int productId : app.repositories.wish.findByUser(app.services.account.getUserId())) {
-            auto product = app.services.product.getProduct(productId);
+            auto product = app.services.product.getOptById(productId);
             if (product.has_value()) {
                 products.push_back(*product);
             }

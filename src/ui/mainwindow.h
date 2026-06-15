@@ -25,7 +25,11 @@ public:
 private:
     void initWindow();
     void initContent();
+
+    void connectNavigations();
     void connectPages();
+
+
     void refreshProducts();
     void refreshWishProducts();
     void refreshCart();

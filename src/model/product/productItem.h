@@ -4,6 +4,7 @@
 
 
 struct ProductItem: public Item{
+    ProductItem(): Item() {}
     ProductItem(int id,int count, int price)
         : Item(id, count, price){}
     ProductItem(int count, int price)

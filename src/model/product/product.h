@@ -12,6 +12,7 @@ class Product {
     Category category = Category::Unknown;
 
 public:
+    Product(): item() {}
     Product(ProductItem item, std::string name, Category category)
         : item(item), name(std::move(name)), category(category) {}
     Product(int count, int price, std::string name, Category category)

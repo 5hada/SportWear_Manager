@@ -3,11 +3,15 @@
 #include <vector>
 
 class ReviewService {
-    ReviewRepository *reviews_ = nullptr;
+    ReviewRepository *reviewRepo = nullptr;
 
+    bool isRepoValid() const;
 public:
-    explicit ReviewService(ReviewRepository *reviews);
+    explicit ReviewService(ReviewRepository *reviewRepo): reviewRepo(reviewRepo) {}
 
-    bool addReview(int userId, int productId, int rating, const std::string &comment);
-    std::vector<Review> reviewsForProduct(int productId) const;
+    bool add(int userId, int productId, int rating, const std::string &comment);
+    // bool modify(int userId, int productId, int rating, const std::string &comment);
+    // bool remove(int userId, int productId, int rating, const std::string &comment);
+
+    std::vector<Review> getAllFromProduct(int productId) const;
 };
