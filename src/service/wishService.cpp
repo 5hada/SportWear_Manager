@@ -1,14 +1,23 @@
 #include "wishService.h"
 
-WishService::WishService(WishRepository *wishlist)
-    : wishlist(wishlist) {}
+#include "database/repository/productRepository.h"
+#include "database/repository/wishRepository.h"
 
-void WishService::add(int userId, int productId) {
-    if (wishlist != nullptr) {
-        wishlist->add(userId, productId);
-    }
+bool WishService::add(int userId, int productId) {
+    if (!isRepoValid()){return false;}
+    if (productRepo->findById(productId) == std::nullopt){return false;}
+    wishRepo->add(userId, productId);
+    return true;
 }
 
 bool WishService::remove(int userId, int productId) {
-    return wishlist != nullptr && wishlist->remove(userId, productId);
+    if (!isRepoValid()){return false;}
+    return wishRepo->remove(userId, productId);
+}
+
+bool WishService::isRepoValid(){
+    if(wishRepo == nullptr || productRepo == nullptr){
+        return false;
+    }
+    return true;
 }

@@ -1,11 +1,15 @@
-#include "database/repository/wishRepository.h"
+
+class WishRepository;
+class ProductRepository;
 
 class WishService {
-    WishRepository *wishlist = nullptr;
+    WishRepository* wishRepo{nullptr};
+    ProductRepository* productRepo{nullptr};
     
+    bool isRepoValid();
 public:
-    explicit WishService(WishRepository *wishlist);
+    explicit WishService(WishRepository* wishRepo): wishRepo(wishRepo) {}
 
-    void add(int userId, int productId);
+    bool add(int userId, int productId);
     bool remove(int userId, int productId);
 };
