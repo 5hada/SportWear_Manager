@@ -22,8 +22,7 @@ set(PROJECT_SOURCES
         src/app/repositoryProvider.h
         src/app/serviceProvider.h
 
-        src/database/databaseManager.h
-        src/database/databaseManager.cpp
+        src/database/repository/repositoryBase.h
         src/database/repository/cartRepository.h
         src/database/repository/cartRepository.cpp
         src/database/repository/orderRepository.h
@@ -38,33 +37,40 @@ set(PROJECT_SOURCES
         src/database/repository/userRepository.cpp
         src/database/repository/wishRepository.h
         src/database/repository/wishRepository.cpp
+        src/database/databaseManager.h
+        src/database/databaseManager.cpp
 
-        src/model/product/order.h
-        src/model/product/orderItem.h
-        src/model/product/category.h
-        src/model/product/category.cpp
         src/model/product/cart.h
         src/model/product/cart.cpp
         src/model/product/cartAction.h
         src/model/product/cartItem.h
+        src/model/product/category.h
+        src/model/product/category.cpp
         src/model/product/item.h
+        src/model/product/order.h
+        src/model/product/orderItem.h
         src/model/product/product.h
         src/model/product/product.cpp
         src/model/product/productItem.h
         src/model/product/receipt.h
         src/model/product/receipt.cpp
+        src/model/product/wish.h
         src/model/review.h
         src/model/review.cpp
         src/model/user/userBase.h
         src/model/user/userBase.cpp
+        src/model/user/admin.h
+        src/model/user/admin.cpp
+        src/model/user/guest.h
+        src/model/user/guest.cpp
         src/model/user/user.h
         src/model/user/user.cpp
         src/model/user/sessionInfo.h
 
-        src/service/cartService.h
-        src/service/cartService.cpp
         src/service/accountService.h
         src/service/accountService.cpp
+        src/service/cartService.h
+        src/service/cartService.cpp
         src/service/orderService.h
         src/service/orderService.cpp
         src/service/productService.h

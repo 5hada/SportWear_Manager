@@ -11,8 +11,7 @@
 
 #include <string>
 
-class RepositoryProvider
-{
+class RepositoryProvider {
 public:
     DataBaseManager database;
 

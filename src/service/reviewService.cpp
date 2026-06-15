@@ -6,7 +6,7 @@ bool ReviewService::addReview(int userId, int productId, int rating, const std::
     if (reviews_ == nullptr || rating < 1 || rating > 5) {
         return false;
     }
-    reviews_->save(Review(reviews_->nextId(), userId, productId, rating, comment));
+    reviews_->insert(Review(reviews_->nextId(), userId, productId, rating, comment));
     return true;
 }
 

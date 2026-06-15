@@ -6,7 +6,7 @@
 bool WishService::add(int userId, int productId) {
     if (!isRepoValid()){return false;}
     if (productRepo->findById(productId) == std::nullopt){return false;}
-    wishRepo->add(userId, productId);
+    wishRepo->insert(userId, productId);
     return true;
 }
 

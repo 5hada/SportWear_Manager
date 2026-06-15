@@ -1,21 +1,13 @@
 #pragma once
 
-#include "database/databaseManager.h"
+#include "repositoryBase.h"
 #include <vector>
 
-class WishRepository {
-    DataBaseManager* database{nullptr};
-
-
-    bool hasDatabase() const;
-
+class WishRepository: public RepositoryBase {
 public:
-    explicit WishRepository(DataBaseManager* database = nullptr): database(database) {}
-
-    void setDatabase(DataBaseManager* database) {this->database = database;}
-
+    WishRepository(DataBaseManager* db):RepositoryBase(db) {}
     std::vector<int> findByUser(int userId) const;
 
-    bool add(int userId, int productId);
+    bool insert(int userId, int productId);
     bool remove(int userId, int productId);
 };
