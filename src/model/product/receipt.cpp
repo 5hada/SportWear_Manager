@@ -1,4 +1,5 @@
 #include "receipt.h"
+#include "orderItem.h"
 
 Receipt::Receipt(
     int id,
@@ -7,7 +8,8 @@ Receipt::Receipt(
     int points,
     int paid,
     std::string date,
-    bool isCanceled
+    bool isCanceled,
+    std::string canceledAt
 ):
     id(id),
     userId(userId),
@@ -15,7 +17,8 @@ Receipt::Receipt(
     points(points),
     paid(paid),
     date(date),
-    isCanceled(isCanceled) {}
+    isCanceled(isCanceled),
+    canceledAt(canceledAt) {}
 
 Receipt::Receipt(
     int userId, 
@@ -27,3 +30,9 @@ Receipt::Receipt(
     items(items),
     points(points),
     paid(paid) {}
+
+void Receipt::setOrderItems(std::vector<OrderItem> items) const{
+    for(OrderItem& item: items){
+        items.push_back(OrderItem(item.id, item.count, item.price));
+    }
+}

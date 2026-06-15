@@ -19,4 +19,6 @@ public:
     bool confirmOrder(int userId, int userPoint);
     bool order(int userId, Cart cartItems,int totalPrice, int usedPoint);
     bool refund(int id);
+
+    void clear();
 };

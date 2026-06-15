@@ -13,6 +13,7 @@ class Receipt {
     int paid;
     std::string date;
     bool isCanceled;
+    std::string canceledAt;
 
 public:
     Receipt() = default;
@@ -23,7 +24,8 @@ public:
         int point,
         int paid,
         std::string date,
-        bool isCanceled = false
+        bool isCanceled = false,
+        std::string canceledAt = ""
     );
     Receipt(
         int userId,
@@ -37,7 +39,9 @@ public:
     std::vector<OrderItem> getOrderItems() const{return items;}
     int getPoints() const { return points; }
     int getPaid() const { return paid; }
-    int getTotalPaid() const { return points+paid; }
     std::string getDate() const { return date; }
     bool getIsCanceled() const { return isCanceled; }
+
+    
+    void setOrderItems(std::vector<OrderItem> items) const;
 };

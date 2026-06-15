@@ -26,6 +26,8 @@ set(PROJECT_SOURCES
         src/database/databaseManager.cpp
         src/database/repository/cartRepository.h
         src/database/repository/cartRepository.cpp
+        src/database/repository/orderRepository.h
+        src/database/repository/orderRepository.cpp
         src/database/repository/productRepository.h
         src/database/repository/productRepository.cpp
         src/database/repository/receiptRepository.h
