@@ -5,20 +5,22 @@
 #include <vector>
 
 class ReviewRepository {
-public:
-    explicit ReviewRepository(DataBaseManager* database = nullptr);
+    DataBaseManager* database{nullptr};
 
-    void setDatabase(DataBaseManager* database);
-
-    const std::vector<Review>& findAll() const;
-    std::vector<Review> findByProductId(int productId) const;
-    void save(const Review& review);
-    int nextId() const;
-
-private:
     bool hasDatabase() const;
     static Review reviewFromStatement(sqlite3_stmt* statement);
+public:
+    explicit ReviewRepository(DataBaseManager* database = nullptr): database(database){}
 
-    DataBaseManager* database{nullptr};
-    mutable std::vector<Review> reviews;
+    void setDatabase(DataBaseManager* database) {this->database = database;}
+
+    std::vector<Review> findAll() const;
+    std::vector<Review> findByProductId(int productId) const;
+    std::vector<Review> findByUser(int userId) const;
+
+    bool insert(const Review& review);
+    bool update(const Review& review);
+    bool remove(int id);
+
+    int nextId() const;
 };
