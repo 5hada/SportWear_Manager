@@ -7,7 +7,6 @@ bool Product::hasStock(int count) const {
 }
 
 bool Product::decreaseStock(int count) {
-bool Product::decreaseStock(int count) {
     if (!hasStock(count)) {
         return false;
     }
