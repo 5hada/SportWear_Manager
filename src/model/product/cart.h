@@ -15,6 +15,7 @@ public:
     const std::vector<CartItem> &getItems() const{ return items;}
 
     void addItem(int productId, int count);
+    void addItem(CartItem item);
     // bool subItem(int productId, int count);
     // bool removeItem(int productId);
     // void clear();

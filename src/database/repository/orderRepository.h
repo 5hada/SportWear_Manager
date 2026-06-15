@@ -1,17 +1,16 @@
-
+#include "repositoryBase.h"
 #include "model/product/orderItem.h"
 #include <vector>
 
-class DataBaseManager;
 
-class OrderRepository{
-    DataBaseManager* database{nullptr};
-
+class OrderRepository: public RepositoryBase {
+    static OrderItem orderItemFromStatement(sqlite3_stmt* statement);
 public:
-    OrderRepository(DataBaseManager* database):database(database){}
+    OrderRepository(DatabaseManager* db):RepositoryBase(db){}
+
 
     std::vector<OrderItem> findById(int receiptId) const;
 
 
-    bool insertOrder(int receiptId, std::vector<OrderItem>* items) const;
+    bool insert(int receiptId, std::vector<OrderItem>* items) const;
 };

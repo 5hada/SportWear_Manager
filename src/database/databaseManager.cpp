@@ -4,23 +4,12 @@
 #include <sstream>
 #include <utility>
 
-DataBaseManager::DataBaseManager(std::string path)
-{
-    open(path);
-}
-
-DataBaseManager::~DataBaseManager() {
-    close();
-}
-
-DataBaseManager::DataBaseManager(DataBaseManager&& other) noexcept
+DatabaseManager::DatabaseManager(DatabaseManager&& other) noexcept
     : db(std::exchange(other.db, nullptr)),
       lastErrorMessage(std::move(other.lastErrorMessage))
-{
-}
+{}
 
-DataBaseManager& DataBaseManager::operator=(DataBaseManager&& other) noexcept
-{
+DatabaseManager& DatabaseManager::operator=(DatabaseManager&& other) noexcept {
     if (this != &other) {
         close();
         db = std::exchange(other.db, nullptr);
@@ -29,8 +18,7 @@ DataBaseManager& DataBaseManager::operator=(DataBaseManager&& other) noexcept
     return *this;
 }
 
-bool DataBaseManager::open(const std::string& path)
-{
+bool DatabaseManager::open(const std::string& path) {
     close();
 
     const int result = sqlite3_open(path.c_str(), &db);
@@ -43,31 +31,14 @@ bool DataBaseManager::open(const std::string& path)
     return execute("PRAGMA foreign_keys = ON;");
 }
 
-void DataBaseManager::close()
-{
+void DatabaseManager::close() {
     if (db != nullptr) {
         sqlite3_close(db);
         db = nullptr;
     }
 }
 
-bool DataBaseManager::isOpen() const
-{
-    return db != nullptr;
-}
-
-sqlite3* DataBaseManager::handle() const
-{
-    return db;
-}
-
-const std::string& DataBaseManager::lastError() const
-{
-    return lastErrorMessage;
-}
-
-bool DataBaseManager::execute(const std::string& sql)
-{
+bool DatabaseManager::execute(const std::string& sql) {
     if (db == nullptr) {
         lastErrorMessage = "database is not open";
         return false;
@@ -85,8 +56,7 @@ bool DataBaseManager::execute(const std::string& sql)
     return true;
 }
 
-bool DataBaseManager::executeFile(const std::string& path)
-{
+bool DatabaseManager::executeFile(const std::string& path) {
     std::ifstream file(path);
     if (!file.is_open()) {
         lastErrorMessage = "failed to open SQL file: " + path;
@@ -98,13 +68,11 @@ bool DataBaseManager::executeFile(const std::string& path)
     return execute(buffer.str());
 }
 
-bool DataBaseManager::initialize(const std::string& databasePath, const std::string& schemaPath)
-{
+bool DatabaseManager::initialize(const std::string& databasePath, const std::string& schemaPath) {
     return open(databasePath) && executeFile(schemaPath);
 }
 
-void DataBaseManager::setErrorFromSqlite(int resultCode)
-{
+void DatabaseManager::setErrorFromSqlite(int resultCode) {
     if (db != nullptr) {
         lastErrorMessage = sqlite3_errmsg(db);
         return;

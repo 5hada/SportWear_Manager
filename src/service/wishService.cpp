@@ -15,9 +15,6 @@ bool WishService::remove(int userId, int productId) {
     return wishRepo->remove(userId, productId);
 }
 
-bool WishService::isRepoValid(){
-    if(wishRepo == nullptr || productRepo == nullptr){
-        return false;
-    }
-    return true;
+bool WishService::isRepoValid() {
+    return wishRepo != nullptr && productRepo != nullptr;
 }

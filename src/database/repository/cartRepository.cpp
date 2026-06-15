@@ -1,93 +1,88 @@
 #include "cartRepository.h"
-#include "database/databaseManager.h"
 
-Cart CartRepository::getCart(int userId) const {
+Cart CartRepository::findByUser(int userId) const {
     Cart cart;
-
+    sqlite3_stmt* statement = nullptr;
     constexpr auto sql =
-        "SELECT product_id, quantity "
+        "SELECT user_id, product_id, quantity, is_selected "
         "FROM cart_items "
         "WHERE user_id = ? "
         "ORDER BY id";
 
-    sqlite3_stmt* statement = nullptr;
-    if (sqlite3_prepare_v2(database->handle(), sql, -1, &statement, nullptr) != SQLITE_OK) {
-        return cart;
+    if (sqlOk(sql, statement)) {
+        sqlite3_bind_int(statement, 1, userId);
+
+        while (sqlite3_step(statement) == SQLITE_ROW) {
+            cart.addItem(cartItemFromStatement(statement));
+        }
+        sqlite3_finalize(statement);
     }
-
-    sqlite3_bind_int(statement, 1, userId);
-
-    while (sqlite3_step(statement) == SQLITE_ROW) {
-        cart.addItem(
-            sqlite3_column_int(statement, 0),
-            sqlite3_column_int(statement, 1)
-        );
-    }
-
-    sqlite3_finalize(statement);
     return cart;
 }
 
-bool CartRepository::addItem(int userId, int productId, int quantity) {
-    constexpr auto sql =
-        "INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?) "
-        "ON CONFLICT(user_id, product_id) DO UPDATE SET quantity = quantity + excluded.quantity";
+bool CartRepository::insert(int userId, int productId, bool isSelected, int quantity) {
     sqlite3_stmt* statement = nullptr;
-    if (sqlite3_prepare_v2(database->handle(), sql, -1, &statement, nullptr) != SQLITE_OK) {
-        return false;
+    constexpr auto sql =
+        "INSERT INTO cart_items (user_id, product_id, quantity, is_selected) "
+        "VALUES (?, ?, ?, ?) ";
+
+    if (sqlOk(sql, statement)) {
+        sqlite3_bind_int(statement, 1, userId);
+        sqlite3_bind_int(statement, 2, productId);
+        sqlite3_bind_int(statement, 3, quantity);
+        sqlite3_bind_int(statement, 4, isSelected? 1 : 0);
+        return sqlFin(statement);
     }
-    sqlite3_bind_int(statement, 1, userId);
-    sqlite3_bind_int(statement, 2, productId);
-    sqlite3_bind_int(statement, 3, quantity);
-    const bool ok = sqlite3_step(statement) == SQLITE_DONE;
-    sqlite3_finalize(statement);
-    return ok;
+    return false;
 }
 
-bool CartRepository::updateItem(int userId, int productId, int quantity) {
+bool CartRepository::update(int userId, int productId, bool isSelected, int quantity) {
+    sqlite3_stmt* statement = nullptr;
     constexpr auto sql =
         "UPDATE cart_items "
-        "SET quantity = ? "
+        "SET quantity = ?, is_selected = ? "
         "WHERE user_id = ? AND product_id = ?";
-    sqlite3_stmt* statement = nullptr;
-    if (sqlite3_prepare_v2(database->handle(), sql, -1, &statement, nullptr) != SQLITE_OK) {
-        return false;
+
+    if (sqlOk(sql, statement)) {
+        sqlite3_bind_int(statement, 1, quantity);
+        sqlite3_bind_int(statement, 2, isSelected? 1 : 0);
+        sqlite3_bind_int(statement, 3, userId);
+        sqlite3_bind_int(statement, 4, productId);
+        return sqlFin(statement);
     }
-
-    sqlite3_bind_int(statement, 1, quantity);
-    sqlite3_bind_int(statement, 2, userId);
-    sqlite3_bind_int(statement, 3, productId);
-
-    const bool updated =
-        sqlite3_step(statement) == SQLITE_DONE &&
-        sqlite3_changes(database->handle()) > 0;
-
-    sqlite3_finalize(statement);
-    return updated;
+    return false;
 }
 
-bool CartRepository::removeItem(int userId, int productId) {
-    constexpr auto sql = "DELETE FROM cart_items WHERE user_id = ? AND product_id = ?";
+bool CartRepository::remove(int userId, int productId) {
     sqlite3_stmt* statement = nullptr;
-    if (sqlite3_prepare_v2(database->handle(), sql, -1, &statement, nullptr) != SQLITE_OK) {
-        return false;
+    constexpr auto sql =
+        "DELETE FROM cart_items WHERE user_id = ? AND product_id = ?";
+
+    if (sqlOk(sql, statement)) {
+        sqlite3_bind_int(statement, 1, userId);
+        sqlite3_bind_int(statement, 2, productId);
+        return sqlFin(statement);
     }
-    sqlite3_bind_int(statement, 1, userId);
-    sqlite3_bind_int(statement, 2, productId);
-    const bool removed = sqlite3_step(statement) == SQLITE_DONE && sqlite3_changes(database->handle()) > 0;
-    sqlite3_finalize(statement);
-    return removed;
+    return false;
 }
 
 bool CartRepository::clear(int userId) {
-
-    constexpr auto sql = "DELETE FROM cart_items WHERE user_id = ?";
     sqlite3_stmt* statement = nullptr;
-    if (sqlite3_prepare_v2(database->handle(), sql, -1, &statement, nullptr) != SQLITE_OK) {
-        return false;
+    constexpr auto sql =
+        "DELETE FROM cart_items WHERE user_id = ?";
+
+    if (sqlOk(sql, statement)) {
+        sqlite3_bind_int(statement, 1, userId);
+        return sqlFin(statement);
     }
-    sqlite3_bind_int(statement, 1, userId);
-    const bool ok = sqlite3_step(statement) == SQLITE_DONE;
-    sqlite3_finalize(statement);
-    return ok;
+    return false;
+}
+
+CartItem CartRepository::cartItemFromStatement(sqlite3_stmt* statement){
+    return CartItem(
+        sqlite3_column_int(statement, 1),
+        sqlite3_column_int(statement, 2),
+        sqlite3_column_int(statement, 0),
+        sqlite3_column_int(statement, 3)
+    );
 }

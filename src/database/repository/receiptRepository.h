@@ -1,19 +1,17 @@
-#include "database/databaseManager.h"
+#include "repositoryBase.h"
 #include "model/product/receipt.h"
 #include <vector>
 
 class DataBaseManager;
 
-class ReceiptRepository{
-    DataBaseManager* database{nullptr};
-
+class ReceiptRepository: public RepositoryBase{
+    static Receipt receiptFromStatement(sqlite3_stmt* statement);
 public:
-    ReceiptRepository(DataBaseManager* database):database(database){}
+    ReceiptRepository(DatabaseManager* db):RepositoryBase(db) {}
 
     std::vector<Receipt> findByUser(int userId) const;
     Receipt* findById(int id) const;
 
-
-    int insertReceipt(Receipt& receipt);
-    bool updateReceipt(Receipt& receipt);
+    int insert(Receipt& receipt);
+    bool update(Receipt& receipt);
 };

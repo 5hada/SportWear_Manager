@@ -1,27 +1,19 @@
 #pragma once
 
-#include "database/databaseManager.h"
+#include "repositoryBase.h"
 #include "model/user/user.h"
 #include <optional>
 #include <vector>
 
-class UserRepository{
-    DataBaseManager* database{nullptr};
-    mutable std::vector<User> users;
-
-
-    bool hasDatabase() const;
+class UserRepository: public RepositoryBase{
     static User userFromStatement(sqlite3_stmt* statement);
-
 public:
-    explicit UserRepository(DataBaseManager* database = nullptr);
+    UserRepository(DatabaseManager* db): RepositoryBase(db) {}
 
-    void setDatabase(DataBaseManager* database);
 
-    const std::vector<User>& findAll() const;
+    const std::vector<User> findAll() const;
     std::optional<User> findById(int id) const;
     std::optional<User> findByName(const std::string& name) const;
     
-    bool save(const User& user);
-
+    bool insert(const User& user);
 };

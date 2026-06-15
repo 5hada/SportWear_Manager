@@ -1,9 +1,14 @@
 #include "cart.h"
+#include "cartItem.h"
 // #include <algorithm>
 
 
 void Cart::addItem(int productId, int count) {
     items.emplace_back(productId, count);
+}
+
+void Cart::addItem(CartItem item) {
+    items.emplace_back(item);
 }
 
 // bool Cart::subItem(int productId, int count) {

@@ -2,122 +2,84 @@
 #include "sqlite3.h"
 
 std::vector<Receipt> ReceiptRepository::findByUser(int userId) const{
-    std::vector<Receipt> receipts;
+    std::vector<Receipt> receipts{};
+    if (hasDatabase()) {
+        constexpr auto sql =
+            "SELECT id, user_id, used_point, total_price, ordered_at, is_canceled, canceled_at "
+            "FROM receipts "
+            "WHERE user_id = ? "
+            "ORDER BY id";
 
-    constexpr auto sql =
-        "SELECT id, used_point, total_price, ordered_at, is_canceled, canceled_at "
-        "FROM receipts "
-        "WHERE user_id = ? "
-        "ORDER BY id";
+        sqlite3_stmt* statement = nullptr;
+        if (sqlOk(sql, statement)) {
+            sqlite3_bind_int(statement, 1, userId);
+            while (sqlite3_step(statement) == SQLITE_ROW) {
+                receipts.emplace_back(receiptFromStatement(statement));
+            }
 
-    sqlite3_stmt* statement = nullptr;
-    if (sqlite3_prepare_v2(database->handle(), sql, -1, &statement, nullptr) != SQLITE_OK) {
-        return receipts;
-    }
-
-    sqlite3_bind_int(statement, 1, userId);
-    while (sqlite3_step(statement) == SQLITE_ROW) {
-        std::string orderedAt =
-            reinterpret_cast<const char*>(sqlite3_column_text(statement, 3));
-
-        std::string canceledAt;
-        if (sqlite3_column_type(statement, 5) != SQLITE_NULL) {
-            canceledAt = reinterpret_cast<const char*>(sqlite3_column_text(statement, 5));
+            sqlite3_finalize(statement);
         }
-
-        receipts.emplace_back(
-            sqlite3_column_int(statement, 0),
-            userId,
-            std::vector<OrderItem>{},
-            sqlite3_column_int(statement, 1),
-            sqlite3_column_int(statement, 2),
-            orderedAt,
-            sqlite3_column_int(statement, 4) != 0,
-            canceledAt
-        );
     }
-
-    sqlite3_finalize(statement);
     return receipts;
 }
 
 Receipt* ReceiptRepository::findById(int id) const{
     Receipt* receipt{nullptr};
+    if (hasDatabase()) {
+        constexpr auto sql =
+            "SELECT id, user_id, used_point, total_price, ordered_at, is_canceled, canceled_at "
+            "FROM receipts "
+            "WHERE id = ? "
+            "ORDER BY id";
 
-    constexpr auto sql =
-        "SELECT user_id, used_point, total_price, ordered_at, is_canceled, canceled_at "
-        "FROM receipts "
-        "WHERE id = ? "
-        "ORDER BY id";
-
-    sqlite3_stmt* statement = nullptr;
-    if (sqlite3_prepare_v2(database->handle(), sql, -1, &statement, nullptr) != SQLITE_OK) {
-        return receipt;
-    }
-
-    sqlite3_bind_int(statement, 1, id);
-    while (sqlite3_step(statement) == SQLITE_ROW) {
-        std::string orderedAt =
-            reinterpret_cast<const char*>(sqlite3_column_text(statement, 3));
-
-        std::string canceledAt;
-        if (sqlite3_column_type(statement, 5) != SQLITE_NULL) {
-            canceledAt = reinterpret_cast<const char*>(sqlite3_column_text(statement, 5));
+        sqlite3_stmt* statement = nullptr;
+        if (!sqlOk(sql, statement)) {
+            return receipt;
         }
 
-        receipt->setData(
-            id,
-            sqlite3_column_int(statement, 0),
-            std::vector<OrderItem>{},
-            sqlite3_column_int(statement, 1),
-            sqlite3_column_int(statement, 2),
-            orderedAt,
-            sqlite3_column_int(statement, 4) != 0,
-            canceledAt
-        );
-    }
+        sqlite3_bind_int(statement, 1, id);
+        while (sqlite3_step(statement) == SQLITE_ROW) {
+            *receipt = receiptFromStatement(statement);
+        }
 
-    sqlite3_finalize(statement);
+        sqlite3_finalize(statement);
+    }
     return receipt;
 }
 
 
-int ReceiptRepository::insertReceipt(Receipt& receipt) {
+int ReceiptRepository::insert(Receipt& receipt) {
+    if (!hasDatabase()) {return -1;}
     sqlite3_stmt* statement = nullptr;
-
     constexpr auto sql =
         "INSERT INTO receipts (user_id, used_point, total_price) "
         "VALUES (?, ?, ?)";
 
-    if (sqlite3_prepare_v2(database->handle(), sql, -1, &statement, nullptr) != SQLITE_OK) {
-        return -1;
-    }
-
-    sqlite3_bind_int(statement, 1, receipt.getUserId());
-    sqlite3_bind_int(statement, 2, receipt.getPoints());
-    sqlite3_bind_int(statement, 3, receipt.getPaid());
-
     int receiptId = -1;
+    if (sqlOk(sql, statement)) {
+        sqlite3_bind_int(statement, 1, receipt.getUserId());
+        sqlite3_bind_int(statement, 2, receipt.getPoints());
+        sqlite3_bind_int(statement, 3, receipt.getPaid());
 
-    if (sqlite3_step(statement) == SQLITE_DONE) {
-        receiptId = static_cast<int>(
-            sqlite3_last_insert_rowid(database->handle())
-        );
+        if (sqlite3_step(statement) == SQLITE_DONE) {
+            receiptId = static_cast<int>(
+                sqlite3_last_insert_rowid(db->handle())
+            );
+        }
+        sqlite3_finalize(statement);
     }
-
-    sqlite3_finalize(statement);
     return receiptId;
 }
 
-bool ReceiptRepository::updateReceipt(Receipt& receipt) {
+bool ReceiptRepository::update(Receipt& receipt) {
+    if (!hasDatabase()) {return false;}
     sqlite3_stmt* statement = nullptr;
-
     constexpr auto sql =
         "UPDATE receipts "
         "SET is_canceled = ? "
         "WHERE id = ?";
 
-    if (sqlite3_prepare_v2(database->handle(), sql, -1, &statement, nullptr) != SQLITE_OK) {
+    if (!sqlOk(sql, statement)) {
         return false;
     }
 
@@ -128,4 +90,17 @@ bool ReceiptRepository::updateReceipt(Receipt& receipt) {
 
     sqlite3_finalize(statement);
     return success;
+}
+
+
+Receipt ReceiptRepository::receiptFromStatement(sqlite3_stmt* statement) {
+    return Receipt(
+        sqlite3_column_int(statement, 0),
+        sqlite3_column_int(statement, 1),
+        {},
+        sqlite3_column_int(statement, 2),
+        sqlite3_column_int(statement, 3),
+        columnText(statement, 4),
+        sqlite3_column_int(statement, 5),
+        columnText(statement, 6));
 }

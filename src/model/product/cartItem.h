@@ -4,14 +4,16 @@
 
 
 struct CartItem: public Item{
-    bool selected = true;
+    int userId = 0;
+    bool isSelected = true;
 public:
     CartItem(int id, int count)
         : Item(id, count, -1){}
+    CartItem(int id, int count, int userId, bool isSelected)
+        : Item(id, count, -1), userId(userId), isSelected(isSelected){}
 
-    bool isSelected(){return selected;}
-
+    bool selected(){return isSelected;}
 
     void setPrice(int price){Item::setPrice(price);}
-    void setSelected(bool isSelected){this->selected = isSelected;}
+    void setSelected(bool isSelected){this->isSelected = isSelected;}
 };

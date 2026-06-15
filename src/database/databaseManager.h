@@ -3,25 +3,25 @@
 #include "sqlite3.h"
 #include <string>
 
-class DataBaseManager
-{
+class DatabaseManager {
 public:
-    DataBaseManager() = default;
-    explicit DataBaseManager(std::string path);
-    ~DataBaseManager();
+    DatabaseManager() = default;
+    explicit DatabaseManager(std::string path) {open(path);}
+    ~DatabaseManager() {close();}
 
-    DataBaseManager(const DataBaseManager&) = delete;
-    DataBaseManager& operator=(const DataBaseManager&) = delete;
+    DatabaseManager(const DatabaseManager&) = delete;
+    DatabaseManager& operator=(const DatabaseManager&) = delete;
 
-    DataBaseManager(DataBaseManager&& other) noexcept;
-    DataBaseManager& operator=(DataBaseManager&& other) noexcept;
+    DatabaseManager(DatabaseManager&& other) noexcept;
+    DatabaseManager& operator=(DatabaseManager&& other) noexcept;
 
     bool open(const std::string& path);
     void close();
-    bool isOpen() const;
+    
+    bool isOpen() const {return db != nullptr;}
 
-    sqlite3* handle() const;
-    const std::string& lastError() const;
+    sqlite3* handle() const {return db;}
+    const std::string& lastError() const {return lastErrorMessage;}
 
     bool execute(const std::string& sql);
     bool executeFile(const std::string& path);

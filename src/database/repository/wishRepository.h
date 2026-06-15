@@ -5,8 +5,10 @@
 
 class WishRepository: public RepositoryBase {
 public:
-    WishRepository(DataBaseManager* db):RepositoryBase(db) {}
+    WishRepository(DatabaseManager* db):RepositoryBase(db) {}
+    
     std::vector<int> findByUser(int userId) const;
+    std::vector<int> findByProduct(int productId) const;
 
     bool insert(int userId, int productId);
     bool remove(int userId, int productId);
