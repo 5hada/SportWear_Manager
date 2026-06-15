@@ -7,7 +7,7 @@ class UserRepository;
 class AccountService{
     UserRepository* userRepo{nullptr};
 
-
+    bool isLoggedIn = false;
     UserBase* currentUser{nullptr};
     Guest* guest;
 
@@ -22,4 +22,6 @@ public:
     bool login(const std::string& name, const std::string& password);
     bool logout();
     bool signup(const std::string& name, const std::string& password);
+
+    bool loggedIn() {return isLoggedIn;}
 };

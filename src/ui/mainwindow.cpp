@@ -182,7 +182,7 @@ void MainWindow::refreshCart() {
 }
 
 bool MainWindow::requireLogin() {
-    if (app.services.account.getUserId() != 0) {
+    if (app.services.account.loggedIn()) {
         return true;
     }
 

@@ -19,6 +19,7 @@ set(PROJECT_SOURCES
         src/main.cpp
 
         src/app/appContext.h
+        src/app/eventProvider.h
         src/app/repositoryProvider.h
         src/app/serviceProvider.h
 

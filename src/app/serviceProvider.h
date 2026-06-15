@@ -28,6 +28,6 @@ public:
           review(&repo.review),
           wish(&repo.wish, &repo.product)
     {
-        
+        order.setPointService(&point);
     }
 };

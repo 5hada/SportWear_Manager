@@ -11,6 +11,7 @@ bool AccountService::login(const std::string &name, const std::string &password)
     if (!user.has_value()) {return false;}
     if (user->checkPassword(password)) {
         *currentUser = user.value();
+        isLoggedIn = true;
         return true;
     }
     return false;
@@ -18,6 +19,7 @@ bool AccountService::login(const std::string &name, const std::string &password)
 
 bool AccountService::logout(){
     currentUser = guest;
+    isLoggedIn = false;
     return true;
 }
 
