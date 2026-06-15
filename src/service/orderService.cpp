@@ -43,12 +43,13 @@ bool OrderService::confirmOrder(int userId, int usedPoint){
 bool OrderService::refund(int id){
     Receipt* receipt = receiptRepo->findById(id);
     if(receipt == nullptr){return false;}
+    receipt->setIsCanceled(true);
+    return receiptRepo->updateReceipt(*receipt);
 }
 
 void OrderService::addPoint(int userId, int totalPrice, int rate){
     if(userId==1 || userId==0){return;}
     int point = totalPrice*(rate/100);
-    
 }
 
 
