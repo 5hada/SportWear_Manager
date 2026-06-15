@@ -29,10 +29,11 @@ public:
     );
     Receipt(
         int userId,
-        std::vector<OrderItem> items,
+        std::vector<OrderItem>* items,
         int point,
         int paid
     );
+    
 
     int getId() const { return id; }
     int getUserId() const { return userId; }

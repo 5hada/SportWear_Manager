@@ -31,7 +31,7 @@ std::vector<OrderItem> OrderRepository::findById(int receiptId) const{
 }
 
 
-bool OrderRepository::insertReceipt(int receiptId, std::vector<OrderItem>& items) {
+bool OrderRepository::insertOrder(int receiptId, std::vector<OrderItem>* items) const {
     constexpr auto sql =
         "INSERT INTO order_items "
         "(receipt_id, product_id, quantity, price_at_added) "
@@ -45,7 +45,7 @@ bool OrderRepository::insertReceipt(int receiptId, std::vector<OrderItem>& items
 
     bool success = true;
 
-    for (OrderItem& item : items) {
+    for (OrderItem& item : *items) {
         sqlite3_bind_int(statement, 1, receiptId);
         sqlite3_bind_int(statement, 2, item.getId());      // product_id
         sqlite3_bind_int(statement, 3, item.getCount());   // quantity

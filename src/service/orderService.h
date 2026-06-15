@@ -1,23 +1,24 @@
-#include"model/product/cart.h"
-#include"model/product/orderItem.h"
-#include <map>
-#include <vector>
+
+#include "model/product/order.h"
 class ReceiptRepository;
+class OrderRepository;
+class CartRepository;
+class ProductRepository;
 
 class OrderService{
-    ReceiptRepository* receipt{nullptr};
-    std::vector<OrderItem>* currentOrder;
-    int totalPrice;
+    ReceiptRepository* receiptRepo{nullptr};
+    OrderRepository* orderRepo{nullptr};
+    CartRepository* cartRepo{nullptr};
+    ProductRepository* productRepo{nullptr};
+    Order* currentOrder{nullptr};
 
     
     void addPoint(int userId, int totalPrice, int rate = 5);
-    std::vector<OrderItem> getOrderItems(Cart cartItems);
 public:
-    OrderService(ReceiptRepository* receiptRepo):receipt(receiptRepo){}
+    OrderService(ReceiptRepository* receiptRepo):receiptRepo(receiptRepo){}
 
-    std::map<int, std::vector<OrderItem>> makeOrder(int userId);
+    Order& makeOrder(int userId);
     bool confirmOrder(int userId, int userPoint);
-    bool order(int userId, Cart cartItems,int totalPrice, int usedPoint);
     bool refund(int id);
 
     void clear();

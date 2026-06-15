@@ -13,5 +13,5 @@ public:
     std::vector<OrderItem> findById(int receiptId) const;
 
 
-    bool insertReceipt(int receiptId, std::vector<OrderItem>& items);
+    bool insertOrder(int receiptId, std::vector<OrderItem>* items) const;
 };

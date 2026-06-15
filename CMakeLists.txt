@@ -39,6 +39,7 @@ set(PROJECT_SOURCES
         src/database/repository/wishRepository.h
         src/database/repository/wishRepository.cpp
 
+        src/model/product/order.h
         src/model/product/orderItem.h
         src/model/product/category.h
         src/model/product/category.cpp
