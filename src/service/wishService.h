@@ -1,4 +1,6 @@
 
+#include "model/product/product.h"
+#include <vector>
 class WishRepository;
 class ProductRepository;
 
@@ -8,8 +10,10 @@ class WishService {
     
     bool isRepoValid();
 public:
-    explicit WishService(WishRepository* wishRepo, ProductRepository* productRepo):
+    WishService(WishRepository* wishRepo, ProductRepository* productRepo):
         wishRepo(wishRepo), productRepo(productRepo){}
+
+    std::vector<Product> getWishs(int userId);
 
     bool add(int userId, int productId);
     bool remove(int userId, int productId);
