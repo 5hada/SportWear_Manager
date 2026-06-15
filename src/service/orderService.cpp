@@ -40,9 +40,10 @@ bool OrderService::confirmOrder(int userId, int usedPoint){
     return true;
 }
 
-// bool OrderService::refund(int id){
-//     receiptRepo->find
-// }
+bool OrderService::refund(int id){
+    Receipt* receipt = receiptRepo->findById(id);
+    if(receipt == nullptr){return false;}
+}
 
 void OrderService::addPoint(int userId, int totalPrice, int rate){
     if(userId==1 || userId==0){return;}

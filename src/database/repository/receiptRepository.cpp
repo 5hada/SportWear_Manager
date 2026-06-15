@@ -41,8 +41,8 @@ std::vector<Receipt> ReceiptRepository::findByUser(int userId) const{
     return receipts;
 }
 
-std::vector<Receipt> ReceiptRepository::findById(int id) const{
-    std::vector<Receipt> receipts;
+Receipt* ReceiptRepository::findById(int id) const{
+    Receipt* receipt{nullptr};
 
     constexpr auto sql =
         "SELECT user_id, used_point, total_price, ordered_at, is_canceled, canceled_at "
@@ -52,7 +52,7 @@ std::vector<Receipt> ReceiptRepository::findById(int id) const{
 
     sqlite3_stmt* statement = nullptr;
     if (sqlite3_prepare_v2(database->handle(), sql, -1, &statement, nullptr) != SQLITE_OK) {
-        return receipts;
+        return receipt;
     }
 
     sqlite3_bind_int(statement, 1, id);
@@ -65,7 +65,7 @@ std::vector<Receipt> ReceiptRepository::findById(int id) const{
             canceledAt = reinterpret_cast<const char*>(sqlite3_column_text(statement, 5));
         }
 
-        receipts.emplace_back(
+        receipt->setData(
             id,
             sqlite3_column_int(statement, 0),
             std::vector<OrderItem>{},
@@ -78,7 +78,7 @@ std::vector<Receipt> ReceiptRepository::findById(int id) const{
     }
 
     sqlite3_finalize(statement);
-    return receipts;
+    return receipt;
 }
 
 
