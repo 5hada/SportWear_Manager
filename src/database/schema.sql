@@ -26,7 +26,10 @@ CREATE TABLE IF NOT EXISTS receipts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     ordered_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    used_point INTEGER NOT NULL CHECK(used_point>= 0),
     total_price INTEGER NOT NULL CHECK(total_price >= 0),
+    is_canceled INTEGER NOT NULL DEFAULT 0,
+    canceled_at TEXT,
 
     FOREIGN KEY (user_id) REFERENCES users(id)
 );

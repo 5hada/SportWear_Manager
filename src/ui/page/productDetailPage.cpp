@@ -7,7 +7,7 @@
 
 ProductDetailPage::ProductDetailPage(QWidget* parent)
     : ElaScrollPage(parent),
-      product(Item{0, 24, 59000}, "Running Jacket", Category::Unknown)
+      product(ProductItem{24, 59000}, "Running Jacket", Category::Unknown)
 {
     setWindowTitle("Product Detail");
     setTitleVisible(false);

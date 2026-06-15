@@ -1,6 +1,6 @@
 
-#include"formPanelLayout.h"
+#include"formPanelWidget.h"
 
-class LoginPanelLayout: public FormPanelLayout{
+class LoginPanelWidget: public FormPanelWidget{
 
 };

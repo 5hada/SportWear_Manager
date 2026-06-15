@@ -1,15 +1,28 @@
-#include "database/repository/cartRepository.h"
-#include "database/repository/productRepository.h"
 
+#include "model/product/cart.h"
+#include "model/product/cartAction.h"
+
+class CartRepository;
+class ProductRepository;
 class CartService {
-    CartRepository *carts_ = nullptr;
-    ProductRepository *products_ = nullptr;
-    
-public:
-    CartService(CartRepository *carts, ProductRepository *products);
+    CartRepository* cartRepo = nullptr;
+    ProductRepository* productRepo = nullptr;
 
-    bool addProduct(int userId, int productId, int quantity);
-    bool removeProduct(int userId, int productId);
-    Cart cart(int userId) const;
-    void clear(int userId);
+    bool checkReposExist() const;
+    bool checkProductExist(int productId) const;
+
+    bool add(int userId, int productId, int count);
+    bool sub(int userId, int productId, int count);
+    bool set(int userId, int productId, int count);
+    bool del(int userId, int productId);
+    bool clear(int userId);
+public:
+    explicit CartService(
+        CartRepository* cartRepo,
+        ProductRepository* productRepo
+    ): cartRepo(cartRepo), productRepo(productRepo){}
+
+    Cart getCart(int userId) const;
+
+    bool handleCart(CartAction action, int userId, int productId=0, int count=0);
 };

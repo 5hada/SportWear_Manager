@@ -93,17 +93,17 @@ std::optional<User> UserRepository::findByName(const std::string& name) const
     return result;
 }
 
-void UserRepository::save(const User& user)
+bool UserRepository::save(const User& user)
 {
     if (!hasDatabase()) {
         for (auto& stored : users) {
             if (stored.getId() == user.getId()) {
                 stored = user;
-                return;
+                return false;
             }
         }
         users.push_back(user);
-        return;
+        return true;
     }
 
     constexpr auto sql =
@@ -111,7 +111,7 @@ void UserRepository::save(const User& user)
         "ON CONFLICT(id) DO UPDATE SET name = excluded.name, password = excluded.password, point = excluded.point";
     sqlite3_stmt* statement = nullptr;
     if (sqlite3_prepare_v2(database->handle(), sql, -1, &statement, nullptr) != SQLITE_OK) {
-        return;
+        return false;
     }
 
     sqlite3_bind_int(statement, 1, user.getId());
@@ -120,6 +120,7 @@ void UserRepository::save(const User& user)
     sqlite3_bind_int(statement, 4, user.getPoint());
     sqlite3_step(statement);
     sqlite3_finalize(statement);
+    return true; 
 }
 
 bool UserRepository::hasDatabase() const

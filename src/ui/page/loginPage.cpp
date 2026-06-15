@@ -1,8 +1,8 @@
 #include "loginPage.h"
 
-#include <ElaWidgetTools/ElaLineEdit.h>
-#include <ElaWidgetTools/ElaPushButton.h>
-#include <ElaWidgetTools/ElaText.h>
+#include <ElaLineEdit.h>
+#include <ElaPushButton.h>
+#include <ElaText.h>
 #include <QFormLayout>
 #include <QVBoxLayout>
 

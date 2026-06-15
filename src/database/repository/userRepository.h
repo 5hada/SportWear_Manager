@@ -5,8 +5,14 @@
 #include <optional>
 #include <vector>
 
-class UserRepository
-{
+class UserRepository{
+    DataBaseManager* database{nullptr};
+    mutable std::vector<User> users;
+
+
+    bool hasDatabase() const;
+    static User userFromStatement(sqlite3_stmt* statement);
+
 public:
     explicit UserRepository(DataBaseManager* database = nullptr);
 
@@ -15,12 +21,7 @@ public:
     const std::vector<User>& findAll() const;
     std::optional<User> findById(int id) const;
     std::optional<User> findByName(const std::string& name) const;
-    void save(const User& user);
+    
+    bool save(const User& user);
 
-private:
-    bool hasDatabase() const;
-    static User userFromStatement(sqlite3_stmt* statement);
-
-    DataBaseManager* database{nullptr};
-    mutable std::vector<User> users;
 };
