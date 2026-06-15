@@ -41,6 +41,46 @@ std::vector<Receipt> ReceiptRepository::findByUser(int userId) const{
     return receipts;
 }
 
+std::vector<Receipt> ReceiptRepository::findById(int id) const{
+    std::vector<Receipt> receipts;
+
+    constexpr auto sql =
+        "SELECT user_id, used_point, total_price, ordered_at, is_canceled, canceled_at "
+        "FROM receipts "
+        "WHERE id = ? "
+        "ORDER BY id";
+
+    sqlite3_stmt* statement = nullptr;
+    if (sqlite3_prepare_v2(database->handle(), sql, -1, &statement, nullptr) != SQLITE_OK) {
+        return receipts;
+    }
+
+    sqlite3_bind_int(statement, 1, id);
+    while (sqlite3_step(statement) == SQLITE_ROW) {
+        std::string orderedAt =
+            reinterpret_cast<const char*>(sqlite3_column_text(statement, 3));
+
+        std::string canceledAt;
+        if (sqlite3_column_type(statement, 5) != SQLITE_NULL) {
+            canceledAt = reinterpret_cast<const char*>(sqlite3_column_text(statement, 5));
+        }
+
+        receipts.emplace_back(
+            id,
+            sqlite3_column_int(statement, 0),
+            std::vector<OrderItem>{},
+            sqlite3_column_int(statement, 1),
+            sqlite3_column_int(statement, 2),
+            orderedAt,
+            sqlite3_column_int(statement, 4) != 0,
+            canceledAt
+        );
+    }
+
+    sqlite3_finalize(statement);
+    return receipts;
+}
+
 
 int ReceiptRepository::insertReceipt(Receipt& receipt) {
     sqlite3_stmt* statement = nullptr;
