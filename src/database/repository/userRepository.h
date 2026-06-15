@@ -2,7 +2,6 @@
 
 #include "database/databaseManager.h"
 #include "model/user/user.h"
-
 #include <optional>
 #include <vector>
 

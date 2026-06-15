@@ -9,8 +9,7 @@ DataBaseManager::DataBaseManager(std::string path)
     open(path);
 }
 
-DataBaseManager::~DataBaseManager()
-{
+DataBaseManager::~DataBaseManager() {
     close();
 }
 

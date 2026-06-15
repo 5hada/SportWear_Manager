@@ -2,7 +2,6 @@
 
 #include "database/databaseManager.h"
 #include "model/product/product.h"
-
 #include <optional>
 #include <vector>
 

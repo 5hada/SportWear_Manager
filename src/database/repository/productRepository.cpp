@@ -1,5 +1,4 @@
 #include "productRepository.h"
-
 #include <algorithm>
 
 namespace {

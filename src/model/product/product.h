@@ -1,4 +1,5 @@
 #pragma once
+#pragma once
 
 #include "category.h"
 #include "item.h"

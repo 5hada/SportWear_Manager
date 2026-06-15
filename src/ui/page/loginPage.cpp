@@ -69,3 +69,15 @@ void LoginPage::setStatus(const QString& status)
 {
     statusText->setText(status);
 }
+
+void LoginPage::buildInterface() {
+    auto *loginTab = new QWidget(tab);
+    auto *loginLayout = new QFormLayout(loginTab);
+    usernameEdit = new QLineEdit("user", loginTab);
+    passwordEdit = new QLineEdit("1234", loginTab);
+    passwordEdit->setEchoMode(QLineEdit::Password);
+    auto *loginButton = new QPushButton("Sign in", loginTab);
+    loginLayout->addRow("ID", usernameEdit);
+    loginLayout->addRow("Password", passwordEdit);
+    loginLayout->addRow(loginButton);
+}

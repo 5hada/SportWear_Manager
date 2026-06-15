@@ -174,6 +174,7 @@ void MainWindow::refreshCart()
 bool MainWindow::requireLogin()
 {
     if (app.currentUserId != 0) {
+    if (app.currentUserId != 0) {
         return true;
     }
 

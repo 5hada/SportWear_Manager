@@ -2,7 +2,6 @@
 
 #include "database/databaseManager.h"
 #include "model/review.h"
-
 #include <vector>
 
 class ReviewRepository
