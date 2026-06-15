@@ -1,26 +1,29 @@
 #pragma once
 
 #include "app/repositoryProvider.h"
+#include "service/accountService.h"
 #include "service/cartService.h"
+#include "service/orderService.h"
 #include "service/productService.h"
 #include "service/reviewService.h"
 #include "service/wishService.h"
-#include "service/accountService.h"
 
 class ServiceProvider {
 public:
     AccountService account{nullptr};
-    ProductService product;
     CartService cart;
+    OrderService order;
+    ProductService product;
     ReviewService review;
     WishService wish;
 
     explicit ServiceProvider(RepositoryProvider& repo)
         : account(&repo.user),
-          product(&repo.product),
           cart(&repo.cart, &repo.product),
+          order(&repo.receipt, &repo.order, &repo.cart, &repo.product),
+          product(&repo.product),
           review(&repo.review),
-          wish(&repo.wish)
+          wish(&repo.wish, &repo.product)
     {
     }
 };

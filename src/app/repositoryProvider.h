@@ -2,7 +2,9 @@
 
 #include "database/databaseManager.h"
 #include "database/repository/cartRepository.h"
+#include "database/repository/orderRepository.h"
 #include "database/repository/productRepository.h"
+#include "database/repository/receiptRepository.h"
 #include "database/repository/reviewRepository.h"
 #include "database/repository/userRepository.h"
 #include "database/repository/wishRepository.h"
@@ -13,18 +15,23 @@ class RepositoryProvider
 {
 public:
     DataBaseManager database;
-    UserRepository user;
-    ProductRepository product;
+
     CartRepository cart;
+    OrderRepository order;
+    ProductRepository product;
+    ReceiptRepository receipt;
     ReviewRepository review;
+    UserRepository user;
     WishRepository wish;
 
     explicit RepositoryProvider(
         const std::string& databasePath = "sportwear.db",
         const std::string& schemaPath = "schema.sql")
         : user(&database),
+          order(&database),
           product(&database),
           cart(&database),
+          receipt(&database),
           review(&database),
           wish(&database)
     {

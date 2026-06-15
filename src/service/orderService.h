@@ -15,7 +15,17 @@ class OrderService{
     
     void addPoint(int userId, int totalPrice, int rate = 5);
 public:
-    OrderService(ReceiptRepository* receiptRepo):receiptRepo(receiptRepo){}
+    OrderService(
+        ReceiptRepository* receiptRepo,
+        OrderRepository* orderRepo,
+        CartRepository* cartRepo,
+        ProductRepository* productRepo
+    ):
+        receiptRepo(receiptRepo),
+        orderRepo(orderRepo),
+        cartRepo(cartRepo),
+        productRepo(productRepo)
+    {}
 
     Order& makeOrder(int userId);
     bool confirmOrder(int userId, int userPoint);
