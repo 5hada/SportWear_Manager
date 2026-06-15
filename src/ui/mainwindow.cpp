@@ -167,7 +167,7 @@ void MainWindow::refreshProducts() {
 void MainWindow::refreshWishProducts() {
     std::vector<Product> products;
     if (app.currentUserId != 0) {
-        for (const int productId : app.repositories.wish.findProductIds(app.currentUserId)) {
+        for (const int productId : app.repositories.wish.findByUser(app.currentUserId)) {
             auto product = app.services.product.getProduct(productId);
             if (product.has_value()) {
                 products.push_back(*product);
