@@ -74,6 +74,8 @@ set(PROJECT_SOURCES
         src/service/cartService.cpp
         src/service/orderService.h
         src/service/orderService.cpp
+        src/service/pointService.h
+        src/service/pointService.cpp
         src/service/productService.h
         src/service/productService.cpp
         src/service/reviewService.h
@@ -83,6 +85,8 @@ set(PROJECT_SOURCES
 
         src/ui/mainwindow.h
         src/ui/mainwindow.cpp
+        src/ui/messageBar.h
+        src/ui/messageBar.cpp
         src/ui/page/loginPage.h
         src/ui/page/loginPage.cpp
         src/ui/page/productDetailPage.h

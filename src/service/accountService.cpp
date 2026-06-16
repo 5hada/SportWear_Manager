@@ -6,11 +6,11 @@
 
 
 bool AccountService::login(const std::string &name, const std::string &password) {
-    if (currentUser->getId() != 0) {return false;}
+    if (currentUser.getId() != 0) {return false;}
     auto user = userRepo->findByName(name);
     if (!user.has_value()) {return false;}
     if (user->checkPassword(password)) {
-        *currentUser = user.value();
+        currentUser = user.value();
         isLoggedIn = true;
         return true;
     }

@@ -8,14 +8,14 @@ class AccountService{
     UserRepository* userRepo{nullptr};
 
     bool isLoggedIn = false;
-    UserBase* currentUser{nullptr};
-    Guest* guest;
+    UserBase currentUser;
+    Guest guest;
 
 public:
-    AccountService(UserRepository* userRepo): userRepo(userRepo) {}
+    AccountService(UserRepository* userRepo): userRepo(userRepo) {currentUser = guest;}
 
-    int getUserId() const {return currentUser->getId();}
-    const std::string getUserName() const {return currentUser->getName();}
+    int getUserId() const {return currentUser.getId();}
+    const std::string getUserName() const {return currentUser.getName();}
 
     void setUserRepo(UserRepository* userRepo) {this->userRepo = userRepo;}
 

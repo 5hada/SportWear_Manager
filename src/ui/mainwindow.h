@@ -14,28 +14,10 @@ class WishPage;
 class CartWidget;
 class ProfilePanel;
 class AlertDialog;
+class ElaPushButton;
 
 class MainWindow : public ElaWindow{
     Q_OBJECT
-
-public:
-    explicit MainWindow(QWidget* parent = nullptr);
-    ~MainWindow() override;
-
-private:
-    void initWindow();
-    void initContent();
-
-    void connectNavigations();
-    void connectPages();
-
-
-    void refreshProducts();
-    void refreshWishProducts();
-    void refreshCart();
-    bool requireLogin();
-
-    void initAlertDialog();
 
     AppContext app;
     LoginPage* loginPage{nullptr};
@@ -47,8 +29,31 @@ private:
     CartWidget* cartWidget{nullptr};
     ProfilePanel* profilePanel{nullptr};
     AlertDialog* alertDialog{nullptr};
+    ElaPushButton* cartButton{nullptr};
 
+    QString categoriesKey;
     QString settingsKey;
-    QString logoutKey;
     QString profileKey;
+    QString loginKey;
+    QString logoutKey;
+    
+    void initWindow();
+    void initContent();
+    void initConnect();
+
+    void connectNavigations();
+    void connectPages();
+
+
+    void refreshProducts();
+    void refreshWishProducts();
+    void refreshCart();
+    
+    bool isLoggedIn();
+
+    int userId();
+    std::string userName();
+public:
+    explicit MainWindow(QWidget* parent = nullptr);
+    ~MainWindow() override;
 };

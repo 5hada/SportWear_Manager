@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 
+#include "ElaPushButton.h"
+#include "messageBar.h"
 
 
 #include "model/product/cartAction.h"
@@ -18,10 +20,10 @@
 #include <ElaText.h>
 #include <QMessageBox>
 #include <qstackedwidget.h>
-#include <ElaMessageBar.h>
 
 MainWindow::MainWindow(QWidget* parent): ElaWindow(parent) {
     initWindow();
+    initContent();
     initContent();
 }
 
@@ -31,8 +33,11 @@ void MainWindow::initWindow() {
     setWindowTitle("SportWear Manager");
     resize(1200, 760);
     setFocusPolicy(Qt::StrongFocus);
-    setUserInfoCardTitle("Guest");
-    setUserInfoCardSubTitle(app.repositories.isDatabaseReady() ? "Not signed in" : "Database unavailable");
+    setUserInfoCardTitle(QString::fromStdString(userName()));
+    setUserInfoCardSubTitle(app.repositories.isDatabaseReady() ?
+        "Not signed in" :
+        "Database unavailable"
+    );
 
     auto* landingText = new ElaText("SportWear Manager", this);
     landingText->setTextPixelSize(32);
@@ -47,9 +52,6 @@ void MainWindow::initContent() {
     wishPage = new WishPage(this);
     cartWidget = new CartWidget(this);
 
-    // ElaMessageBar::success(ElaMessageBarType::BottomRight, "Success", "", 3);
-
-    initAlertDialog();
 
     productPages = new QStackedWidget(this);
     productGridPage = new ProductGridPage(this);
@@ -58,28 +60,55 @@ void MainWindow::initContent() {
     productPages->addWidget(productDetailPage);
     productPages->setCurrentWidget(productGridPage);
 
-    addPageNode("Products", productPages, ElaIconType::Cards);
-    addPageNode("Wish List", wishPage, ElaIconType::Heart);
-    addPageNode("Login", loginPage, ElaIconType::User);
-    addPageNode("History", receiptPage, ElaIconType::ClockRotateLeft);
+    alertDialog = new AlertDialog(this);
+    cartButton  = new ElaPushButton{this};
 
-    addFooterNode("Settings", settingsKey, 0, ElaIconType::GearComplex);
-    addFooterNode("Logout", logoutKey, 0, ElaIconType::ArrowRightFromBracket);
+
+    addPageNode("Home", productPages, ElaIconType::House);
+
+    addPageNode("Products", productPages, ElaIconType::Shirt);
+    addExpanderNode("Categories", categoriesKey, ElaIconType::GridRound2);
+    addPageNode("Tops", productPages, categoriesKey, ElaIconType::Shirt);
+    
+    addPageNode("Wish", wishPage, ElaIconType::Heart);
+    addPageNode("Cart", wishPage, ElaIconType::CartShopping);
+    addPageNode("Orders", receiptPage, ElaIconType::ClockRotateLeft);
+
+    addFooterNode("Settings", settingsKey, 0,ElaIconType::GearComplex);
+    addFooterNode("Login", loginKey, 0,ElaIconType::User);
+    addFooterNode("Logout", logoutKey, 0,ElaIconType::ArrowRightFromBracket);
 
     alertDialog->hide();
     profilePanel->hide();
-    connect(this, &ElaWindow::navigationNodeClicked, this, [=](ElaNavigationType::NavigationNodeType nodeType, QString nodeKey) {
-        if (logoutKey == nodeKey) {
-            alertDialog->moveToCenter();
-            alertDialog->show();
-        }
-    });
+
 
     addDockWidget(Qt::RightDockWidgetArea, cartWidget);
     cartWidget->hide();
 
+
+    refreshProducts();
+    refreshWishProducts();
+    refreshCart();
+
+    navigation(productGridPage->property("ElaPageKey").toString());
+}
+
+void MainWindow::initConnect() {
+    connectNavigations();
+    connectPages();
+    connect(alertDialog, &AlertDialog::exitClicked, this, [=]() {
+        app.services.account.logout();
+        setUserInfoCardTitle("Guest");
+        setUserInfoCardSubTitle("Not signed in");
+        loginPage->setStatus("Signed out.");
+        refreshCart();             
+        MessageBar::Logout(this);
+    });
+}
+
+void MainWindow::connectNavigations() {
     connect(this, &MainWindow::userInfoCardClicked, this, [=]() {
-        this->navigation(loginPage->property("ElaPageKey").toString());
+        this->navigation(productGridPage->property("ElaPageKey").toString());
     });
 
     connect(this, &ElaWindow::navigationNodeClicked, this,
@@ -88,36 +117,22 @@ void MainWindow::initContent() {
                     navigation(loginPage->property("ElaPageKey").toString());
                     return;
                 }
+                if (logoutKey == nodeKey) {
+                    alertDialog->moveToCenter();
+                    alertDialog->show();
+                    return;
+                }
                 if (nodeKey == productGridPage->property("ElaPageKey").toString()) {
                     refreshProducts();
                 }
                 if (nodeKey == wishPage->property("ElaPageKey").toString()) {
                     refreshWishProducts();
                 }
-            });
-
-    connectPages();
-    refreshProducts();
-    refreshCart();
-    navigation(productGridPage->property("ElaPageKey").toString());
+            }
+        );
 }
 
-void Main
-
-void MainWindow::initAlertDialog(){
-    alertDialog = new AlertDialog(this);
-    connect(alertDialog, &AlertDialog::exitClicked, this, [=]() {
-        app.services.account.logout();
-        setUserInfoCardTitle("Guest");
-        setUserInfoCardSubTitle("Not signed in");
-        loginPage->setStatus("Signed out.");
-        refreshCart();             
-        ElaMessageBar::success(ElaMessageBarType::BottomRight, "Signed out", "", 3000, this);
-    });
-}
-
-void MainWindow::connectPages()
-{
+void MainWindow::connectPages() {
     connect(loginPage, &LoginPage::loginRequested, this, [this](const QString& name, const QString& password) {
         const auto success = app.services.account.login(name.toStdString(), password.toStdString());
         if (!success) {
@@ -125,8 +140,8 @@ void MainWindow::connectPages()
             return;
         }
 
-        setUserInfoCardTitle(QString::fromStdString(app.services.account.getUserName()));
-        auto point = app.services.point.getPoint(app.services.account.getUserId());
+        setUserInfoCardTitle(QString::fromStdString(userName()));
+        auto point = app.services.point.getPoint(userId());
         setUserInfoCardSubTitle(QString("Point %1").arg(point));
         loginPage->setStatus("Signed in.");
         refreshProducts();
@@ -141,10 +156,8 @@ void MainWindow::connectPages()
     });
 
     connect(productDetailPage, &ProductDetailPage::addCartRequested, this, [this](int productId) {
-        if (!requireLogin()) {
-            return;
-        }
-        if (!app.services.cart.handleCart(CartAction::Add,app.services.account.getUserId(), productId, 1)) {
+        if (!isLoggedIn()) {return;}
+        if (!app.services.cart.handleCart(CartAction::Add,userId(), productId, 1)) {
             QMessageBox::warning(this, "Cart", "Failed to add product to cart.");
             return;
         }
@@ -153,14 +166,13 @@ void MainWindow::connectPages()
     });
 
     connect(productDetailPage, &ProductDetailPage::addWishRequested, this, [this](int productId) {
-        if (!requireLogin()) {
-            return;
-        }
-        app.services.wish.add(app.services.account.getUserId(), productId);
+        if (!isLoggedIn()) {return;}
+        app.services.wish.add(userId(), productId);
         refreshWishProducts();
         navigation(wishPage->property("ElaPageKey").toString());
     });
 }
+
 
 void MainWindow::refreshProducts() {
     productGridPage->setProducts(app.services.product.getAll());
@@ -168,8 +180,9 @@ void MainWindow::refreshProducts() {
 
 void MainWindow::refreshWishProducts() {
     std::vector<Product> products;
-    if (app.services.account.getUserId() != 0) {
-        for (const int productId : app.repositories.wish.findByUser(app.services.account.getUserId())) {
+    int id = userId();
+    if (id != 0) {
+        for (const int productId : app.repositories.wish.findByUser(id)) {
             auto product = app.services.product.getOptById(productId);
             if (product.has_value()) {
                 products.push_back(*product);
@@ -180,15 +193,19 @@ void MainWindow::refreshWishProducts() {
 }
 
 void MainWindow::refreshCart() {
-    cartWidget->setCart(app.services.account.getUserId() == 0 ? Cart() : app.services.cart.getCart(app.services.account.getUserId()));
+    int id = userId();
+    cartWidget->setCart(id == 0 ? Cart() : app.services.cart.getCart(id));
 }
 
-bool MainWindow::requireLogin() {
-    if (app.services.account.loggedIn()) {
-        return true;
-    }
 
-    loginPage->setStatus("Login required.");
-    navigation(loginPage->property("ElaPageKey").toString());
-    return false;
+bool MainWindow::isLoggedIn() {
+    return app.services.account.loggedIn();
+}
+
+int MainWindow::userId() {
+    return app.services.account.getUserId();
+}
+
+std::string MainWindow::userName() {
+    return app.services.account.getUserName();
 }
