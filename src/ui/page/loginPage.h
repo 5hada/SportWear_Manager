@@ -9,6 +9,14 @@ class ElaText;
 class LoginPage : public ElaScrollPage{
     Q_OBJECT
 
+    ElaLineEdit* idEdit{nullptr};
+    ElaLineEdit* passwordEdit{nullptr};
+    ElaPushButton* loginButton{nullptr};
+
+    
+    ElaText* titleText{nullptr};
+    ElaText* descText{nullptr};
+    ElaText* statusText{nullptr};
 public:
     explicit LoginPage(QWidget* parent = nullptr);
     ~LoginPage() override;
@@ -17,10 +25,4 @@ public:
 
 Q_SIGNALS:
     void loginRequested(const QString& name, const QString& password);
-
-private:
-    ElaLineEdit* idEdit{nullptr};
-    ElaLineEdit* passwordEdit{nullptr};
-    ElaPushButton* loginButton{nullptr};
-    ElaText* statusText{nullptr};
 };

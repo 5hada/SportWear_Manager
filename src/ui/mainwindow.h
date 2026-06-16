@@ -13,7 +13,7 @@ class ReceiptPage;
 class WishPage;
 class CartWidget;
 class ProfilePanel;
-class AlertDialog;
+class Dialog;
 class ElaPushButton;
 
 class MainWindow : public ElaWindow{
@@ -28,7 +28,7 @@ class MainWindow : public ElaWindow{
     WishPage* wishPage{nullptr};
     CartWidget* cartWidget{nullptr};
     ProfilePanel* profilePanel{nullptr};
-    AlertDialog* alertDialog{nullptr};
+    Dialog* dialog{nullptr};
     ElaPushButton* cartButton{nullptr};
 
     QString categoriesKey;
@@ -41,9 +41,7 @@ class MainWindow : public ElaWindow{
     void initContent();
     void initConnect();
 
-    void connectNavigations();
     void connectPages();
-
 
     void refreshProducts();
     void refreshWishProducts();

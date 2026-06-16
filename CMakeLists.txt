@@ -104,8 +104,8 @@ set(PROJECT_SOURCES
         src/ui/page/cart/cartWidget.cpp
         src/ui/page/profile/formPanelWidget.h
         src/ui/page/profile/formPanelWidget.cpp
-        src/ui/page/alertDialog.h
-        src/ui/page/alertDialog.cpp
+        src/ui/dialog.h
+        src/ui/dialog.cpp
 
         external/sqlite3/sqlite3.c
         external/sqlite3/sqlite3.h

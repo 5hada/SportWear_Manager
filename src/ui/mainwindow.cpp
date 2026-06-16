@@ -5,6 +5,7 @@
 
 
 #include "model/product/cartAction.h"
+#include "model/product/category.h"
 #include "model/product/product.h"
 #include "page/loginPage.h"
 #include "page/productDetailPage.h"
@@ -13,7 +14,7 @@
 #include "page/wishPage.h"
 #include "page/cart/cartWidget.h"
 #include "page/profilePanel.h"
-#include "page/alertDialog.h"
+#include "dialog.h"
 
 #include <ElaDef.h>
 #include <ElaIcon.h>
@@ -24,7 +25,7 @@
 MainWindow::MainWindow(QWidget* parent): ElaWindow(parent) {
     initWindow();
     initContent();
-    initContent();
+    initConnect();
 }
 
 MainWindow::~MainWindow() = default;
@@ -60,7 +61,7 @@ void MainWindow::initContent() {
     productPages->addWidget(productDetailPage);
     productPages->setCurrentWidget(productGridPage);
 
-    alertDialog = new AlertDialog(this);
+    dialog = new Dialog(this);
     cartButton  = new ElaPushButton{this};
 
 
@@ -68,8 +69,9 @@ void MainWindow::initContent() {
 
     addPageNode("Products", productPages, ElaIconType::Shirt);
     addExpanderNode("Categories", categoriesKey, ElaIconType::GridRound2);
-    addPageNode("Tops", productPages, categoriesKey, ElaIconType::Shirt);
-    
+    for (auto& category: Categories){
+        addPageNode(QString::fromStdString(categoryToString(category)), productPages, categoriesKey, ElaIconType::Shirt);
+    }
     addPageNode("Wish", wishPage, ElaIconType::Heart);
     addPageNode("Cart", wishPage, ElaIconType::CartShopping);
     addPageNode("Orders", receiptPage, ElaIconType::ClockRotateLeft);
@@ -78,7 +80,7 @@ void MainWindow::initContent() {
     addFooterNode("Login", loginKey, 0,ElaIconType::User);
     addFooterNode("Logout", logoutKey, 0,ElaIconType::ArrowRightFromBracket);
 
-    alertDialog->hide();
+    dialog->hide();
     profilePanel->hide();
 
 
@@ -94,21 +96,10 @@ void MainWindow::initContent() {
 }
 
 void MainWindow::initConnect() {
-    connectNavigations();
-    connectPages();
-    connect(alertDialog, &AlertDialog::exitClicked, this, [=]() {
-        app.services.account.logout();
-        setUserInfoCardTitle("Guest");
-        setUserInfoCardSubTitle("Not signed in");
-        loginPage->setStatus("Signed out.");
-        refreshCart();             
-        MessageBar::Logout(this);
-    });
-}
-
-void MainWindow::connectNavigations() {
     connect(this, &MainWindow::userInfoCardClicked, this, [=]() {
         this->navigation(productGridPage->property("ElaPageKey").toString());
+        refreshProducts();
+        return;
     });
 
     connect(this, &ElaWindow::navigationNodeClicked, this,
@@ -117,9 +108,10 @@ void MainWindow::connectNavigations() {
                     navigation(loginPage->property("ElaPageKey").toString());
                     return;
                 }
-                if (logoutKey == nodeKey) {
-                    alertDialog->moveToCenter();
-                    alertDialog->show();
+                if (nodeKey == logoutKey) {
+                    dialog->moveToCenter();
+                    dialog->setLogoutAlert();
+                    dialog->show();
                     return;
                 }
                 if (nodeKey == productGridPage->property("ElaPageKey").toString()) {
@@ -130,6 +122,16 @@ void MainWindow::connectNavigations() {
                 }
             }
         );
+    connect(dialog, &Dialog::rightClicked, this, [=]() {
+        app.services.account.logout();
+        setUserInfoCardTitle("Guest");
+        setUserInfoCardSubTitle("Not signed in");
+        loginPage->setStatus("Signed out.");
+        refreshCart();             
+        MessageBar::Logout(this);
+    });
+
+    connectPages();
 }
 
 void MainWindow::connectPages() {

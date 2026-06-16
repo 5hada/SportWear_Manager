@@ -6,17 +6,15 @@
 #include <QFormLayout>
 #include <QVBoxLayout>
 
-LoginPage::LoginPage(QWidget* parent)
-    : ElaScrollPage(parent)
-{
+LoginPage::LoginPage(QWidget* parent): ElaScrollPage(parent) {
     setWindowTitle("Login");
     setTitleVisible(false);
     setContentsMargins(2, 2, 0, 0);
 
-    auto* titleText = new ElaText("Login", this);
+    titleText = new ElaText("Login", this);
     titleText->setTextPixelSize(35);
 
-    auto* descText = new ElaText("Sign in to manage products, wish lists, and orders.", this);
+    descText = new ElaText("Sign in to manage products, wish lists, and orders.", this);
     descText->setTextPixelSize(16);
 
     idEdit = new ElaLineEdit(this);
