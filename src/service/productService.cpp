@@ -2,18 +2,11 @@
 #include <optional>
 
 
-std::vector<Product> ProductService::getAll() const {
+Products ProductService::getAll() const {
     if (!isRepoValid()) {
         return {};
     }
     return productRepo->findAll();
-}
-
-std::optional<Product> ProductService::getOptById(int id) const {
-    if (!isRepoValid()) {
-        return std::nullopt;
-    }
-    return productRepo->findById(id);
 }
 
 Product ProductService::getById(int id) const {
@@ -49,14 +42,23 @@ bool ProductService::setStock(int productId, int stock) {
 }
 
 
-bool ProductService::isRepoValid() const{
-    return (productRepo != nullptr);
-}
-
 bool ProductService::isExist(const Product& product) {
     return !(getOptById(product.getId()) == std::nullopt);
 }
 
 bool ProductService::isExist(int id) {
     return getOptById(id) != std::nullopt;
+}
+
+bool ProductService::isRepoValid() const{
+    return (productRepo != nullptr);
+}
+
+
+
+std::optional<Product> ProductService::getOptById(int id) const {
+    if (!isRepoValid()) {
+        return std::nullopt;
+    }
+    return productRepo->findById(id);
 }

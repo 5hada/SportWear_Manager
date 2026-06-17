@@ -3,6 +3,8 @@
 #include <string>
 #include <array>
 
+using std::string;
+
 enum class Category {
     Unknown,
     Top,
@@ -19,5 +21,5 @@ constexpr std::array Categories{
     Category::Accessory
 };
 
-std::string categoryToString(Category category);
-Category categoryFromString(const std::string& value);
+string categoryToString(Category category);
+Category categoryFromString(const string& value);

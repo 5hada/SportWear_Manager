@@ -1,6 +1,6 @@
 
 
-class Wish{
+class Wish {
     int userId;
     int productId;
 

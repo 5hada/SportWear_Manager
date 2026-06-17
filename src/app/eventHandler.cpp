@@ -1,6 +1,6 @@
 #include "eventHandler.h"
-#include "model/product/category.h"
 #include "serviceProvider.h"
+#include "model/product/category.h"
 
 int EventHandler::userId() {
     return service.account.getUserId();

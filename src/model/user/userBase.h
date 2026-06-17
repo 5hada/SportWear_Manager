@@ -16,6 +16,7 @@ public:
 
     int getId() const { return id; }
     const std::string &getName() const { return name; }
+    const std::string &getPassword() const { return password; }
 
     void setId(int id) { this->id = id; }
     void setName(std::string name) { this->name = name; }

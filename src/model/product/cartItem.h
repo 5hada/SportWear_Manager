@@ -2,6 +2,9 @@
 
 #include "model/product/item.h"
 
+class CartItem;
+
+using CartItems = std::vector<CartItem>;
 
 struct CartItem: public Item{
     int userId = 0;

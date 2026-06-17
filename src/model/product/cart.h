@@ -1,18 +1,17 @@
 #pragma once
 
 #include "cartItem.h"
-#include <vector>
 
 class Cart {
-    std::vector<CartItem> items;
+    CartItems items;
 
 public:
     Cart() = default;
-    Cart(std::vector<CartItem>& items) { this->items = items; }
+    Cart(CartItems& items) { this->items = items; }
     // ~Cart();
 
-    std::vector<CartItem> &getItems() { return items;}
-    const std::vector<CartItem> &getItems() const{ return items;}
+    CartItems &getItems() { return items;}
+    const CartItems &getItems() const{ return items;}
 
     void addItem(int productId, int count);
     void addItem(CartItem item);

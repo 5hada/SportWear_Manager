@@ -4,8 +4,8 @@
 #include "database/repository/wishRepository.h"
 #include <optional>
 
-std::vector<Product> WishService::getWishs(int userId){
-    std::vector<Product> wishs;
+Products WishService::getWishs(int userId){
+    Products wishs;
     std::optional<Product> item;
     if (userId > 1){
         for(int id: wishRepo->findByUser(userId)){
