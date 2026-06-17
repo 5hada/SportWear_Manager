@@ -16,7 +16,7 @@ ProfilePanel::ProfilePanel(QWidget* parent): ElaDialog(parent) {
 
 void ProfilePanel::initPanel() {
     setFixedSize(600, 400);
-    setAppBarHeight(0);
+    // setAppBarHeight(0);
     this->setIsFixedSize(true);
     setWindowModality(Qt::ApplicationModal);
     setWindowButtonFlags(ElaAppBarType::CloseButtonHint);
