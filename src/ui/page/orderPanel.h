@@ -1,13 +1,13 @@
 #pragma once
 
-#include "ElaScrollPage.h"
+#include "ElaDialog.h"
 #include "model/product/order.h"
 
 class QStandardItemModel;
 class ElaTableView;
 class ElaText;
 
-class OrderPanel: public ElaScrollPage {
+class OrderPanel: public ElaDialog {
     Q_OBJECT
 
     QStandardItemModel* model{nullptr};

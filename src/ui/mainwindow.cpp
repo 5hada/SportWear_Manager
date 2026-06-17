@@ -88,7 +88,6 @@ void MainWindow::initContent() {
     }
     addPageNode("Wish", wishPage, ElaIconType::Heart);
     addPageNode("Cart", cartPage, ElaIconType::CartShopping);
-    addPageNode("Checkout", orderPanel, ElaIconType::CreditCard);
     addPageNode("Orders", receiptPage, ElaIconType::ClockRotateLeft);
 
     addFooterNode("User", profileKey, 0,ElaIconType::User);
@@ -194,8 +193,11 @@ void MainWindow::connectPages() {
     });
 
     connect(productGridPage, &ProductGridPage::productSelected, this, [this](const Product& product) {
-        productDetailPage->setProduct(product);
-        productPages->setCurrentWidget(productDetailPage);
+        showDetailPage(product.getId());
+    });
+
+    connect(productDetailPage, &ProductDetailPage::backRequested, this, [this]() {
+        productPages->setCurrentWidget(productGridPage);
     });
 
     connect(productDetailPage, &ProductDetailPage::cartRequest, this, [this](int productId) {
@@ -240,7 +242,7 @@ void MainWindow::showProductCategoryPage(Category category) {
 
 void MainWindow::showDetailPage(int productId) {
    productDetailPage->setProduct(event.getProduct(productId));
-//    navigation(detailPage)
+   productPages->setCurrentWidget(productDetailPage);
 }
 
 void MainWindow::showCartPage() {
@@ -257,7 +259,6 @@ void MainWindow::showWishPage() {
 
 void MainWindow::showOrderPanel() {
     orderPanel->setOrder(event.makeOrder(), event.getPoint());
-    navigation(orderPanel->property("ElaPageKey").toString());
 }
 
 void MainWindow::showReceiptPage() {

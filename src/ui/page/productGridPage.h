@@ -5,6 +5,8 @@
 #include "model/product/product.h"
 
 class ElaFlowLayout;
+class ElaLineEdit;
+class ElaText;
 class QHBoxLayout;
 
 class ProductGridPage: public ElaScrollPage {
@@ -14,6 +16,7 @@ class ProductGridPage: public ElaScrollPage {
     ElaFlowLayout* productLayout{nullptr};
     QHBoxLayout* indexNavigation;
     ElaText* pageIndex;
+    ElaLineEdit* searchEdit{nullptr};
 
     void initPage();
     void initLayout();
@@ -23,6 +26,7 @@ class ProductGridPage: public ElaScrollPage {
 
     void addProductCard(const Product& product);
     void rebuildProducts();
+    bool matchesSearch(const Product& product) const;
     void detailRequest(int productId);
 public:
     explicit ProductGridPage(QWidget* parent = nullptr);

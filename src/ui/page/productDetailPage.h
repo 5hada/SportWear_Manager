@@ -26,6 +26,7 @@ public:
     void setProduct(const Product& product);
 
 Q_SIGNALS:
+    void backRequested();
     void orderRequest(int productId, int count = 1);
     void cartRequest(int productId, int count = 1);
     void wishRequest(int productId);

@@ -7,9 +7,8 @@
 #include <QStandardItemModel>
 #include <QVBoxLayout>
 
-OrderPanel::OrderPanel(QWidget* parent): ElaScrollPage(parent) {
+OrderPanel::OrderPanel(QWidget* parent): ElaDialog(parent) {
     setWindowTitle("Order");
-    setTitleVisible(false);
     setContentsMargins(2, 2, 0, 0);
 
     auto* titleText = new ElaText("Order", this);
@@ -65,15 +64,20 @@ OrderPanel::OrderPanel(QWidget* parent): ElaScrollPage(parent) {
     centerLayout->addLayout(buttonLayout);
     centerLayout->addStretch();
 
-    addCentralWidget(centralWidget, true, false, 0);
+    setLayout(centerLayout);
 
     connect(confirmButton, &ElaPushButton::clicked, this, [this]() {
-        Q_EMIT confirmRequested(0);
+        emit confirmRequested(0);
     });
-    connect(cancelButton, &ElaPushButton::clicked, this, &OrderPanel::cancelRequested);
+    connect(cancelButton, &ElaPushButton::clicked, this, [this]() {
+        emit cancelRequested();
+        close();
+    });
 }
 
 void OrderPanel::setOrder(const Order& order, int availablePoint) {
+    moveToCenter();
+    show();
     model->removeRows(0, model->rowCount());
 
     for (const auto& item : order.getItems()) {

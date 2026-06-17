@@ -6,6 +6,7 @@
 #include <ElaFlowLayout.h>
 #include <ElaPopularCard.h>
 #include <ElaText.h>
+#include <QString>
 #include <QVBoxLayout>
 #include <qboxlayout.h>
 #include <qdebug.h>
@@ -28,10 +29,16 @@ void ProductGridPage::initLayout() {
     auto* descText = new ElaText("Browse sportwear inventory.", this);
     descText->setTextPixelSize(16);
 
+    searchEdit = new ElaLineEdit(this);
+    searchEdit->setPlaceholderText("Search products");
+    searchEdit->setFixedHeight(36);
+
     auto* titleLayout = new QVBoxLayout();
     titleLayout->setContentsMargins(20, 10, 20, 10);
     titleLayout->addWidget(titleText);
     titleLayout->addWidget(descText);
+    titleLayout->addSpacing(12);
+    titleLayout->addWidget(searchEdit);
 
     productLayout = new ElaFlowLayout(0, 10, 10);
     productLayout->setContentsMargins(0, 0, 0, 0);
@@ -51,6 +58,10 @@ void ProductGridPage::initLayout() {
     centerLayout->addLayout(indexNavigation);
 
     addCentralWidget(centralWidget, true, false, 0);
+
+    connect(searchEdit, &ElaLineEdit::textChanged, this, [this]() {
+        rebuildProducts();
+    });
 }
 
 void ProductGridPage::initIndexNavigation() {
@@ -102,8 +113,22 @@ void ProductGridPage::rebuildProducts() {
     }
 
     for (const auto& product : products) {
+        if (!matchesSearch(product)) {
+            continue;
+        }
         addProductCard(product);
     }
+}
+
+bool ProductGridPage::matchesSearch(const Product& product) const {
+    if (searchEdit == nullptr || searchEdit->text().trimmed().isEmpty()) {
+        return true;
+    }
+
+    const auto query = searchEdit->text().trimmed();
+    return QString::fromStdString(product.getName()).contains(query, Qt::CaseInsensitive)
+        || QString::fromStdString(product.getDetail()).contains(query, Qt::CaseInsensitive)
+        || QString::fromStdString(categoryToString(product.getCategory())).contains(query, Qt::CaseInsensitive);
 }
 
 void ProductGridPage::addProductCard(const Product& product) {
