@@ -11,6 +11,7 @@ class EventHandler;
 
 class ProductDetailPage;
 class ProductGridPage;
+class ProfilePanel;
 class OrderPanel;
 class ReceiptPage;
 class CartPage;
@@ -27,6 +28,7 @@ class MainWindow : public ElaWindow{
     ProductGridPage* productGridPage{nullptr};
     std::map<Category,ProductGridPage>* productCategoryPages{nullptr};
     ProductDetailPage* productDetailPage{nullptr};
+    ProfilePanel* profilePanel{nullptr};
     OrderPanel* orderPanel{nullptr};
     ReceiptPage* receiptPage{nullptr};
     CartWidget* cartWidget{nullptr};

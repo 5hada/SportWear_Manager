@@ -9,6 +9,7 @@
 #include "model/product/product.h"
 #include "page/productDetailPage.h"
 #include "page/productGridPage.h"
+#include "page/profilePanel.h"
 #include "page/orderPanel.h"
 #include "page/receiptPage.h"
 #include "page/wishPage.h"
@@ -56,6 +57,8 @@ void MainWindow::initContent() {
         productCategoryPages->insert_or_assign(category, ProductGridPage(this));
     }
     productDetailPage = new ProductDetailPage(this);
+    profilePanel = new ProfilePanel(this);
+    profilePanel->hide();
     productPages->addWidget(productGridPage);
     productPages->addWidget(productDetailPage);
     productPages->setCurrentWidget(productGridPage);
@@ -117,6 +120,7 @@ void MainWindow::connectNavigation() {
                     return;
                 }
                 if (nodeKey == settingsKey) {
+                    showUserPanel();
                     return;
                 }
                 if (nodeKey == profileKey) {
@@ -136,7 +140,17 @@ void MainWindow::connectNavigation() {
 }
 
 void MainWindow::connectPages() {
-    connect(dialog, &Dialog::loginRequested, this, [this](const QString& name, const QString& password) {
+    connect(profilePanel, &ProfilePanel::trySignup, this, [this](const QString& name, const QString& password) {
+        const auto success = event.signup(name.toStdString(), password.toStdString());
+        if (!success) {
+            MessageBar::Fail(this);
+        }
+
+        setUserInfoCardTitle(QString::fromStdString(event.getName()));
+        setUserInfoCardSubTitle(QString("Point %1\nSigned in.").arg(event.getPoint()));
+        showProductPage();
+    });
+    connect(profilePanel, &ProfilePanel::tryLogin, this, [this](const QString& name, const QString& password) {
         const auto success = event.login(name.toStdString(), password.toStdString());
         if (!success) {
             MessageBar::Fail(this);
@@ -145,8 +159,18 @@ void MainWindow::connectPages() {
         setUserInfoCardTitle(QString::fromStdString(event.getName()));
         setUserInfoCardSubTitle(QString("Point %1\nSigned in.").arg(event.getPoint()));
         showProductPage();
-        navigation(productGridPage->property("ElaPageKey").toString());
     });
+    connect(profilePanel, &ProfilePanel::tryLogout, this, [this]() {
+        const auto success = event.logout();
+        if (!success) {
+            MessageBar::Fail(this);
+        }
+
+        setUserInfoCardTitle(QString::fromStdString(event.getName()));
+        setUserInfoCardSubTitle(QString("Point %1\nSigned in.").arg(event.getPoint()));
+        showProductPage();
+    });
+
     connect(dialog, &Dialog::rightClicked, this, [=]() {
         event.logout();
         setUserInfoCardTitle("Guest");

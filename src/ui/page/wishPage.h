@@ -9,7 +9,7 @@ class QStandardItemModel;
 
 class WishPage: public ElaScrollPage {
     Q_OBJECT
-\
+
     ElaTableView* wishTable{nullptr};
     QStandardItemModel* model{nullptr};
     Products wishs;

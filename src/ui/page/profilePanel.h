@@ -2,6 +2,8 @@
 #include "model/user/user.h"
 #include <ElaDialog.h>
 
+using std::string;
+
 class QStackedWidget;
 class UserPanel;
 class SignupPanel;
@@ -28,4 +30,9 @@ public:
     explicit ProfilePanel(QWidget* parent = nullptr);
 
     void show(UserRole role);
+     
+Q_SIGNALS:
+    void trySignup(string name, string password);
+    void tryLogin(string name, string password);
+    void tryLogout();
 };

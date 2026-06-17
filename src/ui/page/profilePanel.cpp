@@ -43,6 +43,7 @@ void ProfilePanel::show(UserRole role) {
             
         case UserRole::Guest:
         case UserRole::User:
+        return;
     }
 }
 
