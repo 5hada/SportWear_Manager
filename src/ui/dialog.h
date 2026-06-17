@@ -15,18 +15,19 @@ class Dialog: public ElaDialog {
 
     ElaPushButton* leftButton{nullptr};
     ElaPushButton* rightButton{nullptr};
-
-    void onCancelClicked();
-    void onExitClicked();
-public:
-    Dialog(QWidget* parent = nullptr) {initLayout();}
-
+    
     void initLayout();
     void setTitle(std::string title);
     void setDesc(std::string desc);
     void setState(std::string state);
     void setLeftButtonText(std::string text);
     void setRightButtonText(std::string text);
+
+    void onCancelClicked();
+    void onExitClicked();
+public:
+    Dialog(QWidget* parent = nullptr) {initLayout();}
+
 
     void setAlert();
     void setLogoutAlert();

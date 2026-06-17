@@ -4,7 +4,7 @@
 
 class UserRepository;
 
-class AccountService{
+class AccountService {
     UserRepository* userRepo{nullptr};
 
     bool isLoggedIn = false;

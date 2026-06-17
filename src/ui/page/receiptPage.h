@@ -7,8 +7,7 @@
 
 class ElaFlowLayout;
 
-class ReceiptPage : public ElaScrollPage
-{
+class ReceiptPage: public ElaScrollPage {
     Q_OBJECT
 
 public:
