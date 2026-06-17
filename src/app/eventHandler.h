@@ -20,6 +20,9 @@ public:
     EventHandler(ServiceProvider& service): service(service) {}
 
 
+    string getUserInfo();
+
+
     bool signup(string name, string password);
     bool login(string name, string password);
     bool logout();

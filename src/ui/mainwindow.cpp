@@ -50,8 +50,7 @@ void MainWindow::initWindow() {
 }
 
 void MainWindow::initContent() {
-    setUserInfoCardTitle(QString::fromStdString(event.getName()));
-    setUserInfoCardSubTitle("Not signed in");
+    updateUserInfo();
 
     productPages = new QStackedWidget(this);
     productGridPage = new ProductGridPage(this);
@@ -329,4 +328,9 @@ void MainWindow::adjustCartButton() {
 
 void MainWindow::showUserPanel() {
     profilePanel->show(event.isLoggedIn() ? UserRole::User : UserRole::Guest);
+}
+
+void MainWindow::updateUserInfo() {
+    setUserInfoCardTitle(QString::fromStdString(event.getName()));
+    setUserInfoCardSubTitle("Not signed in");   
 }

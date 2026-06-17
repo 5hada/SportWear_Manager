@@ -48,6 +48,8 @@ class MainWindow : public ElaWindow{
     void connectNavigation();
     void connectPages();
 
+    void updateUserInfo();
+
     void showProductPage();
     void showProductCategoryPage(Category category);
     void showDetailPage(int productId);
