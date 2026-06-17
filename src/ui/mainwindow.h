@@ -1,33 +1,42 @@
 #pragma once
 
-
-#include "app/appContext.h"
-
 #include <ElaWindow.h>
-#include <qstackedwidget.h>
 
-class LoginPage;
+class QStackedWidget;
+class ElaPushButton;
+
+class AdminController;
+class AuthController;
+class CartController;
+class OrderController;
+class ProductController;
+
 class ProductDetailPage;
 class ProductGridPage;
+class OrderPanel;
 class ReceiptPage;
-class WishPage;
+class CartPage;
 class CartWidget;
-class ProfilePanel;
+class WishPage;
 class Dialog;
-class ElaPushButton;
 
 class MainWindow : public ElaWindow{
     Q_OBJECT
 
-    AppContext app;
-    LoginPage* loginPage{nullptr};
+    AdminController& admin;
+    AuthController& auth;
+    CartController& cart;
+    OrderController& order;
+    ProductController& product;
+
+    QStackedWidget* productPages{nullptr};
     ProductGridPage* productGridPage{nullptr};
     ProductDetailPage* productDetailPage{nullptr};
-    QStackedWidget* productPages{nullptr};
+    OrderPanel* orderPanel{nullptr};
     ReceiptPage* receiptPage{nullptr};
-    WishPage* wishPage{nullptr};
     CartWidget* cartWidget{nullptr};
-    ProfilePanel* profilePanel{nullptr};
+    CartPage* cartPage{nullptr};
+    WishPage* wishPage{nullptr};
     Dialog* dialog{nullptr};
     ElaPushButton* cartButton{nullptr};
 
@@ -43,15 +52,26 @@ class MainWindow : public ElaWindow{
 
     void connectPages();
 
-    void refreshProducts();
-    void refreshWishProducts();
-    void refreshCart();
-    
-    bool isLoggedIn();
+    void showProductPage();
+    void showDetailPage(int productId);
+    void showOrderPanel();
+    void showReceiptPage();
+    void showCartWidget();
+    void showCartPage();
+    void showWishPage();
 
-    int userId();
-    std::string userName();
+    void showLoginPanel();
+    void showLogoutPanel();
+    void showSignupPanel();
+
+    void adjustCartButton();
+
 public:
-    explicit MainWindow(QWidget* parent = nullptr);
-    ~MainWindow() override;
+    MainWindow(
+        AdminController& admin,
+        AuthController& auth,
+        CartController& cart,
+        OrderController& order,
+        ProductController& product
+    );
 };

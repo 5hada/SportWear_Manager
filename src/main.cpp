@@ -1,3 +1,4 @@
+#include "app/appContext.h"
 #include "ui/mainwindow.h"
 
 #include <QApplication>
@@ -11,18 +12,10 @@ int main(int argc, char *argv[]) {
 
     ElaApplication::getInstance()->init();
 
-    QTranslator translator;
-    const QStringList uiLanguages = QLocale::system().uiLanguages();
-    for (const QString &locale : uiLanguages) {
-        const QString baseName = "untitled1_" + QLocale(locale).name();
-        if (translator.load(":/i18n/" + baseName)) {
-            a.installTranslator(&translator);
-            break;
-        }
-    }
+    AppContext app;
 
-    MainWindow w;
-    w.show();
+    MainWindow window(app.adminController, app.authController, app.cartController, app.orderController, app.productController);
+    window.show();
 
     return a.exec();
 }

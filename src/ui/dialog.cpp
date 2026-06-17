@@ -33,7 +33,8 @@ void Dialog::initLayout() {
     
     setLayout(mainLayout);
     
-    connect(leftButton, &ElaPushButton::pressed, this, &Dialog::close);
+    connect(leftButton, &ElaPushButton::pressed, this,
+        [=](void){emit leftClicked(); close();});
     connect(rightButton, &ElaPushButton::pressed, this, 
         [=](void){emit rightClicked(); close();});
 }

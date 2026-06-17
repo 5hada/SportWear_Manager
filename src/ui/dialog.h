@@ -15,7 +15,7 @@ class Dialog: public ElaDialog {
 
     ElaPushButton* leftButton{nullptr};
     ElaPushButton* rightButton{nullptr};
-    
+
     void initLayout();
     void setTitle(std::string title);
     void setDesc(std::string desc);
@@ -23,8 +23,6 @@ class Dialog: public ElaDialog {
     void setLeftButtonText(std::string text);
     void setRightButtonText(std::string text);
 
-    void onCancelClicked();
-    void onExitClicked();
 public:
     Dialog(QWidget* parent = nullptr) {initLayout();}
 
@@ -37,7 +35,11 @@ public:
     void setErrorNotice();
     void setOrderNotice();
 
+    void setForm();
+    void setLoginForm();
+    void setSignupForm();
 
 Q_SIGNALS:
+    void leftClicked();
     void rightClicked();
 };

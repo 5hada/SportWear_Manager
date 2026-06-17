@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+class Receipt;
+
+using Receipts = std::vector<Receipt>;
 class Receipt {
     int id;
     int userId;
