@@ -38,21 +38,44 @@ void ProfilePanel::initLayout() {
     auto* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->addWidget(layouts);
+
+    connect(userPanel, &UserPanel::signupRequested, this, &ProfilePanel::setSignup);
+    connect(userPanel, &UserPanel::loginRequested, this, &ProfilePanel::setLogin);
+    connect(userPanel, &UserPanel::logoutRequested, this, &ProfilePanel::setLogout);
+
+    connect(signupPanel, &SignupPanel::leftButtonClicked, this, &ProfilePanel::setUser);
+    connect(signupPanel, &SignupPanel::rightButtonClicked, this,
+            [this](const string& name, const string& password) {
+                Q_EMIT trySignup(QString::fromStdString(name), QString::fromStdString(password));
+            });
+
+    connect(loginPanel, &LoginPanel::leftButtonClicked, this, &ProfilePanel::setUser);
+    connect(loginPanel, &LoginPanel::rightButtonClicked, this,
+            [this](const string& name, const string& password) {
+                Q_EMIT tryLogin(QString::fromStdString(name), QString::fromStdString(password));
+            });
+
+    connect(logoutPanel, &LogoutPanel::cancelRequested, this, &ProfilePanel::setUser);
+    connect(logoutPanel, &LogoutPanel::logoutRequested, this, &ProfilePanel::tryLogout);
 }
 
 void ProfilePanel::show(UserRole role) {
     switch (role) {
         case UserRole::Admin:
+            setLogout();
             break;
         case UserRole::Guest:
+            setUser();
             break;
         case UserRole::User:
+            setLogout();
             break;
     }
+    ElaDialog::show();
 }
 
 void ProfilePanel::setUser() {
-    layouts->setCurrentWidget(signupPanel);
+    layouts->setCurrentWidget(userPanel);
 }
 
 void ProfilePanel::setSignup() {

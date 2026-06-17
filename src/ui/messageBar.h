@@ -10,6 +10,4 @@ namespace MessageBar {
     void Logout(QWidget* parent);
     void Signup(QWidget* parent);
 
-
-
 }

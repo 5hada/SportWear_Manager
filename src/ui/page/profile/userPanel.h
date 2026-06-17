@@ -6,6 +6,8 @@ class ElaPushButton;
 class ElaText;
 
 class UserPanel: public QWidget {
+    Q_OBJECT
+
     ElaText* titleText{nullptr};
     ElaText* descText{nullptr};
     ElaPushButton* signupButton;
@@ -15,4 +17,8 @@ class UserPanel: public QWidget {
 public:
     explicit UserPanel(QWidget* parent = nullptr);
 
+Q_SIGNALS:
+    void signupRequested();
+    void loginRequested();
+    void logoutRequested();
 };

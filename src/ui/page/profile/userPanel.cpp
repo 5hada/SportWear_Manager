@@ -31,4 +31,8 @@ UserPanel::UserPanel(QWidget* parent): QWidget(parent) {
     mainLayout->addSpacing(20);
     mainLayout->addLayout(buttonLayout);
     mainLayout->addStretch();
+
+    connect(signupButton, &ElaPushButton::clicked, this, &UserPanel::signupRequested);
+    connect(loginButton, &ElaPushButton::clicked, this, &UserPanel::loginRequested);
+    connect(logoutButton, &ElaPushButton::clicked, this, &UserPanel::logoutRequested);
 }

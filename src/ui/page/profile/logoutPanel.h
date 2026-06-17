@@ -6,6 +6,8 @@ class ElaPushButton;
 class ElaText;
 
 class LogoutPanel: public QWidget {
+    Q_OBJECT
+
     ElaText* titleText{nullptr};
     ElaText* descText{nullptr};
     ElaPushButton* cancelButton{nullptr};
@@ -13,4 +15,8 @@ class LogoutPanel: public QWidget {
 
 public:
     explicit LogoutPanel(QWidget* parent = nullptr);
+
+Q_SIGNALS:
+    void cancelRequested();
+    void logoutRequested();
 };

@@ -146,30 +146,36 @@ void MainWindow::connectPages() {
         const auto success = event.signup(name.toStdString(), password.toStdString());
         if (!success) {
             MessageBar::Fail(this);
+            return;
         }
 
         setUserInfoCardTitle(QString::fromStdString(event.getName()));
         setUserInfoCardSubTitle(QString("Point %1\nSigned in.").arg(event.getPoint()));
+        profilePanel->hide();
         showProductPage();
     });
     connect(profilePanel, &ProfilePanel::tryLogin, this, [this](const QString& name, const QString& password) {
         const auto success = event.login(name.toStdString(), password.toStdString());
         if (!success) {
             MessageBar::Fail(this);
+            return;
         }
 
         setUserInfoCardTitle(QString::fromStdString(event.getName()));
         setUserInfoCardSubTitle(QString("Point %1\nSigned in.").arg(event.getPoint()));
+        profilePanel->hide();
         showProductPage();
     });
     connect(profilePanel, &ProfilePanel::tryLogout, this, [this]() {
         const auto success = event.logout();
         if (!success) {
             MessageBar::Fail(this);
+            return;
         }
 
         setUserInfoCardTitle(QString::fromStdString(event.getName()));
-        setUserInfoCardSubTitle(QString("Point %1\nSigned in.").arg(event.getPoint()));
+        setUserInfoCardSubTitle("Not signed in");
+        profilePanel->hide();
         showProductPage();
     });
 
@@ -240,5 +246,5 @@ void MainWindow::adjustCartButton() {
 }
 
 void MainWindow::showUserPanel() {
-
+    profilePanel->show(event.isLoggedIn() ? UserRole::User : UserRole::Guest);
 }

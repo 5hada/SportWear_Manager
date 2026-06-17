@@ -29,4 +29,7 @@ LogoutPanel::LogoutPanel(QWidget* parent): QWidget(parent) {
     mainLayout->addWidget(descText);
     mainLayout->addStretch();
     mainLayout->addLayout(buttonLayout);
+
+    connect(cancelButton, &ElaPushButton::clicked, this, &LogoutPanel::cancelRequested);
+    connect(logoutButton, &ElaPushButton::clicked, this, &LogoutPanel::logoutRequested);
 }

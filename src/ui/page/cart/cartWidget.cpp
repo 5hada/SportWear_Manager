@@ -4,9 +4,7 @@
 #include <QHeaderView>
 #include <QStandardItemModel>
 
-CartWidget::CartWidget(QWidget* parent)
-    : ElaDockWidget("Cart", parent)
-{
+CartWidget::CartWidget(QWidget* parent): ElaDockWidget("Cart", parent) {
     model = new QStandardItemModel(this);
     model->setHorizontalHeaderLabels({"Product ID", "Quantity", "Unit Price", "Total"});
 
@@ -18,10 +16,7 @@ CartWidget::CartWidget(QWidget* parent)
     setWidget(cartList);
 }
 
-CartWidget::~CartWidget() = default;
-
-void CartWidget::setCart(const Cart& cart)
-{
+void CartWidget::setCart(const Cart& cart) {
     model->removeRows(0, model->rowCount());
 
     for (const auto& item : cart.getItems()) {

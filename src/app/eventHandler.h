@@ -21,6 +21,7 @@ public:
     bool signup(string name, string password);
     bool login(string name, string password);
     bool logout();
+    bool isLoggedIn();
 
     string getName();
     int getPoint();

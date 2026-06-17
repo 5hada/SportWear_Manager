@@ -18,6 +18,10 @@ bool EventHandler::logout() {
     return service.account.logout();
 }
 
+bool EventHandler::isLoggedIn() {
+    return service.account.loggedIn();
+}
+
 string EventHandler::getName() {
     return service.account.getUserName();
 }

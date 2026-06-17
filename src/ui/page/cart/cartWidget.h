@@ -7,17 +7,14 @@
 class ElaTableView;
 class QStandardItemModel;
 
-class CartWidget : public ElaDockWidget
-{
+class CartWidget: public ElaDockWidget {
     Q_OBJECT
 
+    QStandardItemModel* model{nullptr};
+    ElaTableView* cartList{nullptr};
+    
 public:
     explicit CartWidget(QWidget* parent = nullptr);
-    ~CartWidget() override;
 
     void setCart(const Cart& cart);
-
-private:
-    ElaTableView* cartList{nullptr};
-    QStandardItemModel* model{nullptr};
 };
