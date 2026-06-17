@@ -1,3 +1,5 @@
+#pragma once
+
 #include "orderItem.h"
 #include <vector>
 

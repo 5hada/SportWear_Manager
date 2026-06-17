@@ -1,12 +1,16 @@
 #include "orderService.h"
+
 #include "pointService.h"
+
 #include "model/product/cart.h"
 #include "model/product/orderItem.h"
 #include "model/product/receipt.h"
+
 #include "database/repository/receiptRepository.h"
 #include "database/repository/orderRepository.h"
 #include "database/repository/cartRepository.h"
 #include "database/repository/productRepository.h"
+
 #include <optional>
 
 Receipts OrderService::getReceipts(int userId) {
@@ -25,7 +29,7 @@ Order& OrderService::makeOrder(int userId){
             price = productRepo->findById(id)->getPrice();
             OrderItem newItem(id, item.getCount(), price);
             currentOrder.addItem(newItem);
-            currentOrder.addPrice(price);
+            currentOrder.addPrice(price * item.getCount());
         }
     }
     return currentOrder;

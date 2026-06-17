@@ -36,6 +36,14 @@ bool EventHandler::handleCart(CartAction action, int productId, int count) {
     return service.cart.handleCart(action, userId(), productId, count);
 }
 
+Order EventHandler::makeOrder() {
+    return service.order.makeOrder(userId());
+}
+
+bool EventHandler::confirmOrder(int usedPoint) {
+    return service.order.confirmOrder(userId(), usedPoint);
+}
+
 Receipts EventHandler::getReceipts() {
     return service.order.getReceipts(userId());
 }

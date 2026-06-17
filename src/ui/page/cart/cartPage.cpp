@@ -67,4 +67,23 @@ CartPage::CartPage(QWidget* parent): ElaScrollPage(parent) {
     centerLayout->addStretch();
 
     addCentralWidget(centralWidget, true, false, 0);
+
+    connect(orderButton, &ElaPushButton::clicked, this, &CartPage::orderRequested);
+}
+
+void CartPage::setCart(const Cart& cart) {
+    model->removeRows(0, model->rowCount());
+
+    for (const auto& item : cart.getItems()) {
+        QList<QStandardItem*> row;
+        row << new QStandardItem(item.isSelected ? "Yes" : "No");
+        row << new QStandardItem(QString::number(item.id));
+        row << new QStandardItem(QString::number(item.count));
+        row << new QStandardItem(QString::number(item.price));
+        row << new QStandardItem(QString::number(item.price * item.count));
+        model->appendRow(row);
+    }
+
+    totalCountText->setText(QString("Items: %1").arg(cart.getTotalCount()));
+    totalPriceText->setText(QString("Total: %1").arg(cart.getTotalPrice()));
 }

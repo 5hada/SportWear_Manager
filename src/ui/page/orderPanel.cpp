@@ -66,4 +66,26 @@ OrderPanel::OrderPanel(QWidget* parent): ElaScrollPage(parent) {
     centerLayout->addStretch();
 
     addCentralWidget(centralWidget, true, false, 0);
+
+    connect(confirmButton, &ElaPushButton::clicked, this, [this]() {
+        Q_EMIT confirmRequested(0);
+    });
+    connect(cancelButton, &ElaPushButton::clicked, this, &OrderPanel::cancelRequested);
+}
+
+void OrderPanel::setOrder(const Order& order, int availablePoint) {
+    model->removeRows(0, model->rowCount());
+
+    for (const auto& item : order.getItems()) {
+        QList<QStandardItem*> row;
+        row << new QStandardItem(QString::number(item.id));
+        row << new QStandardItem(QString::number(item.count));
+        row << new QStandardItem(QString::number(item.price));
+        row << new QStandardItem(QString::number(item.price * item.count));
+        model->appendRow(row);
+    }
+
+    totalText->setText(QString("Total: %1").arg(order.getTotalPrice()));
+    pointText->setText(QString("Available point: %1").arg(availablePoint));
+    paidText->setText(QString("Payment: %1").arg(order.getTotalPrice()));
 }

@@ -1,13 +1,15 @@
-
 #pragma once
 
 #include "ElaScrollPage.h"
+#include "model/product/order.h"
 
-class ElaTableView;
 class QStandardItemModel;
+class ElaTableView;
 class ElaText;
 
 class OrderPanel: public ElaScrollPage {
+    Q_OBJECT
+
     QStandardItemModel* model{nullptr};
     ElaTableView* orderTable{nullptr};
     ElaText* totalText{nullptr};
@@ -16,4 +18,10 @@ class OrderPanel: public ElaScrollPage {
 
 public:
     explicit OrderPanel(QWidget* parent = nullptr);
+
+    void setOrder(const Order& order, int availablePoint = 0);
+
+Q_SIGNALS:
+    void confirmRequested(int usedPoint);
+    void cancelRequested();
 };

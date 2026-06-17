@@ -2,6 +2,7 @@
 
 #include "model/product/cart.h"
 #include "model/product/cartAction.h"
+#include "model/product/order.h"
 #include "model/product/receipt.h"
 #include "model/product/product.h"
 #include "model/product/category.h"
@@ -28,6 +29,9 @@ public:
 
     Cart getCart();
     bool handleCart(CartAction action, int productId, int count);
+
+    Order makeOrder();
+    bool confirmOrder(int usedPoint = 0);
 
     Receipts getReceipts();
     bool refund(int receiptId);

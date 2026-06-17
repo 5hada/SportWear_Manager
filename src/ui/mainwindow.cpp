@@ -88,6 +88,7 @@ void MainWindow::initContent() {
     }
     addPageNode("Wish", wishPage, ElaIconType::Heart);
     addPageNode("Cart", cartPage, ElaIconType::CartShopping);
+    addPageNode("Checkout", orderPanel, ElaIconType::CreditCard);
     addPageNode("Orders", receiptPage, ElaIconType::ClockRotateLeft);
 
     addFooterNode("User", profileKey, 0,ElaIconType::User);
@@ -114,7 +115,13 @@ void MainWindow::connectNavigation() {
                     return;
                 }
                 if (nodeKey == cartPage->property("ElaPageKey").toString()) {
-                    cartWidget->setCart(event.getCart());
+                    const auto cart = event.getCart();
+                    cartPage->setCart(cart);
+                    cartWidget->setCart(cart);
+                    return;
+                }
+                if (nodeKey == orderPanel->property("ElaPageKey").toString()) {
+                    orderPanel->setOrder(event.makeOrder(), event.getPoint());
                     return;
                 }
                 if (nodeKey == receiptPage->property("ElaPageKey").toString()) {
@@ -202,6 +209,23 @@ void MainWindow::connectPages() {
     connect(productDetailPage, &ProductDetailPage::wishRequest, this, [this](int productId) {
         event.setWish(productId);
     });
+
+    connect(cartPage, &CartPage::orderRequested, this, [this]() {
+        showOrderPanel();
+    });
+
+    connect(orderPanel, &OrderPanel::confirmRequested, this, [this](int usedPoint) {
+        if (!event.confirmOrder(usedPoint)) {
+            MessageBar::Fail(this);
+            return;
+        }
+        cartWidget->setCart(event.getCart());
+        showReceiptPage();
+    });
+
+    connect(orderPanel, &OrderPanel::cancelRequested, this, [this]() {
+        showCartPage();
+    });
 }
 
 void MainWindow::showProductPage() {
@@ -220,7 +244,9 @@ void MainWindow::showDetailPage(int productId) {
 }
 
 void MainWindow::showCartPage() {
-    cartWidget->setCart(event.getCart());
+    const auto cart = event.getCart();
+    cartPage->setCart(cart);
+    cartWidget->setCart(cart);
     navigation(cartPage->property("ElaPageKey").toString());
 }
 
@@ -230,7 +256,8 @@ void MainWindow::showWishPage() {
 }
 
 void MainWindow::showOrderPanel() {
-    
+    orderPanel->setOrder(event.makeOrder(), event.getPoint());
+    navigation(orderPanel->property("ElaPageKey").toString());
 }
 
 void MainWindow::showReceiptPage() {
