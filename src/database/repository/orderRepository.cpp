@@ -2,8 +2,8 @@
 #include "sqlite3.h"
 
 
-std::vector<OrderItem> OrderRepository::findById(int receiptId) const{
-    std::vector<OrderItem> items;
+Items OrderRepository::findById(int receiptId) const{
+    Items items;
     sqlite3_stmt* statement = nullptr;
     constexpr auto sql =
         "SELECT product_id, count, price_at_added "
@@ -22,7 +22,7 @@ std::vector<OrderItem> OrderRepository::findById(int receiptId) const{
 }
 
 
-bool OrderRepository::insert(int receiptId, std::vector<OrderItem> items) const {
+bool OrderRepository::insert(int receiptId, Items items) const {
     sqlite3_stmt* statement = nullptr;
     constexpr auto sql =
         "INSERT INTO order_items "
@@ -33,7 +33,7 @@ bool OrderRepository::insert(int receiptId, std::vector<OrderItem> items) const 
     if (!sqlOk(sql, statement)) {
         return false;
     }
-    for (OrderItem& item : items) {
+    for (Item& item : items) {
         sqlite3_bind_int(statement, 1, receiptId);
         sqlite3_bind_int(statement, 2, item.getId());      // product_id
         sqlite3_bind_int(statement, 3, item.getCount());   // count
@@ -51,8 +51,8 @@ bool OrderRepository::insert(int receiptId, std::vector<OrderItem> items) const 
     return success;
 }
 
-OrderItem OrderRepository::orderItemFromStatement(sqlite3_stmt* statement){
-    return OrderItem(            
+Item OrderRepository::orderItemFromStatement(sqlite3_stmt* statement){
+    return Item(            
             sqlite3_column_int(statement, 0),
             sqlite3_column_int(statement, 1),
             sqlite3_column_int(statement, 2)

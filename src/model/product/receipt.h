@@ -1,9 +1,8 @@
 #pragma once
 
-#include "orderItem.h"
+#include "Item.h"
 
 #include <string>
-#include <vector>
 
 class Receipt;
 
@@ -11,7 +10,7 @@ using Receipts = std::vector<Receipt>;
 class Receipt {
     int id;
     int userId;
-    std::vector<OrderItem> items;
+    Items items;
     int points;
     int paid;
     std::string date;
@@ -23,7 +22,7 @@ public:
     Receipt(
         int id,
         int userId,
-        std::vector<OrderItem> items,
+        Items items,
         int point,
         int paid,
         std::string date,
@@ -32,7 +31,7 @@ public:
     );
     Receipt(
         int userId,
-        std::vector<OrderItem> items,
+        Items items,
         int point,
         int paid
     );
@@ -40,7 +39,7 @@ public:
 
     int getId() const { return id; }
     int getUserId() const { return userId; }
-    std::vector<OrderItem> getOrderItems() const{return items;}
+    Items getOrderItems() const{return items;}
     int getPoints() const { return points; }
     int getPaid() const { return paid; }
     std::string getDate() const { return date; }
@@ -49,7 +48,7 @@ public:
 
     void setId(int id) {this->id = id;}
     void setUserId(int userId){this->userId = userId;}
-    void setOrderItems(std::vector<OrderItem> items) {this->items = items;}
+    void setOrderItems(Items items) {this->items = items;}
     void setPoints(int points){this->points = points;}
     void setPaid(int paid){this->paid = paid;}
     void setDate(std::string date){this->date = date;}
@@ -59,7 +58,7 @@ public:
     void setData(
         int id,
         int userId,
-        std::vector<OrderItem> items,
+        Items items,
         int point,
         int paid,
         std::string date,
@@ -67,5 +66,5 @@ public:
         std::string canceledAt = ""
     );
 
-    void setOrderItems(std::vector<OrderItem> items) const;
+    void setOrderItems(Items items) const;
 };

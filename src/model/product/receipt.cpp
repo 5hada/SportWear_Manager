@@ -1,11 +1,9 @@
 #include "receipt.h"
-#include "orderItem.h"
-#include <vector>
 
 Receipt::Receipt(
     int id,
     int userId, 
-    std::vector<OrderItem> items,
+    Items items,
     int points,
     int paid,
     std::string date,
@@ -23,7 +21,7 @@ Receipt::Receipt(
 
 Receipt::Receipt(
     int userId, 
-    std::vector<OrderItem> items,
+    Items items,
     int points,
     int paid
 ):
@@ -37,7 +35,7 @@ Receipt::Receipt(
 void Receipt::setData(
     int id,
     int userId,
-    std::vector<OrderItem> items,
+    Items items,
     int points,
     int paid,
     std::string date,
@@ -54,8 +52,8 @@ void Receipt::setData(
     setCanceledAt(canceledAt);
 }
 
-void Receipt::setOrderItems(std::vector<OrderItem> items) const{
-    for(OrderItem& item: items){
-        items.emplace_back(OrderItem(item.id, item.count, item.price));
+void Receipt::setOrderItems(Items items) const{
+    for(Item& item: items){
+        items.emplace_back(Item(item.id, item.count, item.price));
     }
 }

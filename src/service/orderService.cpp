@@ -3,7 +3,6 @@
 #include "pointService.h"
 
 #include "model/product/cart.h"
-#include "model/product/orderItem.h"
 #include "model/product/receipt.h"
 
 #include "database/repository/receiptRepository.h"
@@ -34,7 +33,7 @@ bool OrderService::makeOrder(int userId, int productId) {
         if(item.selected()){
             id = item.getId();
             price = productRepo->findById(id)->getPrice();
-            OrderItem newItem(id, item.getCount(), price);
+            Item newItem(id, item.getCount(), price);
             currentOrder.addItem(newItem);
         }
     }
@@ -42,7 +41,7 @@ bool OrderService::makeOrder(int userId, int productId) {
 }
 
 bool OrderService::makeInstantOrder(int productId) {
-    OrderItem instantItem(productId, 1, productRepo->findById(productId)->getPrice());
+    Item instantItem(productId, 1, productRepo->findById(productId)->getPrice());
     currentOrder.addItem(instantItem);
     return true;
 }
