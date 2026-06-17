@@ -26,6 +26,8 @@ class Dialog: public ElaDialog {
 public:
     Dialog(QWidget* parent = nullptr) {initLayout();}
 
+    void setPanel();
+    void setUserPanel();
 
     void setAlert();
     void setLogoutAlert();
@@ -42,4 +44,6 @@ public:
 Q_SIGNALS:
     void leftClicked();
     void rightClicked();
+
+    void loginRequested();
 };

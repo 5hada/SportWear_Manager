@@ -5,11 +5,7 @@
 class QStackedWidget;
 class ElaPushButton;
 
-class AdminController;
-class AuthController;
-class CartController;
-class OrderController;
-class ProductController;
+class EventHandler;
 
 class ProductDetailPage;
 class ProductGridPage;
@@ -23,11 +19,7 @@ class Dialog;
 class MainWindow : public ElaWindow{
     Q_OBJECT
 
-    AdminController& admin;
-    AuthController& auth;
-    CartController& cart;
-    OrderController& order;
-    ProductController& product;
+    EventHandler& event;
 
     QStackedWidget* productPages{nullptr};
     ProductGridPage* productGridPage{nullptr};
@@ -43,6 +35,7 @@ class MainWindow : public ElaWindow{
     QString categoriesKey;
     QString settingsKey;
     QString profileKey;
+    QString logIOKey;
     QString loginKey;
     QString logoutKey;
     
@@ -60,18 +53,14 @@ class MainWindow : public ElaWindow{
     void showCartPage();
     void showWishPage();
 
+    void showUserPanel();
     void showLoginPanel();
     void showLogoutPanel();
     void showSignupPanel();
 
     void adjustCartButton();
-
 public:
     MainWindow(
-        AdminController& admin,
-        AuthController& auth,
-        CartController& cart,
-        OrderController& order,
-        ProductController& product
+        EventHandler& event
     );
 };

@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
 
     AppContext app;
 
-    MainWindow window(app.adminController, app.authController, app.cartController, app.orderController, app.productController);
+    MainWindow window(app.event);
     window.show();
 
     return a.exec();

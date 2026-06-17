@@ -1,5 +1,6 @@
 
 #include "model/product/order.h"
+#include "model/product/receipt.h"
 class ReceiptRepository;
 class OrderRepository;
 class CartRepository;
@@ -30,6 +31,9 @@ public:
     {}
 
     void setPointService(PointService* pointService) {this->pointService = pointService;}
+
+
+    Receipts getReceipts(int userId);
 
     Order& makeOrder(int userId);
     bool confirmOrder(int userId, int userPoint);
