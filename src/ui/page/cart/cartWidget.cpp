@@ -1,4 +1,5 @@
 #include "cartWidget.h"
+#include "ElaTableView.h"
 
 #include <QHeaderView>
 #include <QStandardItemModel>
@@ -9,7 +10,7 @@ CartWidget::CartWidget(QWidget* parent)
     model = new QStandardItemModel(this);
     model->setHorizontalHeaderLabels({"Product ID", "Quantity", "Unit Price", "Total"});
 
-    cartList = new CartList(this);
+    cartList = new ElaTableView(this);
     cartList->setModel(model);
     cartList->verticalHeader()->setHidden(true);
     cartList->horizontalHeader()->setStretchLastSection(true);

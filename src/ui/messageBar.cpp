@@ -12,7 +12,7 @@ namespace MessageBar {
         ElaMessageBar::error(ElaMessageBarType::BottomRight, "Failed!", "", 3000, parent);
     }
 
-    void Loigin(QWidget* parent){
+    void Login(QWidget* parent){
         ElaMessageBar::success(ElaMessageBarType::BottomRight, "Logged in", "", 3000, parent);
     }
     void Logout(QWidget* parent){

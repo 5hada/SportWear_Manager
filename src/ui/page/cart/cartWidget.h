@@ -1,10 +1,10 @@
 #pragma once
 
-#include "cartList.h"
 
 #include <ElaWidgetTools/ElaDockWidget.h>
 #include "model/product/cart.h"
 
+class ElaTableView;
 class QStandardItemModel;
 
 class CartWidget : public ElaDockWidget
@@ -18,6 +18,6 @@ public:
     void setCart(const Cart& cart);
 
 private:
-    CartList* cartList{nullptr};
+    ElaTableView* cartList{nullptr};
     QStandardItemModel* model{nullptr};
 };
