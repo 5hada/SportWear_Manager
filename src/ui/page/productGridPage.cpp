@@ -34,6 +34,23 @@ void ProductGridPage::initLayout() {
     productLayout->setContentsMargins(0, 0, 0, 0);
     productLayout->setIsAnimation(true);
 
+    initIndexNavigation();
+    
+    auto* centralWidget = new QWidget(this);
+    centralWidget->setWindowTitle("Products");
+
+    auto* centerLayout = new QVBoxLayout(centralWidget);
+    centerLayout->setContentsMargins(30, 20, 30, 20);
+    centerLayout->addLayout(titleLayout);
+    centerLayout->addSpacing(12);
+    centerLayout->addLayout(productLayout);
+    centerLayout->addStretch();
+    centerLayout->addLayout(indexNavigation);
+
+    addCentralWidget(centralWidget, true, false, 0);
+}
+
+void ProductGridPage::initIndexNavigation() {
     auto* leftEndArrow = new ElaIconButton(ElaIconType::AnglesLeft);
     leftEndArrow->setFixedWidth(40);
     auto* leftArrow = new ElaIconButton(ElaIconType::AngleLeft);
@@ -56,30 +73,16 @@ void ProductGridPage::initLayout() {
     indexLayout->addSpacing(20);
     indexLayout->addWidget(pageIndexInput);
 
-    auto* pageIndexLayout = new QHBoxLayout();
-    pageIndexLayout->addStretch();
-    pageIndexLayout->addWidget(leftEndArrow);
-    pageIndexLayout->addWidget(leftArrow);
-    pageIndexLayout->addSpacing(20);
-    pageIndexLayout->addLayout(indexLayout);
-    pageIndexLayout->addSpacing(20);
-    pageIndexLayout->addWidget(rightArrow);
-    pageIndexLayout->addWidget(rightEndArrow);
-    pageIndexLayout->addStretch();
-    
-
-    auto* centralWidget = new QWidget(this);
-    centralWidget->setWindowTitle("Products");
-
-    auto* centerLayout = new QVBoxLayout(centralWidget);
-    centerLayout->setContentsMargins(30, 20, 30, 20);
-    centerLayout->addLayout(titleLayout);
-    centerLayout->addSpacing(12);
-    centerLayout->addLayout(productLayout);
-    centerLayout->addStretch();
-    centerLayout->addLayout(pageIndexLayout);
-
-    addCentralWidget(centralWidget, true, false, 0);
+    indexNavigation = new QHBoxLayout();
+    indexNavigation->addStretch();
+    indexNavigation->addWidget(leftEndArrow);
+    indexNavigation->addWidget(leftArrow);
+    indexNavigation->addSpacing(20);
+    indexNavigation->addLayout(indexLayout);
+    indexNavigation->addSpacing(20);
+    indexNavigation->addWidget(rightArrow);
+    indexNavigation->addWidget(rightEndArrow);
+    indexNavigation->addStretch();
 }
 
 void ProductGridPage::setProducts(std::vector<Product> products) {
@@ -87,8 +90,7 @@ void ProductGridPage::setProducts(std::vector<Product> products) {
     rebuildProducts();
 }
 
-void ProductGridPage::rebuildProducts()
-{
+void ProductGridPage::rebuildProducts() {
     while (auto* item = productLayout->takeAt(0)) {
         if (auto* widget = item->widget()) {
             widget->deleteLater();
@@ -107,9 +109,9 @@ void ProductGridPage::addProductCard(const Product& product) {
     productCard->setTitle(product.getName().empty() ? "Sample Product" : QString::fromStdString(product.getName()));
     productCard->setSubTitle(QString("Price %1 / Stock %2").arg(product.getPrice()).arg(product.getStock()));
     productCard->setInteractiveTips("Detail");
-    productCard->setDetailedText(product.getDetail().empty()
-                                     ? "No detail."
-                                     : QString::fromStdString(product.getDetail()));
+    productCard->setDetailedText(product.getDetail().empty() ?
+        "No detail." : QString::fromStdString(product.getDetail())
+    );
     connect(productCard, &ElaPopularCard::popularCardClicked, this, [this, product]() {
         Q_EMIT productSelected(product);
     });

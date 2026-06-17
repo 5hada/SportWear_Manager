@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ElaScrollPage.h>
+#include <qboxlayout.h>
 #include <vector>
 
 #include "model/product/product.h"
@@ -12,10 +13,12 @@ class ProductGridPage : public ElaScrollPage {
 
     std::vector<Product> products;
     ElaFlowLayout* productLayout{nullptr};
+    QHBoxLayout* indexNavigation;
     ElaText* pageIndex;
 
     void initPage();
     void initLayout();
+    void initIndexNavigation();
     void initConnect();
     void initCard();
 

@@ -4,6 +4,11 @@
 #include "category.h"
 #include "productItem.h"
 #include <string>
+#include <vector>
+
+class Product;
+
+using Products = std::vector<Product>;
 
 class Product {
     ProductItem item;
