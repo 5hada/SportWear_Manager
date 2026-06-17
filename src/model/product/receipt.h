@@ -32,7 +32,7 @@ public:
     );
     Receipt(
         int userId,
-        std::vector<OrderItem>* items,
+        std::vector<OrderItem> items,
         int point,
         int paid
     );

@@ -34,8 +34,7 @@ bool ProductService::setPrice(int productId, int price) {
     if (isExist(productId)) {
         Product product(getById(productId));
         product.setPrice(price);
-        productRepo->update(product);
-        return true;
+        return productRepo->update(product);
     }
     return false;
 }
@@ -44,8 +43,7 @@ bool ProductService::setStock(int productId, int stock) {
     if (isExist(productId)) {
         Product product(getById(productId));
         product.setStock(stock);
-        productRepo->update(product);
-        return true;
+        return productRepo->update(product);
     }
     return false;
 }
@@ -56,7 +54,7 @@ bool ProductService::isRepoValid() const{
 }
 
 bool ProductService::isExist(const Product& product) {
-    return getOptById(product.getId()) == std::nullopt;
+    return !(getOptById(product.getId()) == std::nullopt);
 }
 
 bool ProductService::isExist(int id) {

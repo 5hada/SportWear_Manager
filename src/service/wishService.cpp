@@ -22,8 +22,7 @@ std::vector<Product> WishService::getWishs(int userId){
 bool WishService::add(int userId, int productId) {
     if (!isRepoValid()){return false;}
     if (productRepo->findById(productId) == std::nullopt){return false;}
-    wishRepo->insert(userId, productId);
-    return true;
+    return wishRepo->insert(userId, productId);
 }
 
 bool WishService::remove(int userId, int productId) {

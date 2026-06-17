@@ -15,7 +15,7 @@ Receipts OrderService::getReceipts(int userId) {
 
 Order& OrderService::makeOrder(int userId){
     clear();
-    currentOrder->setUserId(userId);
+    currentOrder.setUserId(userId);
     int id;
     int price;
     for(auto& item: cartRepo->findByUser(userId).getItems()){
@@ -23,18 +23,18 @@ Order& OrderService::makeOrder(int userId){
             id = item.getId();
             price = productRepo->findById(id)->getPrice();
             OrderItem newItem(id, item.getCount(), price);
-            currentOrder->addItem(newItem);
-            currentOrder->addPrice(price);
+            currentOrder.addItem(newItem);
+            currentOrder.addPrice(price);
         }
     }
-    return *currentOrder;
+    return currentOrder;
 }
 
 
 bool OrderService::confirmOrder(int userId, int usedPoint){
-    if(currentOrder->getUserId() != userId){return false;}
-    int totalPrice = currentOrder->getTotalPrice();
-    auto& items = currentOrder->getItems();
+    if(currentOrder.getUserId() != userId){return false;}
+    int totalPrice = currentOrder.getTotalPrice();
+    auto& items = currentOrder.getItems();
     Receipt newReceipt(userId, items, usedPoint, totalPrice);
     int receiptId = -1;
     receiptId = receiptRepo->insert(newReceipt);
@@ -46,16 +46,15 @@ bool OrderService::confirmOrder(int userId, int usedPoint){
 }
 
 bool OrderService::refund(int id){
-    Receipt* receipt = receiptRepo->findById(id);
-    if(receipt == nullptr){return false;}
-    receipt->setIsCanceled(true);
-    if (receiptRepo->update(*receipt)){
-        return pointService->revert(receipt->getUserId(), receipt->getPoints(), receipt->getPaid());
+    Receipt receipt = receiptRepo->findById(id);
+    receipt.setIsCanceled(true);
+    if (receiptRepo->update(receipt)){
+        return pointService->revert(receipt.getUserId(), receipt.getPoints(), receipt.getPaid());
     }
     return false;
 }
 
 
 void OrderService::clear(){
-    currentOrder->clear();
+    currentOrder.clear();
 }

@@ -9,7 +9,7 @@ public:
     CartRepository(DatabaseManager* db): RepositoryBase(db){}
 
     Cart findByUser(int userId) const;
-    CartItem findByProduct(int productId) const;
+    CartItem findByProduct(int userId, int productId) const;
 
     bool insert(int userId, int productId, int count, bool isSelected);
     bool update(int userId, int productId, int count, bool isSelected);

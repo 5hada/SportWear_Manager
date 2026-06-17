@@ -14,12 +14,16 @@ bool PointService::handlePoint(PointAction action, int userId, int point){
     switch (action){
         case PointAction::Add:
             user->addPoint(point);
+            break;
         case PointAction::Sub:
             user->usePoint(point);
+            break;
         case PointAction::Set:
             user->setPoint(point);
+            break;
         case PointAction::Init:
             user->setPoint(0);
+            break;
     }
     return userRepo->updatePoint(user.value());
 }
@@ -45,6 +49,6 @@ bool PointService::revert(int userId, int usedPoint, int totalPrice){
 }
 
 int PointService::calPoint(int price){
-    int rate = 5;
+    float rate = 5;
     return price*(rate/100);
 }

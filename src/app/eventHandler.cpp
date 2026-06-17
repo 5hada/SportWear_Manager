@@ -3,7 +3,7 @@
 #include "serviceProvider.h"
 
 int EventHandler::userId() {
-    return userId();
+    return service.account.getUserId();
 }
 
 bool EventHandler::signup(string name, string password) {
@@ -29,7 +29,7 @@ Cart EventHandler::getCart() {
     return service.cart.getCart(userId());
 }
 bool EventHandler::handleCart(CartAction action, int productId, int count) {
-    return service.cart.handleCart(action, userId());
+    return service.cart.handleCart(action, userId(), productId, count);
 }
 
 Receipts EventHandler::getReceipts() {

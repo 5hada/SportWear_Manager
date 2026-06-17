@@ -20,17 +20,17 @@ Cart CartRepository::findByUser(int userId) const {
     return cart;
 }
 
-CartItem CartRepository::findByProduct(int productId) const {
+CartItem CartRepository::findByProduct(int userId, int productId) const {
     CartItem item;
     sqlite3_stmt* statement = nullptr;
     constexpr auto sql =
         "SELECT user_id, product_id, count, is_selected "
         "FROM cart_items "
-        "WHERE product_id = ? "
-        "ORDER BY id";
+        "WHERE user_id = ? AND product_id = ? ";
 
     if (sqlOk(sql, statement)) {
-        sqlite3_bind_int(statement, 1, productId);
+        sqlite3_bind_int(statement, 1, userId);
+        sqlite3_bind_int(statement, 2, productId);
         item = cartItemFromStatement(statement);
         sqlite3_finalize(statement);
     }
@@ -75,7 +75,7 @@ bool CartRepository::updateCount(int userId, int productId, int count) {
     constexpr auto sql =
         "UPDATE cart_items "
         "SET count = ? "
-        "WHERE user_id = ? AND product_id = ?";
+        "WHERE user_id = ? AND product_id = ? ";
 
     if (sqlOk(sql, statement)) {
         sqlite3_bind_int(statement, 1, count);

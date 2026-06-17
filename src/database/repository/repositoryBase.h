@@ -21,7 +21,7 @@ protected:
         return db != nullptr && db->isOpen();
     }
 
-    bool sqlOk(const char* const sql, sqlite3_stmt* statement) const{
+    bool sqlOk(const char* const sql, sqlite3_stmt*& statement) const{
         return sqlite3_prepare_v2(db->handle(), sql, -1, &statement, nullptr) == SQLITE_OK;
     }
 

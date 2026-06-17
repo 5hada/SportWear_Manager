@@ -9,9 +9,9 @@
 
 class AppContext {
 public:
-    EventHandler event;
     RepositoryProvider repositories;
     ServiceProvider services;
+    EventHandler event;
 
     AppContext():
         repositories(),

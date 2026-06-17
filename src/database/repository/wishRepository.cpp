@@ -3,7 +3,7 @@
 
 std::vector<int> WishRepository::findByUser(int userId) const {
     std::vector<int> productIds{};
-    if (!hasDatabase()){
+    if (hasDatabase()){
         constexpr auto sql =
             "SELECT product_id FROM wish_items WHERE user_id = ? ORDER BY id";
         sqlite3_stmt* statement = nullptr;

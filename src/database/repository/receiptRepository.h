@@ -10,7 +10,7 @@ public:
     ReceiptRepository(DatabaseManager* db):RepositoryBase(db) {}
 
     std::vector<Receipt> findByUser(int userId) const;
-    Receipt* findById(int id) const;
+    Receipt findById(int id) const;
 
     int insert(Receipt& receipt);
     bool update(Receipt& receipt);

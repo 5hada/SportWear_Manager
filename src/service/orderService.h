@@ -15,7 +15,7 @@ class OrderService{
 
     PointService* pointService{nullptr};
 
-    Order* currentOrder{nullptr};
+    Order currentOrder;
 
 public:
     OrderService(

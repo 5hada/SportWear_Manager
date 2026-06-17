@@ -23,12 +23,12 @@ Receipt::Receipt(
 
 Receipt::Receipt(
     int userId, 
-    std::vector<OrderItem>* items,
+    std::vector<OrderItem> items,
     int points,
     int paid
 ):
     userId(userId),
-    items(*items),
+    items(items),
     points(points),
     paid(paid) {}
 
