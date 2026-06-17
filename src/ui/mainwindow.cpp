@@ -20,6 +20,7 @@
 #include <ElaIcon.h>
 #include <ElaText.h>
 #include <QMessageBox>
+#include <qpoint.h>
 #include <qstackedwidget.h>
 
 MainWindow::MainWindow(QWidget* parent): ElaWindow(parent) {
@@ -63,7 +64,11 @@ void MainWindow::initContent() {
 
     dialog = new Dialog(this);
     cartButton  = new ElaPushButton{this};
-
+    cartButton->setFixedWidth(50);
+    cartButton->move(
+        this->width() - cartButton->width() - 20,
+        this->height() - cartButton->height() - 10
+    );
 
     addPageNode("Home", productPages, ElaIconType::House);
 
