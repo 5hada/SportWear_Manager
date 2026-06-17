@@ -1,83 +1,78 @@
 #include "productDetailPage.h"
+#include "ElaDef.h"
+#include "ElaIconButton.h"
 
 #include <ElaPushButton.h>
 #include <ElaText.h>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <qboxlayout.h>
 
-ProductDetailPage::ProductDetailPage(QWidget* parent)
-    : ElaScrollPage(parent),
-      product(ProductItem{24, 59000}, "Running Jacket", Category::Unknown)
-{
+
+void ProductDetailPage::initPage() {
     setWindowTitle("Product Detail");
     setTitleVisible(false);
     setContentsMargins(2, 2, 0, 0);
 
-    auto* titleText = new ElaText("Product Detail", this);
+    auto* titleText = new ElaText("Product Detail");
     titleText->setTextPixelSize(35);
 
-    nameText = new ElaText(this);
+    nameText = new ElaText();
     nameText->setTextPixelSize(24);
 
-    priceText = new ElaText(this);
+    priceText = new ElaText();
     priceText->setTextPixelSize(18);
 
-    stockText = new ElaText(this);
+    stockText = new ElaText();
     stockText->setTextPixelSize(18);
 
-    detailText = new ElaText(this);
+    detailText = new ElaText();
     detailText->setTextPixelSize(15);
+    detailText->setWordWrap(true);
 
-    auto* addCartButton = new ElaPushButton("Add to Cart", this);
-    auto* wishButton = new ElaPushButton("Add Wish", this);
+    auto* textLayout = new QVBoxLayout();
+    textLayout->setSpacing(14);
+    textLayout->addWidget(titleText);
+    textLayout->addSpacing(12);
+    textLayout->addWidget(nameText);
+    textLayout->addWidget(priceText);
+    textLayout->addWidget(stockText);
+    textLayout->addWidget(detailText);
+
+    auto* addCartButton = new ElaIconButton(ElaIconType::Heart);
+    auto* wishButton = new ElaPushButton("Add Wish");
+    auto* buttonLayout = new QHBoxLayout();
+    buttonLayout->setSpacing(10);
+    buttonLayout->addWidget(wishButton);
+    buttonLayout->addWidget(addCartButton);
+
+    auto* mainLayout = new QVBoxLayout();
+    mainLayout->setContentsMargins(30, 20, 30, 20);
+    mainLayout->addLayout(textLayout);
+    mainLayout->addSpacing(20);
+    mainLayout->addLayout(buttonLayout);
+    mainLayout->addStretch();
+    setLayout(mainLayout);
 
     connect(addCartButton, &ElaPushButton::clicked, this, [this]() {
-        Q_EMIT addCartRequested(product.getId());
+        Q_EMIT cartRequest(product.getId());
     });
     connect(wishButton, &ElaPushButton::clicked, this, [this]() {
-        Q_EMIT addWishRequested(product.getId());
+        Q_EMIT wishRequest(product.getId());
     });
-
-    auto* actionLayout = new QHBoxLayout();
-    actionLayout->setSpacing(10);
-    actionLayout->addWidget(addCartButton);
-    actionLayout->addWidget(wishButton);
-    actionLayout->addStretch();
-
-    auto* centralWidget = new QWidget(this);
-    centralWidget->setWindowTitle("Product Detail");
-
-    auto* centerLayout = new QVBoxLayout(centralWidget);
-    centerLayout->setContentsMargins(30, 20, 30, 20);
-    centerLayout->setSpacing(14);
-    centerLayout->addWidget(titleText);
-    centerLayout->addSpacing(12);
-    centerLayout->addWidget(nameText);
-    centerLayout->addWidget(priceText);
-    centerLayout->addWidget(stockText);
-    centerLayout->addWidget(detailText);
-    centerLayout->addSpacing(12);
-    centerLayout->addLayout(actionLayout);
-    centerLayout->addStretch();
-
     refresh();
-    addCentralWidget(centralWidget, true, false, 0);
 }
 
-ProductDetailPage::~ProductDetailPage() = default;
-
-void ProductDetailPage::setProduct(const Product& product)
-{
+void ProductDetailPage::setProduct(const Product& product) {
     this->product = product;
     refresh();
 }
 
-void ProductDetailPage::refresh()
-{
-    nameText->setText(product.getName().empty() ? "Running Jacket" : QString::fromStdString(product.getName()));
+void ProductDetailPage::refresh() {
+    nameText->setText(product.getName().empty() ?
+        "Unknown" : QString::fromStdString(product.getName()));
     priceText->setText(QString("Price: %1").arg(product.getPrice()));
     stockText->setText(QString("Stock: %1").arg(product.getStock()));
-    detailText->setText(product.getDetail().empty()
-                            ? "No detail."
-                            : QString::fromStdString(product.getDetail()));
+    detailText->setText(product.getDetail().empty() ?
+        "No detail." : QString::fromStdString(product.getDetail()));
 }

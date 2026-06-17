@@ -6,7 +6,7 @@
 
 class ElaText;
 
-class ProductDetailPage : public ElaScrollPage{
+class ProductDetailPage : public ElaScrollPage {
     Q_OBJECT
 
     Product product;
@@ -14,16 +14,19 @@ class ProductDetailPage : public ElaScrollPage{
     ElaText* priceText{nullptr};
     ElaText* stockText{nullptr};
     ElaText* detailText{nullptr};
+    int selectedCount;
 
+    void initPage();
     void refresh();
 
 public:
-    explicit ProductDetailPage(QWidget* parent = nullptr);
-    ~ProductDetailPage() override;
+    explicit ProductDetailPage(QWidget* parent): ElaScrollPage(parent) {initPage();}
+    ~ProductDetailPage() override = default;
 
     void setProduct(const Product& product);
 
 Q_SIGNALS:
-    void addCartRequested(int productId);
-    void addWishRequested(int productId);
+    void orderRequest(int productId, int count = 1);
+    void cartRequest(int productId, int count = 1);
+    void wishRequest(int productId);
 };

@@ -162,7 +162,7 @@ void MainWindow::connectPages() {
         productPages->setCurrentWidget(productDetailPage);
     });
 
-    connect(productDetailPage, &ProductDetailPage::addCartRequested, this, [this](int productId) {
+    connect(productDetailPage, &ProductDetailPage::cartRequest, this, [this](int productId) {
         if (!isLoggedIn()) {return;}
         if (!app.services.cart.handleCart(CartAction::Add,userId(), productId, 1)) {
             QMessageBox::warning(this, "Cart", "Failed to add product to cart.");
@@ -172,7 +172,7 @@ void MainWindow::connectPages() {
         cartWidget->show();
     });
 
-    connect(productDetailPage, &ProductDetailPage::addWishRequested, this, [this](int productId) {
+    connect(productDetailPage, &ProductDetailPage::wishRequest, this, [this](int productId) {
         if (!isLoggedIn()) {return;}
         app.services.wish.add(userId(), productId);
         refreshWishProducts();
