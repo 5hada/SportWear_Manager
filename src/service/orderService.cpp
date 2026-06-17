@@ -21,12 +21,8 @@ Receipts OrderService::getReceipts(int userId) {
 }
 
 
-bool OrderService::makeOrder(int userId, int productId) {
+bool OrderService::makeListOrder(int userId) {
     clear();
-    if (userId == 0) {
-        if (productId == -1) {return false;}
-        return makeInstantOrder(productId);
-    }
     currentOrder.setUserId(userId);
     int id, price;
     for(auto& item: cartRepo->findByUser(userId).getItems()){
@@ -42,6 +38,8 @@ bool OrderService::makeOrder(int userId, int productId) {
 }
 
 bool OrderService::makeInstantOrder(int productId) {
+    clear();
+    if (!productRepo->findById(productId)) {return false;}
     Item instantItem(productId, 1, productRepo->findById(productId)->getPrice());
     currentOrder.addItem(instantItem);
     currentOrder.setAvailablePoints(0);
@@ -49,6 +47,11 @@ bool OrderService::makeInstantOrder(int productId) {
 }
 
 Order& OrderService::getOrder() {
+    return currentOrder;
+}
+
+Order& OrderService::getClear() {
+    currentOrder.clear();
     return currentOrder;
 }
 
@@ -67,10 +70,11 @@ bool OrderService::confirmOrder(int userId, int usedPoint) {
     return true;
 }
 
-bool OrderService::refund(int id) {
+bool OrderService::refund(int id, int userId) {
     std::optional<Receipt> receipt_ = receiptRepo->findById(id);
     if (receipt_ == std::nullopt) {return false;}
     Receipt receipt = receipt_.value();
+    if (receipt.getUserId() != userId) {return false;}
     receipt.setIsCanceled(true);
     if (receiptRepo->update(receipt)){
         return pointService->revert(receipt.getUserId(), receipt.getPoints(), receipt.getPaid());

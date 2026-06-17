@@ -1,5 +1,6 @@
 
 #include "model/user/user.h"
+#include "model/user/userInfo.h"
 
 class UserRepository;
 
@@ -7,8 +8,10 @@ class AccountService {
     UserRepository* userRepo{nullptr};
 
     User currentUser;
+    UserInfo userInfo;
 
     void getUser();
+    void updateInfo();
 public:
     AccountService(UserRepository* userRepo): userRepo(userRepo) {}
 
@@ -22,4 +25,7 @@ public:
     bool signup(const std::string& name, const std::string& password);
 
     bool isLoggedIn();
+
+
+    UserInfo getInfo();
 };

@@ -19,6 +19,9 @@ public:
     bool isGuest();
     void init();
 
+    UserRole getRole() const {return role;}
+    void setRole(UserRole role) {this->role = role;}
+
     int getPoint() const {return point;}
     bool setPoint(int point);
 

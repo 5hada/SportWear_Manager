@@ -1,8 +1,12 @@
 #pragma once
 
 #include <string>
+#include <vector>
+
+class Review;
 
 using std::string;
+using Reviews = std::vector<Review>;
 
 class Review {
     int id = 0;

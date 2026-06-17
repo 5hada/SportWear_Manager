@@ -5,9 +5,10 @@
 
 #include "app/eventHandler.h"
 
-#include "model/product/cartAction.h"
+#include "model/actions.h"
 #include "model/product/category.h"
 #include "model/product/product.h"
+#include "model/user/user.h"
 #include "page/productDetailPage.h"
 #include "page/productGridPage.h"
 #include "page/profilePanel.h"
@@ -105,12 +106,12 @@ void MainWindow::connectNavigation() {
     connect(this, &ElaWindow::navigationNodeClicked, this,
             [this](ElaNavigationType::NavigationNodeType, const QString& nodeKey) {
                 if (nodeKey == productPages->property("ElaPageKey").toString()) {
-                    productGridPage->setProducts(event.getAll());
+                    productGridPage->setProducts(event.getProducts());
                     productPages->setCurrentWidget(productGridPage);
                     return;
                 }
                 if (nodeKey == wishPage->property("ElaPageKey").toString()) {
-                    wishPage->setWishs(event.getWishAll());
+                    wishPage->setWishs(event.getWishs());
                     return;
                 }
                 if (nodeKey == cartPage->property("ElaPageKey").toString()) {
@@ -157,41 +158,38 @@ void MainWindow::connectPages() {
     };
 
     connect(profilePanel, &ProfilePanel::trySignup, this, [this, closeProfileAndShowProducts](const QString& name, const QString& password) {
-        const auto success = event.signup(name.toStdString(), password.toStdString());
+        const auto success = event.setUser(UserAction::Signup,name.toStdString(), password.toStdString());
         if (!success) {
             MessageBar::Fail(this);
             return;
         }
 
-        setUserInfoCardTitle(QString::fromStdString(event.getName()));
-        setUserInfoCardSubTitle(QString("Point %1\nSigned in.").arg(event.getPoint()));
+        updateUserInfo();
         closeProfileAndShowProducts();
     });
     connect(profilePanel, &ProfilePanel::tryLogin, this, [this, closeProfileAndShowProducts](const QString& name, const QString& password) {
-        const auto success = event.login(name.toStdString(), password.toStdString());
+        const auto success = event.setUser(UserAction::Login, name.toStdString(), password.toStdString());
         if (!success) {
             MessageBar::Fail(this);
             return;
         }
 
-        setUserInfoCardTitle(QString::fromStdString(event.getName()));
-        setUserInfoCardSubTitle(QString("Point %1\nSigned in.").arg(event.getPoint()));
+        updateUserInfo();
         closeProfileAndShowProducts();
     });
     connect(profilePanel, &ProfilePanel::tryLogout, this, [this, closeProfileAndShowProducts]() {
-        const auto success = event.logout();
+        const auto success = event.setUser(UserAction::Logout);
         if (!success) {
             MessageBar::Fail(this);
             return;
         }
 
-        setUserInfoCardTitle(QString::fromStdString(event.getName()));
-        setUserInfoCardSubTitle("Not signed in");
+        updateUserInfo();
         closeProfileAndShowProducts();
     });
 
     connect(dialog, &Dialog::rightClicked, this, [=]() {
-        event.logout();
+        event.setUser(UserAction::Logout);
         setUserInfoCardTitle("Guest");
         setUserInfoCardSubTitle("Not signed in");
         MessageBar::Logout(this);
@@ -282,7 +280,7 @@ void MainWindow::connectPages() {
 }
 
 void MainWindow::showProductPage() {
-    productGridPage->setProducts(event.getAll());
+    productGridPage->setProducts(event.getProducts());
     productPages->setCurrentWidget(productGridPage);
     navigation(productPages->property("ElaPageKey").toString());
 }
@@ -304,7 +302,7 @@ void MainWindow::showCartPage() {
 }
 
 void MainWindow::showWishPage() {
-    wishPage->setWishs(event.getWishAll());
+    wishPage->setWishs(event.getWishs());
     navigation(wishPage->property("ElaPageKey").toString());
 }
 
@@ -327,10 +325,21 @@ void MainWindow::adjustCartButton() {
 }
 
 void MainWindow::showUserPanel() {
-    profilePanel->show(event.isLoggedIn() ? UserRole::User : UserRole::Guest);
+    profilePanel->show(event.getUser().getRole());
 }
 
 void MainWindow::updateUserInfo() {
-    setUserInfoCardTitle(QString::fromStdString(event.getName()));
-    setUserInfoCardSubTitle("Not signed in");   
+    UserInfo info = event.getUser();
+    setUserInfoCardTitle(QString::fromStdString(info.getName()));
+    switch (info.getRole()){
+        case UserRole::User:
+            setUserInfoCardSubTitle(QString("Point %1\nSigned in.").arg(info.getPoint()));
+            break;
+        case UserRole::Admin:
+            setUserInfoCardSubTitle(QString("Point %1\nSigned in. ADMINSTRATOR").arg(info.getPoint()));
+            break;
+        case UserRole::Guest:
+            setUserInfoCardSubTitle("Not signed in");   
+            break;
+    }
 }

@@ -29,3 +29,14 @@ bool AccountService::signup(const std::string &name, const std::string &password
     User newUser(name, password);
     return userRepo->insert(newUser);
 }
+
+
+UserInfo AccountService::getInfo() {
+    updateInfo();
+    return userInfo;
+}
+
+
+void AccountService::updateInfo() {
+    userInfo = currentUser;
+}

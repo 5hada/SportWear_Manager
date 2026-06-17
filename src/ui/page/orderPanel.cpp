@@ -6,7 +6,7 @@
 #include <QHeaderView>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
-#include <tuple>
+
 
 OrderPanel::OrderPanel(QWidget* parent): ElaDialog(parent) {
     setWindowTitle("Order");
@@ -76,7 +76,7 @@ OrderPanel::OrderPanel(QWidget* parent): ElaDialog(parent) {
     });
 }
 
-void OrderPanel::setOrder(Order& order) {
+void OrderPanel::setOrder(Order order) {
     moveToCenter();
     show();
     model->removeRows(0, model->rowCount());

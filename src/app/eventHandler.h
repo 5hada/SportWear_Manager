@@ -1,14 +1,18 @@
 #include <string>
 #include <optional>
 
+#include "model/actions.h"
 #include "model/product/cart.h"
-#include "model/product/cartAction.h"
 #include "model/product/order.h"
 #include "model/product/receipt.h"
 #include "model/product/product.h"
 #include "model/product/category.h"
+#include "model/user/userInfo.h"
+#include "model/review.h"
 
 using std::string;
+using std::optional;
+using std::nullopt;
 
 class ServiceProvider;
 
@@ -19,24 +23,18 @@ class EventHandler {
 public:
     EventHandler(ServiceProvider& service): service(service) {}
 
+    UserInfo getUser();
+    bool setUser(UserAction action, optional<string> name = nullopt, optional<string> password = nullopt);
 
-    string getUserInfo();
-    string getName();
-    int getPoint();
-    Cart getCart();
-    Order& getOrder(int productId = -1);
-    Products getAll();
-    Products getCategory(Category category);
-    Products getWishAll();
+    Products getProducts(optional<string> text = nullopt, optional<Category> category = nullopt);
     Product getProduct(int productId);
-    Receipts getReceipts();
 
-
-    bool signup(string name, string password);
-    bool login(string name, string password);
-    bool logout();
-    bool isLoggedIn();
+    Order getOrder(int productId = -1);
+    bool confirmOrder(int usedPoint = 0);
     
+    bool refund(int receiptId);
+
+    Cart getCart();
     bool handleCart(
         CartAction action,
         int productId = 0,
@@ -44,10 +42,19 @@ public:
         std::optional<bool> isSelected = std::nullopt
     );
 
-    bool makeOrder(int productId = -1);
-    bool confirmOrder(int usedPoint = 0);
-    bool refund(int receiptId);
-    bool setWish(int productId);
+
+    Receipts getReceipts();
+    
+    Products getWishs();
+    bool setWish(int productId, bool isWished = true);
+
+    Reviews getReviews(int productId);
+    bool setReview(Review review);
+
+    bool setProduct();
+
+
+    void errorCallback();
 };
 
 

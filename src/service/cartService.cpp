@@ -1,8 +1,6 @@
 #include "cartService.h"
 #include "database/repository/cartRepository.h"
 #include "database/repository/productRepository.h"
-#include "model/product/cart.h"
-#include "model/product/cartAction.h"
 #include <optional>
 
 

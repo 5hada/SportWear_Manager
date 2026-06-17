@@ -1,4 +1,5 @@
 #include "eventHandler.h"
+#include "model/actions.h"
 #include "serviceProvider.h"
 #include "model/product/category.h"
 
@@ -6,28 +7,60 @@ int EventHandler::userId() {
     return service.account.getUserId();
 }
 
-bool EventHandler::signup(string name, string password) {
-    return service.account.signup(name, password);
+UserInfo EventHandler::getUser() {
+    return service.account.getInfo();
 }
 
-bool EventHandler::login(string name, string password) {
-    return service.account.login(name, password);
+bool EventHandler::setUser(UserAction action, optional<string> name, optional<string> password) {
+    switch (action) {
+        case UserAction::Signup:
+            if (name == nullopt || password == nullopt) {
+                return service.account.signup(name.value(), password.value());
+                break;
+            }
+        case UserAction::Login:
+            if (name == nullopt || password == nullopt) {
+                return service.account.login(name.value(), password.value());
+                break;
+            }
+        case UserAction::Logout:
+            return service.account.logout();
+    }
+    return false;
 }
 
-bool EventHandler::logout() {
-    return service.account.logout();
+Products EventHandler::getProducts(optional<string> text, optional<Category> category) {
+    if (text == nullopt && category == nullopt) {
+        return service.product.getAll();
+    }
+    return service.product.getAll(); //임시
+}
+Product EventHandler::getProduct(int productId) {
+    return service.product.getById(productId);
 }
 
-bool EventHandler::isLoggedIn() {
-    return service.account.isLoggedIn();
+Order EventHandler::getOrder(int productId) {
+    if (productId < 0) {
+        if (service.order.makeListOrder(userId())) {
+            return service.order.getOrder();
+        }
+    }
+    else {
+        if (service.order.makeInstantOrder(productId)) {
+            return service.order.getOrder();
+        }
+    }
+    return service.order.getClear();
+}
+bool EventHandler::confirmOrder(int usedPoint) {
+    return service.order.confirmOrder(userId(), usedPoint);
 }
 
-string EventHandler::getName() {
-    return service.account.getUserName();
+
+bool EventHandler::refund(int receiptId) {
+    return service.order.refund(receiptId, userId());
 }
-int EventHandler::getPoint() {
-    return service.point.getPoint(userId());
-}
+
 
 Cart EventHandler::getCart() {
     return service.cart.getCart(userId());
@@ -36,45 +69,34 @@ bool EventHandler::handleCart(CartAction action, int productId, int count, std::
     return service.cart.handleCart(action, userId(), productId, count, isSelected);
 }
 
-bool EventHandler::makeOrder(int productId) {
-    if (userId() == 0) {
-        if(productId == -1) {return false;}
-        return service.order.makeOrder(userId(), productId);
-        
-    }
-   return service.order.makeOrder(userId());
-}
-
-Order& EventHandler::getOrder(int productId) {
-    makeOrder(productId);
-    return service.order.getOrder();
-}
-
-
-bool EventHandler::confirmOrder(int usedPoint) {
-    return service.order.confirmOrder(userId(), usedPoint);
-}
 
 Receipts EventHandler::getReceipts() {
     return service.order.getReceipts(userId());
 }
-bool EventHandler::refund(int receiptId) {
-    return service.order.refund(receiptId);
-}
 
-Products EventHandler::getAll() {
-    return service.product.getAll();
-}
-Products EventHandler::getCategory(Category category) {
-    return {};
-}
-Products EventHandler::getWishAll() {
+
+Products EventHandler::getWishs() {
     return service.wish.getWishs(userId());
 }
-Product EventHandler::getProduct(int productId) {
-    return service.product.getById(productId);
+
+bool EventHandler::setWish(int productId, bool isWished) {
+    if (isWished) {
+        return service.wish.add(userId(), productId);
+    }
+    else {
+        return service.wish.remove(userId(), productId);
+    }
 }
 
-bool EventHandler::setWish(int productId) {
-    return service.wish.add(userId(), productId);
+
+Reviews EventHandler::getReviews(int productId) {
+    return service.review.getAllFromProduct(productId);
+}
+bool EventHandler::setReview(Review review) {
+    return false;
+}
+
+
+bool EventHandler::setProduct() {
+    return false;
 }
