@@ -37,12 +37,14 @@ bool OrderService::makeOrder(int userId, int productId) {
             currentOrder.addItem(newItem);
         }
     }
+    currentOrder.setAvailablePoints(pointService->getPoint(userId));
     return true;
 }
 
 bool OrderService::makeInstantOrder(int productId) {
     Item instantItem(productId, 1, productRepo->findById(productId)->getPrice());
     currentOrder.addItem(instantItem);
+    currentOrder.setAvailablePoints(0);
     return true;
 }
 

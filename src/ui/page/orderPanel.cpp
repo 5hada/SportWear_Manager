@@ -76,9 +76,7 @@ OrderPanel::OrderPanel(QWidget* parent): ElaDialog(parent) {
     });
 }
 
-void OrderPanel::setOrder(const std::tuple<Order&, int> orderData) {
-    Order& order = std::get<0>(orderData);
-    int availablePoint = std::get<1>(orderData);
+void OrderPanel::setOrder(Order& order) {
     moveToCenter();
     show();
     model->removeRows(0, model->rowCount());
@@ -93,6 +91,6 @@ void OrderPanel::setOrder(const std::tuple<Order&, int> orderData) {
     }
 
     totalText->setText(QString("Total: %1").arg(order.getTotalPrice()));
-    pointText->setText(QString("Available point: %1").arg(availablePoint));
+    pointText->setText(QString("Available point: %1").arg(order.getAvailablePoints()));
     paidText->setText(QString("Payment: %1").arg(order.getTotalPrice()));
 }

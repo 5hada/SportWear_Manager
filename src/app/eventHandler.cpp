@@ -46,9 +46,9 @@ bool EventHandler::makeOrder(int productId) {
    return service.order.makeOrder(userId());
 }
 
-std::tuple<Order&,int> EventHandler::getOrder(int productId) {
+Order& EventHandler::getOrder(int productId) {
     makeOrder(productId);
-    return std::tuple<Order&,int>(service.order.getOrder(),getPoint());
+    return service.order.getOrder();
 }
 
 

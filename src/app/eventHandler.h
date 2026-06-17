@@ -42,7 +42,7 @@ public:
 
 
     bool makeOrder(int productId = -1);
-    std::tuple<Order&,int>  getOrder(int productId = -1);
+    Order& getOrder(int productId = -1);
     bool confirmOrder(int usedPoint = 0);
 
     Receipts getReceipts();

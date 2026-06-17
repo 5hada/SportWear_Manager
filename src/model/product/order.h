@@ -23,10 +23,12 @@ public:
 
 
     int getUserId() const {return userId;}
+    int getAvailablePoints() const {return availablePoints;}
     int getTotalPrice() const {return totalPrice;}
     const Items& getItems() const {return items;}
 
     void setUserId(int userId) {this->userId = userId;}
+    void setAvailablePoints(int availablePoints) {this->availablePoints = availablePoints;}
     void setTotalPrice(int newPrice) {totalPrice = newPrice;}
     void setItems(Items items) {this->items = items;}
 
