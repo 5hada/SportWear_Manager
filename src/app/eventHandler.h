@@ -1,4 +1,5 @@
 #include <string>
+#include <optional>
 
 #include "model/product/cart.h"
 #include "model/product/cartAction.h"
@@ -27,14 +28,28 @@ public:
     string getName();
     int getPoint();
 
-    Cart getCart();
-    bool handleCart(CartAction action, int productId, int count);
 
-    Order makeOrder();
+
+    Cart getCart();
+    bool handleCart(
+        CartAction action,
+        int productId = 0,
+        int count = 0,
+        std::optional<bool> isSelected = std::nullopt
+    );
+
+
+
+
+    bool makeOrder(int productId = -1);
+    std::tuple<Order&,int>  getOrder(int productId = -1);
     bool confirmOrder(int usedPoint = 0);
 
     Receipts getReceipts();
     bool refund(int receiptId);
+
+
+
 
     Products getAll();
     Products getCategory(Category category);

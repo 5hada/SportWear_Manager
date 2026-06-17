@@ -51,10 +51,12 @@ void ProductDetailPage::initPage() {
 
     auto* addCartButton = new ElaIconButton(ElaIconType::CartShopping, this);
     auto* wishButton = new ElaPushButton("Add Wish", this);
+    auto* buyButton = new ElaPushButton("Buy Now", this);
     auto* buttonLayout = new QHBoxLayout();
     buttonLayout->setSpacing(10);
     buttonLayout->addWidget(wishButton);
     buttonLayout->addWidget(addCartButton);
+    buttonLayout->addWidget(buyButton);
 
     auto* centralWidget = new QWidget(this);
     centralWidget->setWindowTitle("Product Detail");
@@ -74,6 +76,9 @@ void ProductDetailPage::initPage() {
     });
     connect(wishButton, &ElaPushButton::clicked, this, [this]() {
         Q_EMIT wishRequest(product.getId());
+    });
+    connect(buyButton, &ElaPushButton::clicked, this, [this]() {
+        Q_EMIT orderRequest(product.getId(), 1);
     });
     refresh();
 }

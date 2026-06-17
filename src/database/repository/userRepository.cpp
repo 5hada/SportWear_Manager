@@ -56,16 +56,14 @@ bool UserRepository::insert(const User& user) {
     if (!hasDatabase()) {return false;}
     sqlite3_stmt* statement = nullptr;
     constexpr auto sql =
-        "INSERT INTO users (id, name, password, point) VALUES (?, ?, ?, ?) "
-        "ON CONFLICT(id) DO UPDATE SET name = excluded.name, password = excluded.password, point = excluded.point";
+        "INSERT INTO users (name, password, point) VALUES (?, ?, ?)";
 
     if (!sqlOk(sql, statement)) {
         return false;
     }
-    sqlite3_bind_int(statement, 1, user.getId());
-    sqlBindText(statement, 2, user.getName());
-    sqlBindText(statement, 3, user.getPassword());
-    sqlite3_bind_int(statement, 4, user.getPoint());
+    sqlBindText(statement, 1, user.getName());
+    sqlBindText(statement, 2, user.getPassword());
+    sqlite3_bind_int(statement, 3, user.getPoint());
     return sqlFin(statement);
 }
 

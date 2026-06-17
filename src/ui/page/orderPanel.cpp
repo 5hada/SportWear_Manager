@@ -6,6 +6,7 @@
 #include <QHeaderView>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
+#include <tuple>
 
 OrderPanel::OrderPanel(QWidget* parent): ElaDialog(parent) {
     setWindowTitle("Order");
@@ -75,7 +76,9 @@ OrderPanel::OrderPanel(QWidget* parent): ElaDialog(parent) {
     });
 }
 
-void OrderPanel::setOrder(const Order& order, int availablePoint) {
+void OrderPanel::setOrder(const std::tuple<Order&, int> orderData) {
+    Order& order = std::get<0>(orderData);
+    int availablePoint = std::get<1>(orderData);
     moveToCenter();
     show();
     model->removeRows(0, model->rowCount());

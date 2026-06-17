@@ -4,6 +4,7 @@
 #include <ElaTableView.h>
 #include <ElaText.h>
 #include <QHeaderView>
+#include <QItemSelectionModel>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
 
@@ -35,6 +36,9 @@ CartPage::CartPage(QWidget* parent): ElaScrollPage(parent) {
     totalPriceText->setTextPixelSize(18);
 
     auto* removeButton = new ElaPushButton("Remove", this);
+    auto* decreaseButton = new ElaPushButton("-1", this);
+    auto* increaseButton = new ElaPushButton("+1", this);
+    auto* toggleButton = new ElaPushButton("Toggle", this);
     auto* clearButton = new ElaPushButton("Clear", this);
     auto* orderButton = new ElaPushButton("Order", this);
 
@@ -46,6 +50,12 @@ CartPage::CartPage(QWidget* parent): ElaScrollPage(parent) {
 
     auto* buttonLayout = new QHBoxLayout();
     buttonLayout->addStretch();
+    buttonLayout->addWidget(decreaseButton);
+    buttonLayout->addSpacing(10);
+    buttonLayout->addWidget(increaseButton);
+    buttonLayout->addSpacing(10);
+    buttonLayout->addWidget(toggleButton);
+    buttonLayout->addSpacing(10);
     buttonLayout->addWidget(removeButton);
     buttonLayout->addSpacing(10);
     buttonLayout->addWidget(clearButton);
@@ -68,6 +78,31 @@ CartPage::CartPage(QWidget* parent): ElaScrollPage(parent) {
 
     addCentralWidget(centralWidget, true, false, 0);
 
+    connect(decreaseButton, &ElaPushButton::clicked, this, [this]() {
+        const int productId = selectedProductId();
+        if (productId >= 0) {
+            Q_EMIT decreaseRequested(productId);
+        }
+    });
+    connect(increaseButton, &ElaPushButton::clicked, this, [this]() {
+        const int productId = selectedProductId();
+        if (productId >= 0) {
+            Q_EMIT increaseRequested(productId);
+        }
+    });
+    connect(toggleButton, &ElaPushButton::clicked, this, [this]() {
+        const int productId = selectedProductId();
+        if (productId >= 0) {
+            Q_EMIT toggleSelectedRequested(productId, !selectedProductIsSelected());
+        }
+    });
+    connect(removeButton, &ElaPushButton::clicked, this, [this]() {
+        const int productId = selectedProductId();
+        if (productId >= 0) {
+            Q_EMIT removeRequested(productId);
+        }
+    });
+    connect(clearButton, &ElaPushButton::clicked, this, &CartPage::clearRequested);
     connect(orderButton, &ElaPushButton::clicked, this, &CartPage::orderRequested);
 }
 
@@ -86,4 +121,34 @@ void CartPage::setCart(const Cart& cart) {
 
     totalCountText->setText(QString("Items: %1").arg(cart.getTotalCount()));
     totalPriceText->setText(QString("Total: %1").arg(cart.getTotalPrice()));
+}
+
+int CartPage::selectedProductId() const {
+    if (cartTable == nullptr || cartTable->selectionModel() == nullptr) {
+        return -1;
+    }
+
+    const auto selectedRows = cartTable->selectionModel()->selectedRows();
+    if (selectedRows.isEmpty()) {
+        return -1;
+    }
+
+    const int row = selectedRows.first().row();
+    const auto* productIdItem = model->item(row, 1);
+    return productIdItem == nullptr ? -1 : productIdItem->text().toInt();
+}
+
+bool CartPage::selectedProductIsSelected() const {
+    if (cartTable == nullptr || cartTable->selectionModel() == nullptr) {
+        return false;
+    }
+
+    const auto selectedRows = cartTable->selectionModel()->selectedRows();
+    if (selectedRows.isEmpty()) {
+        return false;
+    }
+
+    const int row = selectedRows.first().row();
+    const auto* selectedItem = model->item(row, 0);
+    return selectedItem != nullptr && selectedItem->text() == "Yes";
 }

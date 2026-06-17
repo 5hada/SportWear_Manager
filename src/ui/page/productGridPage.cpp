@@ -4,8 +4,10 @@
 #include "ElaLineEdit.h"
 
 #include <ElaFlowLayout.h>
-#include <ElaPopularCard.h>
 #include <ElaText.h>
+#include <QLabel>
+#include <QPushButton>
+#include <QPixmap>
 #include <QString>
 #include <QVBoxLayout>
 #include <qboxlayout.h>
@@ -132,18 +134,73 @@ bool ProductGridPage::matchesSearch(const Product& product) const {
 }
 
 void ProductGridPage::addProductCard(const Product& product) {
-    auto* productCard = new ElaPopularCard(this);
-    productCard->setCardPixmap(QPixmap(":/Resource/Image/Cirno.jpg"));
-    productCard->setTitle(product.getName().empty() ? "Sample Product" : QString::fromStdString(product.getName()));
-    productCard->setSubTitle(QString("Price %1 / Stock %2").arg(product.getPrice()).arg(product.getStock()));
-    productCard->setInteractiveTips("Detail");
-    productCard->setDetailedText(product.getDetail().empty() ?
-        "No detail." : QString::fromStdString(product.getDetail())
+    auto* productCard = new QPushButton(this);
+    productCard->setCursor(Qt::PointingHandCursor);
+    productCard->setFixedWidth(320);
+    productCard->setMinimumHeight(132);
+    productCard->setFlat(true);
+    productCard->setStyleSheet(
+        "QPushButton {"
+        "  text-align: left;"
+        "  border: 1px solid rgba(120, 120, 120, 80);"
+        "  border-radius: 6px;"
+        "  background: rgba(255, 255, 255, 18);"
+        "}"
+        "QPushButton:hover {"
+        "  border-color: rgba(80, 140, 220, 180);"
+        "  background: rgba(80, 140, 220, 24);"
+        "}"
     );
-    connect(productCard, &ElaPopularCard::popularCardClicked, this, [this, product]() {
-        Q_EMIT productSelected(product);
-    });
-    connect(productCard, &ElaPopularCard::popularCardButtonClicked, this, [this, product]() {
+
+    auto* imageLabel = new QLabel(productCard);
+    imageLabel->setFixedSize(72, 72);
+    imageLabel->setScaledContents(true);
+    imageLabel->setPixmap(QPixmap(":/Resource/Image/Cirno.jpg"));
+
+    auto* nameText = new ElaText(product.getName().empty()
+        ? "Sample Product"
+        : QString::fromStdString(product.getName()), productCard);
+    nameText->setTextPixelSize(18);
+    nameText->setWordWrap(true);
+
+    auto* categoryText = new ElaText(QString::fromStdString(categoryToString(product.getCategory())), productCard);
+    categoryText->setTextPixelSize(13);
+
+    auto* priceText = new ElaText(QString("Price %1").arg(product.getPrice()), productCard);
+    priceText->setTextPixelSize(14);
+
+    auto* stockText = new ElaText(QString("Stock %1").arg(product.getStock()), productCard);
+    stockText->setTextPixelSize(14);
+
+    auto* detailText = new ElaText(product.getDetail().empty()
+        ? "No detail."
+        : QString::fromStdString(product.getDetail()), productCard);
+    detailText->setTextPixelSize(12);
+    detailText->setWordWrap(true);
+
+    auto* metaLayout = new QHBoxLayout();
+    metaLayout->setContentsMargins(0, 0, 0, 0);
+    metaLayout->addWidget(priceText);
+    metaLayout->addSpacing(12);
+    metaLayout->addWidget(stockText);
+    metaLayout->addStretch();
+
+    auto* textLayout = new QVBoxLayout();
+    textLayout->setContentsMargins(0, 0, 0, 0);
+    textLayout->setSpacing(8);
+    textLayout->addWidget(nameText);
+    textLayout->addWidget(categoryText);
+    textLayout->addLayout(metaLayout);
+    textLayout->addWidget(detailText);
+    textLayout->addStretch();
+
+    auto* cardLayout = new QHBoxLayout(productCard);
+    cardLayout->setContentsMargins(14, 12, 14, 12);
+    cardLayout->setSpacing(12);
+    cardLayout->addWidget(imageLabel);
+    cardLayout->addLayout(textLayout);
+
+    connect(productCard, &QPushButton::clicked, this, [this, product]() {
         Q_EMIT productSelected(product);
     });
     productLayout->addWidget(productCard);

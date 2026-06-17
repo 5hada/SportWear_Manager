@@ -17,6 +17,7 @@ class OrderService{
 
     Order currentOrder;
 
+    bool makeInstantOrder(int productId);
 public:
     OrderService(
         ReceiptRepository* receiptRepo,
@@ -35,7 +36,9 @@ public:
 
     Receipts getReceipts(int userId);
 
-    Order& makeOrder(int userId);
+    bool makeOrder(int userId, int productId = -1);
+    Order& getOrder();
+    
     bool confirmOrder(int userId, int userPoint);
     bool refund(int id);
 

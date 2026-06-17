@@ -10,6 +10,7 @@
 #include "database/repository/wishRepository.h"
 
 #include <string>
+#include <filesystem>
 
 class RepositoryProvider {
 public:
@@ -34,13 +35,33 @@ public:
           review(&database),
           wish(&database)
     {
-        databaseReady = database.initialize(databasePath, schemaPath);
+        databaseReady = database.initialize(databasePath, resolveSchemaPath(schemaPath));
         seedProducts();
     }
 
     bool isDatabaseReady() const { return databaseReady; }
 
 private:
+    static std::string resolveSchemaPath(const std::string& schemaPath) {
+        namespace fs = std::filesystem;
+        const fs::path requested(schemaPath);
+        if (fs::exists(requested)) {
+            return requested.string();
+        }
+
+        const fs::path sourceTreeSchema = fs::path("src") / "database" / "schema.sql";
+        if (fs::exists(sourceTreeSchema)) {
+            return sourceTreeSchema.string();
+        }
+
+        const fs::path parentSourceTreeSchema = fs::path("..") / "src" / "database" / "schema.sql";
+        if (fs::exists(parentSourceTreeSchema)) {
+            return parentSourceTreeSchema.string();
+        }
+
+        return schemaPath;
+    }
+
     void seedProducts() {
         if (!databaseReady || !product.findAll().empty()) {
             return;

@@ -14,29 +14,44 @@
 #include <optional>
 
 Receipts OrderService::getReceipts(int userId) {
+    if (userId == 0) {
+        Receipts receipt;
+        return receipt;
+    }
     return receiptRepo->findByUser(userId);
 }
 
 
-Order& OrderService::makeOrder(int userId){
+bool OrderService::makeOrder(int userId, int productId) {
     clear();
+    if (userId == 0) {
+        if (productId == -1) {return false;}
+        return makeInstantOrder(productId);
+    }
     currentOrder.setUserId(userId);
-    int id;
-    int price;
+    int id, price;
     for(auto& item: cartRepo->findByUser(userId).getItems()){
         if(item.selected()){
             id = item.getId();
             price = productRepo->findById(id)->getPrice();
             OrderItem newItem(id, item.getCount(), price);
             currentOrder.addItem(newItem);
-            currentOrder.addPrice(price * item.getCount());
         }
     }
+    return true;
+}
+
+bool OrderService::makeInstantOrder(int productId) {
+    OrderItem instantItem(productId, 1, productRepo->findById(productId)->getPrice());
+    currentOrder.addItem(instantItem);
+    return true;
+}
+
+Order& OrderService::getOrder() {
     return currentOrder;
 }
 
-
-bool OrderService::confirmOrder(int userId, int usedPoint){
+bool OrderService::confirmOrder(int userId, int usedPoint) {
     if(currentOrder.getUserId() != userId){return false;}
     int totalPrice = currentOrder.getTotalPrice();
     auto& items = currentOrder.getItems();
@@ -45,12 +60,13 @@ bool OrderService::confirmOrder(int userId, int usedPoint){
     receiptId = receiptRepo->insert(newReceipt);
     if(receiptId == -1){return false;}
     if(!orderRepo->insert(receiptId, items)){return false;}
+    if(!cartRepo->removeSelected(userId)){return false;}
     pointService->reward(userId, totalPrice);
     clear();
     return true;
 }
 
-bool OrderService::refund(int id){
+bool OrderService::refund(int id) {
     std::optional<Receipt> receipt_ = receiptRepo->findById(id);
     if (receipt_ == std::nullopt) {return false;}
     Receipt receipt = receipt_.value();
@@ -62,6 +78,6 @@ bool OrderService::refund(int id){
 }
 
 
-void OrderService::clear(){
+void OrderService::clear() {
     currentOrder.clear();
 }

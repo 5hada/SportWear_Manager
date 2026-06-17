@@ -69,7 +69,14 @@ bool DatabaseManager::executeFile(const std::string& path) {
 }
 
 bool DatabaseManager::initialize(const std::string& databasePath, const std::string& schemaPath) {
-    return open(databasePath) && executeFile(schemaPath);
+    if (!open(databasePath)) {
+        return false;
+    }
+    if (!executeFile(schemaPath)) {
+        close();
+        return false;
+    }
+    return true;
 }
 
 void DatabaseManager::setErrorFromSqlite(int resultCode) {

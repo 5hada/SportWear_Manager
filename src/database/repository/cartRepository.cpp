@@ -118,6 +118,18 @@ bool CartRepository::remove(int userId, int productId) {
     return false;
 }
 
+bool CartRepository::removeSelected(int userId) {
+    sqlite3_stmt* statement = nullptr;
+    constexpr auto sql =
+        "DELETE FROM cart_items WHERE user_id = ? AND is_selected = 1";
+
+    if (sqlOk(sql, statement)) {
+        sqlite3_bind_int(statement, 1, userId);
+        return sqlFin(statement);
+    }
+    return false;
+}
+
 bool CartRepository::clear(int userId) {
     sqlite3_stmt* statement = nullptr;
     constexpr auto sql =

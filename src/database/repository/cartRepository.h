@@ -16,6 +16,7 @@ public:
     bool updateCount(int userId, int productId, int count);
     bool updateSelected(int userId, int productId, bool isSelected);
     bool remove(int userId, int productId);
+    bool removeSelected(int userId);
 
     bool clear(int userId);
 };

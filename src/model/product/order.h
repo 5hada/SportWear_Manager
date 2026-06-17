@@ -8,6 +8,8 @@ class Order{
     int userId;
     int totalPrice;
     std::vector<OrderItem> items;
+
+    void addPrice(int price){totalPrice+=price;}
 public:
     Order(): userId(0), totalPrice(0){};
     Order(int userId, int totalPrice, std::vector<OrderItem> items): userId(userId), totalPrice(totalPrice){setItems(items);}
@@ -22,8 +24,10 @@ public:
     void setItems(std::vector<OrderItem> items){this->items = items;}
     // void setItems(std::vector<OrderItem>* items){this->items = *items;}
 
-    void addPrice(int price){totalPrice+=price;}
-    void addItem(OrderItem& item){items.emplace_back(item);}
+    void addItem(OrderItem item){
+        items.emplace_back(item);
+        addPrice(item.getPrice()*item.getCount());
+    }
 
     void clear(){userId = 0; totalPrice = 0; items.clear();}
 };

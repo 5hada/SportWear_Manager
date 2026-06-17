@@ -1,6 +1,7 @@
 #include "eventHandler.h"
 #include "model/product/category.h"
 #include "serviceProvider.h"
+#include <tuple>
 
 int EventHandler::userId() {
     return service.account.getUserId();
@@ -32,13 +33,24 @@ int EventHandler::getPoint() {
 Cart EventHandler::getCart() {
     return service.cart.getCart(userId());
 }
-bool EventHandler::handleCart(CartAction action, int productId, int count) {
-    return service.cart.handleCart(action, userId(), productId, count);
+bool EventHandler::handleCart(CartAction action, int productId, int count, std::optional<bool> isSelected) {
+    return service.cart.handleCart(action, userId(), productId, count, isSelected);
 }
 
-Order EventHandler::makeOrder() {
-    return service.order.makeOrder(userId());
+bool EventHandler::makeOrder(int productId) {
+    if (userId() == 0) {
+        if(productId == -1) {return false;}
+        return service.order.makeOrder(userId(), productId);
+        
+    }
+   return service.order.makeOrder(userId());
 }
+
+std::tuple<Order&,int> EventHandler::getOrder(int productId) {
+    makeOrder(productId);
+    return std::tuple<Order&,int>(service.order.getOrder(),getPoint());
+}
+
 
 bool EventHandler::confirmOrder(int usedPoint) {
     return service.order.confirmOrder(userId(), usedPoint);

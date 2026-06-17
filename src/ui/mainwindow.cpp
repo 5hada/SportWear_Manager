@@ -25,6 +25,7 @@
 #include <ElaIcon.h>
 #include <ElaText.h>
 #include <QMessageBox>
+#include <QTimer>
 #include <qobject.h>
 #include <qpoint.h>
 #include <qstackedwidget.h>
@@ -119,10 +120,6 @@ void MainWindow::connectNavigation() {
                     cartWidget->setCart(cart);
                     return;
                 }
-                if (nodeKey == orderPanel->property("ElaPageKey").toString()) {
-                    orderPanel->setOrder(event.makeOrder(), event.getPoint());
-                    return;
-                }
                 if (nodeKey == receiptPage->property("ElaPageKey").toString()) {
                     receiptPage->setReceipts(event.getReceipts());
                     return;
@@ -148,7 +145,19 @@ void MainWindow::connectNavigation() {
 }
 
 void MainWindow::connectPages() {
-    connect(profilePanel, &ProfilePanel::trySignup, this, [this](const QString& name, const QString& password) {
+    const auto refreshCart = [this]() {
+        const auto cart = event.getCart();
+        cartPage->setCart(cart);
+        cartWidget->setCart(cart);
+    };
+    const auto closeProfileAndShowProducts = [this]() {
+        profilePanel->hide();
+        QTimer::singleShot(0, this, [this]() {
+            showProductPage();
+        });
+    };
+
+    connect(profilePanel, &ProfilePanel::trySignup, this, [this, closeProfileAndShowProducts](const QString& name, const QString& password) {
         const auto success = event.signup(name.toStdString(), password.toStdString());
         if (!success) {
             MessageBar::Fail(this);
@@ -157,10 +166,9 @@ void MainWindow::connectPages() {
 
         setUserInfoCardTitle(QString::fromStdString(event.getName()));
         setUserInfoCardSubTitle(QString("Point %1\nSigned in.").arg(event.getPoint()));
-        profilePanel->hide();
-        showProductPage();
+        closeProfileAndShowProducts();
     });
-    connect(profilePanel, &ProfilePanel::tryLogin, this, [this](const QString& name, const QString& password) {
+    connect(profilePanel, &ProfilePanel::tryLogin, this, [this, closeProfileAndShowProducts](const QString& name, const QString& password) {
         const auto success = event.login(name.toStdString(), password.toStdString());
         if (!success) {
             MessageBar::Fail(this);
@@ -169,10 +177,9 @@ void MainWindow::connectPages() {
 
         setUserInfoCardTitle(QString::fromStdString(event.getName()));
         setUserInfoCardSubTitle(QString("Point %1\nSigned in.").arg(event.getPoint()));
-        profilePanel->hide();
-        showProductPage();
+        closeProfileAndShowProducts();
     });
-    connect(profilePanel, &ProfilePanel::tryLogout, this, [this]() {
+    connect(profilePanel, &ProfilePanel::tryLogout, this, [this, closeProfileAndShowProducts]() {
         const auto success = event.logout();
         if (!success) {
             MessageBar::Fail(this);
@@ -181,8 +188,7 @@ void MainWindow::connectPages() {
 
         setUserInfoCardTitle(QString::fromStdString(event.getName()));
         setUserInfoCardSubTitle("Not signed in");
-        profilePanel->hide();
-        showProductPage();
+        closeProfileAndShowProducts();
     });
 
     connect(dialog, &Dialog::rightClicked, this, [=]() {
@@ -205,7 +211,13 @@ void MainWindow::connectPages() {
             MessageBar::Fail(this);
             return;
         }
+        cartWidget->setCart(event.getCart());
         cartWidget->show();
+    });
+
+    connect(productDetailPage, &ProductDetailPage::orderRequest, this, [this](int productId, int count) {
+        orderPanel->setOrder(event.getOrder(productId));
+        showOrderPanel();
     });
 
     connect(productDetailPage, &ProductDetailPage::wishRequest, this, [this](int productId) {
@@ -214,6 +226,46 @@ void MainWindow::connectPages() {
 
     connect(cartPage, &CartPage::orderRequested, this, [this]() {
         showOrderPanel();
+    });
+
+    connect(cartPage, &CartPage::increaseRequested, this, [this, refreshCart](int productId) {
+        if (!event.handleCart(CartAction::Add, productId, 1)) {
+            MessageBar::Fail(this);
+            return;
+        }
+        refreshCart();
+    });
+
+    connect(cartPage, &CartPage::decreaseRequested, this, [this, refreshCart](int productId) {
+        if (!event.handleCart(CartAction::Sub, productId, 1)) {
+            MessageBar::Fail(this);
+            return;
+        }
+        refreshCart();
+    });
+
+    connect(cartPage, &CartPage::toggleSelectedRequested, this, [this, refreshCart](int productId, bool isSelected) {
+        if (!event.handleCart(CartAction::Toggle, productId, 0, isSelected)) {
+            MessageBar::Fail(this);
+            return;
+        }
+        refreshCart();
+    });
+
+    connect(cartPage, &CartPage::removeRequested, this, [this, refreshCart](int productId) {
+        if (!event.handleCart(CartAction::Del, productId)) {
+            MessageBar::Fail(this);
+            return;
+        }
+        refreshCart();
+    });
+
+    connect(cartPage, &CartPage::clearRequested, this, [this, refreshCart]() {
+        if (!event.handleCart(CartAction::Clear)) {
+            MessageBar::Fail(this);
+            return;
+        }
+        refreshCart();
     });
 
     connect(orderPanel, &OrderPanel::confirmRequested, this, [this](int usedPoint) {
@@ -258,7 +310,9 @@ void MainWindow::showWishPage() {
 }
 
 void MainWindow::showOrderPanel() {
-    orderPanel->setOrder(event.makeOrder(), event.getPoint());
+    orderPanel->setOrder(event.getOrder());
+    orderPanel->moveToCenter();
+    orderPanel->show();
 }
 
 void MainWindow::showReceiptPage() {

@@ -19,7 +19,7 @@ class OrderPanel: public ElaDialog {
 public:
     explicit OrderPanel(QWidget* parent = nullptr);
 
-    void setOrder(const Order& order, int availablePoint = 0);
+    void setOrder(const std::tuple<Order&, int> orderData);
 
 Q_SIGNALS:
     void confirmRequested(int usedPoint);
