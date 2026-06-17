@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ElaScrollPage.h>
-#include <vector>
 
 #include "model/product/receipt.h"
 
@@ -10,16 +9,13 @@ class ElaFlowLayout;
 class ReceiptPage: public ElaScrollPage {
     Q_OBJECT
 
-public:
-    explicit ReceiptPage(QWidget* parent = nullptr);
-    ~ReceiptPage() override;
+    Receipts receipts;
+    ElaFlowLayout* receiptLayout{nullptr};
 
-    void setReceipts(std::vector<Receipt> receipts);
-
-private:
     void rebuildReceipts();
     void addReceiptCard(const Receipt& receipt);
+public:
+    explicit ReceiptPage(QWidget* parent = nullptr);
 
-    std::vector<Receipt> receipts;
-    ElaFlowLayout* receiptLayout{nullptr};
+    void setReceipts(Receipts receipts);
 };

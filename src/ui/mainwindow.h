@@ -1,6 +1,8 @@
 #pragma once
 
+#include "model/product/category.h"
 #include <ElaWindow.h>
+#include <map>
 
 class QStackedWidget;
 class ElaPushButton;
@@ -23,6 +25,7 @@ class MainWindow : public ElaWindow{
 
     QStackedWidget* productPages{nullptr};
     ProductGridPage* productGridPage{nullptr};
+    std::map<Category,ProductGridPage>* productCategoryPages{nullptr};
     ProductDetailPage* productDetailPage{nullptr};
     OrderPanel* orderPanel{nullptr};
     ReceiptPage* receiptPage{nullptr};
@@ -35,17 +38,16 @@ class MainWindow : public ElaWindow{
     QString categoriesKey;
     QString settingsKey;
     QString profileKey;
-    QString logIOKey;
-    QString loginKey;
-    QString logoutKey;
     
     void initWindow();
     void initContent();
     void initConnect();
 
+    void connectNavigation();
     void connectPages();
 
     void showProductPage();
+    void showProductCategoryPage(Category category);
     void showDetailPage(int productId);
     void showOrderPanel();
     void showReceiptPage();

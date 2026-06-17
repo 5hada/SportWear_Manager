@@ -2,7 +2,13 @@
 
 #include "userBase.h"
 
+enum class UserRole {
+    Guest,
+    User,
+    Admin
+};
 class User : public UserBase {
+    UserRole role;
     int point = 0;
 
 public:

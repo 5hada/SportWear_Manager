@@ -1,17 +1,16 @@
 #pragma once
 
 #include <ElaScrollPage.h>
-#include <qboxlayout.h>
-#include <vector>
 
 #include "model/product/product.h"
 
 class ElaFlowLayout;
+class QHBoxLayout;
 
 class ProductGridPage : public ElaScrollPage {
     Q_OBJECT
 
-    std::vector<Product> products;
+    Products products;
     ElaFlowLayout* productLayout{nullptr};
     QHBoxLayout* indexNavigation;
     ElaText* pageIndex;
@@ -26,10 +25,9 @@ class ProductGridPage : public ElaScrollPage {
     void rebuildProducts();
     void detailRequest(int productId);
 public:
-    explicit ProductGridPage(QWidget* parent): ElaScrollPage(parent) {initPage();}
-    ~ProductGridPage() override = default;
+    explicit ProductGridPage(QWidget* parent = nullptr);
 
-    void setProducts(std::vector<Product> products);
+    void setProducts(Products products);
 
 Q_SIGNALS:
     void productSelected(const Product& product);

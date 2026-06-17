@@ -30,7 +30,8 @@
 MainWindow::MainWindow(EventHandler& event): event(event){
     initWindow();
     initContent();
-    initConnect();
+    connectNavigation();
+    connectPages();
 }
 
 void MainWindow::initWindow() {
@@ -38,8 +39,6 @@ void MainWindow::initWindow() {
     resize(1200, 760);
     moveToCenter();
     setFocusPolicy(Qt::StrongFocus);
-    setUserInfoCardTitle(QString::fromStdString(event.getName()));
-    setUserInfoCardSubTitle("Not signed in");
 
     auto* landingText = new ElaText("SportWear Manager", this);
     landingText->setTextPixelSize(32);
@@ -48,8 +47,14 @@ void MainWindow::initWindow() {
 }
 
 void MainWindow::initContent() {
+    setUserInfoCardTitle(QString::fromStdString(event.getName()));
+    setUserInfoCardSubTitle("Not signed in");
+
     productPages = new QStackedWidget(this);
     productGridPage = new ProductGridPage(this);
+    for (auto& category: Categories){
+        productCategoryPages->insert_or_assign(category, ProductGridPage(this));
+    }
     productDetailPage = new ProductDetailPage(this);
     productPages->addWidget(productGridPage);
     productPages->addWidget(productDetailPage);
@@ -58,7 +63,7 @@ void MainWindow::initContent() {
     orderPanel = new OrderPanel(this);
     orderPanel->hide();
     receiptPage = new ReceiptPage(this);
-    cartWidget = new CartWidget(this);\
+    cartWidget = new CartWidget(this);
     cartWidget->hide();
     cartPage = new CartPage(this);
     wishPage = new WishPage(this);
@@ -75,19 +80,19 @@ void MainWindow::initContent() {
     addPageNode("Products", productPages, ElaIconType::Shirt);
     addExpanderNode("Categories", categoriesKey, ElaIconType::GridRound2);
     for (auto& category: Categories){
-        addPageNode(QString::fromStdString(categoryToString(category)), productPages, categoriesKey, ElaIconType::Shirt);
+        addPageNode(QString::fromStdString(categoryToString(category)), &productCategoryPages->at(category), categoriesKey, ElaIconType::Shirt);
     }
     addPageNode("Wish", wishPage, ElaIconType::Heart);
     addPageNode("Cart", cartPage, ElaIconType::CartShopping);
     addPageNode("Orders", receiptPage, ElaIconType::ClockRotateLeft);
 
-    addFooterNode("User", loginKey, 0,ElaIconType::User);
+    addFooterNode("User", profileKey, 0,ElaIconType::User);
     addFooterNode("Settings", settingsKey, 0,ElaIconType::GearComplex);
     
     addDockWidget(Qt::RightDockWidgetArea, cartWidget);
 }
 
-void MainWindow::initConnect() {
+void MainWindow::connectNavigation() {
     connect(this, &MainWindow::userInfoCardClicked, this, [=]() {
         showUserPanel();
         return;
@@ -97,41 +102,37 @@ void MainWindow::initConnect() {
             [this](ElaNavigationType::NavigationNodeType, const QString& nodeKey) {
                 if (nodeKey == productPages->property("ElaPageKey").toString()) {
                     showProductPage();
+                    return;
                 }
                 if (nodeKey == wishPage->property("ElaPageKey").toString()) {
                     showWishPage();
+                    return;
                 }
                 if (nodeKey == cartPage->property("ElaPageKey").toString()) {
                     showCartPage();
+                    return;
                 }
                 if (nodeKey == receiptPage->property("ElaPageKey").toString()) {
                     showReceiptPage();
+                    return;
                 }
                 if (nodeKey == settingsKey) {
                     return;
                 }
-                if (nodeKey == loginKey) {
-                    dialog->moveToCenter();
-                    dialog->setLoginForm();
-                    dialog->show();
+                if (nodeKey == profileKey) {
+                    showUserPanel();
                     return;
                 }
-                if (nodeKey == logoutKey) {
-                    dialog->moveToCenter();
-                    dialog->setLogoutAlert();
-                    dialog->show();
-                    return;
+                for (auto& category: Categories){
+                    if (nodeKey == productCategoryPages->at(category).property("ElaPageKey").toString()) {
+                        showProductCategoryPage(category);
+                        return;
+                    }
                 }
             }
         );
-    connect(dialog, &Dialog::rightClicked, this, [=]() {
-        event.logout();
-        setUserInfoCardTitle("Guest");
-        setUserInfoCardSubTitle("Not signed in");
-        MessageBar::Logout(this);
-    });
+    
 
-    connectPages();
 }
 
 void MainWindow::connectPages() {
@@ -145,6 +146,12 @@ void MainWindow::connectPages() {
         setUserInfoCardSubTitle(QString("Point %1\nSigned in.").arg(event.getPoint()));
         showProductPage();
         navigation(productGridPage->property("ElaPageKey").toString());
+    });
+    connect(dialog, &Dialog::rightClicked, this, [=]() {
+        event.logout();
+        setUserInfoCardTitle("Guest");
+        setUserInfoCardSubTitle("Not signed in");
+        MessageBar::Logout(this);
     });
 
     connect(productGridPage, &ProductGridPage::productSelected, this, [this](const Product& product) {
@@ -180,7 +187,7 @@ void MainWindow::showCartPage() {
 }
 
 void MainWindow::showWishPage() {
-    wishPage->setWishProducts(event.getWishAll());
+    wishPage->setWishs(event.getWishAll());
     navigation(wishPage->property("ElaPageKey").toString());
 }
 

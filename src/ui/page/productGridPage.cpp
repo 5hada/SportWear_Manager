@@ -2,7 +2,6 @@
 #include "ElaDef.h"
 #include "ElaIconButton.h"
 #include "ElaLineEdit.h"
-#include "loginPage.h"
 
 #include <ElaFlowLayout.h>
 #include <ElaPopularCard.h>
@@ -11,11 +10,15 @@
 #include <qboxlayout.h>
 #include <qdebug.h>
 
+ProductGridPage::ProductGridPage(QWidget* parent): ElaScrollPage(parent) {
+    initPage();
+    initLayout();
+}
+
 void ProductGridPage::initPage() {
     setWindowTitle("Products");
     setTitleVisible(false);
     setContentsMargins(2, 2, 0, 0);
-    initLayout();
 }
 
 void ProductGridPage::initLayout() {

@@ -9,12 +9,6 @@ class Review {
     int rating = 0;
     std::string comment;
 
-    int id_ = 0;
-    int userId_ = 0;
-    int productId_ = 0;
-    int rating_ = 0;
-    std::string comment_;
-
 public:
     Review() = default;
     Review(int id, int userId, int productId, int rating, std::string comment);

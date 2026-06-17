@@ -1,10 +1,14 @@
 
-#include"dialog.h"
-#include<ElaPushButton.h>
-#include<QVBoxLayout>
-#include<QHBoxLayout>
-#include<ElaText.h>
+#include "dialog.h"
+#include <ElaPushButton.h>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <ElaText.h>
 
+Dialog::Dialog(QWidget* parent): ElaDialog(parent) {
+    callback = DialogCallback::Unknown;
+    initLayout();
+}
 
 void Dialog::initLayout() {
     resize(400,200);

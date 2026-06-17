@@ -1,13 +1,22 @@
 
 #include "ElaDialog.h"
+#include <functional>
 
 class ElaText;
 class ElaPushButton;
 
+enum class DialogCallback {
+    Signup,
+    Login,
+    Logout,
+    Unknown
+};
 
 
 class Dialog: public ElaDialog {
     Q_OBJECT
+
+    DialogCallback callback;
 
     ElaText* title;
     ElaText* desc;
@@ -15,6 +24,8 @@ class Dialog: public ElaDialog {
 
     ElaPushButton* leftButton{nullptr};
     ElaPushButton* rightButton{nullptr};
+
+    std::function<void()> onConfirm;
 
     void initLayout();
     void setTitle(std::string title);
@@ -24,7 +35,7 @@ class Dialog: public ElaDialog {
     void setRightButtonText(std::string text);
 
 public:
-    Dialog(QWidget* parent = nullptr) {initLayout();}
+    Dialog(QWidget* parent = nullptr);
 
     void setPanel();
     void setUserPanel();

@@ -6,9 +6,7 @@
 #include <QStandardItemModel>
 #include <QVBoxLayout>
 
-WishPage::WishPage(QWidget* parent)
-    : ElaScrollPage(parent)
-{
+WishPage::WishPage(QWidget* parent): ElaScrollPage(parent) {
     setWindowTitle("Wish List");
     setTitleVisible(false);
     setContentsMargins(2, 2, 0, 0);
@@ -53,19 +51,10 @@ WishPage::WishPage(QWidget* parent)
     rebuildRows();
 }
 
-WishPage::~WishPage() = default;
-
-void WishPage::setWishProducts(std::vector<Product> products)
-{
-    wishProducts = std::move(products);
-    rebuildRows();
-}
-
-void WishPage::rebuildRows()
-{
+void WishPage::rebuildRows() {
     model->removeRows(0, model->rowCount());
 
-    for (const auto& product : wishProducts) {
+    for (const auto& product : wishs) {
         QList<QStandardItem*> row;
         row << new QStandardItem(QString::number(product.getId()));
         row << new QStandardItem(product.getName().empty() ? "Sample Product" : QString::fromStdString(product.getName()));

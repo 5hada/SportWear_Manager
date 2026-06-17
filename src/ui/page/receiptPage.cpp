@@ -5,9 +5,7 @@
 #include <ElaText.h>
 #include <QVBoxLayout>
 
-ReceiptPage::ReceiptPage(QWidget* parent)
-    : ElaScrollPage(parent)
-{
+ReceiptPage::ReceiptPage(QWidget* parent): ElaScrollPage(parent) {
     setWindowTitle("Receipts");
     setTitleVisible(false);
     setContentsMargins(2, 2, 0, 0);
@@ -37,16 +35,12 @@ ReceiptPage::ReceiptPage(QWidget* parent)
     addCentralWidget(centralWidget, true, false, 0);
 }
 
-ReceiptPage::~ReceiptPage() = default;
-
-void ReceiptPage::setReceipts(std::vector<Receipt> receipts)
-{
+void ReceiptPage::setReceipts(Receipts receipts) {
     this->receipts = std::move(receipts);
     rebuildReceipts();
 }
 
-void ReceiptPage::rebuildReceipts()
-{
+void ReceiptPage::rebuildReceipts() {
     while (auto* item = receiptLayout->takeAt(0)) {
         if (auto* widget = item->widget()) {
             widget->deleteLater();
@@ -59,8 +53,7 @@ void ReceiptPage::rebuildReceipts()
     }
 }
 
-void ReceiptPage::addReceiptCard(const Receipt& receipt)
-{
+void ReceiptPage::addReceiptCard(const Receipt& receipt) {
     auto* receiptCard = new ElaPopularCard(this);
     receiptCard->setTitle(QString("Receipt #%1").arg(receipt.getId()));
     receiptCard->setSubTitle(QString("Paid %1 / Point %2").arg(receipt.getPaid()).arg(receipt.getPoints()));
