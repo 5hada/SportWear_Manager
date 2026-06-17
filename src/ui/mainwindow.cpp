@@ -105,19 +105,20 @@ void MainWindow::connectNavigation() {
     connect(this, &ElaWindow::navigationNodeClicked, this,
             [this](ElaNavigationType::NavigationNodeType, const QString& nodeKey) {
                 if (nodeKey == productPages->property("ElaPageKey").toString()) {
-                    showProductPage();
+                    productGridPage->setProducts(event.getAll());
+                    productPages->setCurrentWidget(productGridPage);
                     return;
                 }
                 if (nodeKey == wishPage->property("ElaPageKey").toString()) {
-                    showWishPage();
+                    wishPage->setWishs(event.getWishAll());
                     return;
                 }
                 if (nodeKey == cartPage->property("ElaPageKey").toString()) {
-                    showCartPage();
+                    cartWidget->setCart(event.getCart());
                     return;
                 }
                 if (nodeKey == receiptPage->property("ElaPageKey").toString()) {
-                    showReceiptPage();
+                    receiptPage->setReceipts(event.getReceipts());
                     return;
                 }
                 if (nodeKey == settingsKey) {
@@ -199,7 +200,8 @@ void MainWindow::connectPages() {
 
 void MainWindow::showProductPage() {
     productGridPage->setProducts(event.getAll());
-    navigation(productGridPage->property("ElapageKey").toString());
+    productPages->setCurrentWidget(productGridPage);
+    navigation(productPages->property("ElaPageKey").toString());
 }
 
 void MainWindow::showProductCategoryPage(Category category) {
@@ -212,7 +214,8 @@ void MainWindow::showDetailPage(int productId) {
 }
 
 void MainWindow::showCartPage() {
-    
+    cartWidget->setCart(event.getCart());
+    navigation(cartPage->property("ElaPageKey").toString());
 }
 
 void MainWindow::showWishPage() {

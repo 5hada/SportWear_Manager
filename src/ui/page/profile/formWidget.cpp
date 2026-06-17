@@ -31,8 +31,10 @@ void FormWidget::initLayout() {
     textLayout->addWidget(desc);
 
     auto* editLayout = new QVBoxLayout();
+    editLayout->addWidget(topEditText);
     editLayout->addWidget(topEdit);
     editLayout->addSpacing(10);
+    editLayout->addWidget(bottomEditText);
     editLayout->addWidget(bottomEdit);
 
     auto* buttonLayout = new QHBoxLayout();
@@ -74,4 +76,6 @@ void FormWidget::setEditText(string topEditText, string bottomEditText) {
 void FormWidget::setButtonText(string leftButtonText, string rightButtonText) {
     this->leftButtonText->setText(leftButtonText.c_str());
     this->rightButtonText->setText(rightButtonText.c_str());
+    leftButton->setText(leftButtonText.c_str());
+    rightButton->setText(rightButtonText.c_str());
 }

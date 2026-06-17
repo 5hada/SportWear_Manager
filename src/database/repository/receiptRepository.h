@@ -1,6 +1,7 @@
 #include "repositoryBase.h"
 #include "model/product/receipt.h"
 #include <vector>
+#include <optional>
 
 class DataBaseManager;
 
@@ -10,7 +11,7 @@ public:
     ReceiptRepository(DatabaseManager* db):RepositoryBase(db) {}
 
     std::vector<Receipt> findByUser(int userId) const;
-    Receipt findById(int id) const;
+    std::optional<Receipt> findById(int id) const;
 
     int insert(Receipt& receipt);
     bool update(Receipt& receipt);

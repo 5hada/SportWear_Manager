@@ -58,5 +58,5 @@ bool ProductService::isExist(const Product& product) {
 }
 
 bool ProductService::isExist(int id) {
-    return getOptById(id) == std::nullopt;
+    return getOptById(id) != std::nullopt;
 }

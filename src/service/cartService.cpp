@@ -1,6 +1,7 @@
 #include "cartService.h"
 #include "database/repository/cartRepository.h"
 #include "database/repository/productRepository.h"
+#include "model/product/cart.h"
 #include "model/product/cartAction.h"
 #include <optional>
 
@@ -18,7 +19,13 @@ Cart CartService::getCart(int userId) const {
 
 bool CartService::add(int userId, int productId, int count, std::optional<bool> isSelected) {
     if (count <= 0 || !checkProductExist(productId)) {return false;}
-    int newCount = cartRepo->findByProduct(userId, productId).getCount() + count;
+
+    CartItem existingItem = cartRepo->findByProduct(userId, productId);
+    if (existingItem.getId() < 0) {
+        return cartRepo->insert(userId, productId, count, isSelected.value_or(true));
+    }
+
+    int newCount = existingItem.getCount() + count;
     if(isSelected == std::nullopt){
         return cartRepo->updateCount(userId, productId, newCount);
     }
@@ -27,7 +34,13 @@ bool CartService::add(int userId, int productId, int count, std::optional<bool> 
 
 bool CartService::sub(int userId, int productId, int count, std::optional<bool> isSelected){
     if (count <= 0 || !checkProductExist(productId)) {return false;}
-    int newCount = cartRepo->findByProduct(userId, productId).getCount() - count;
+    CartItem existingItem = cartRepo->findByProduct(userId, productId);
+    if (existingItem.getId() < 0) {return false;}
+
+    int newCount = existingItem.getCount() - count;
+    if (newCount <= 0) {
+        return cartRepo->remove(userId, productId);
+    }
     if(isSelected == std::nullopt){
         return cartRepo->updateCount(userId, productId, newCount);
     }

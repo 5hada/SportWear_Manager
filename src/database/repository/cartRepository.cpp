@@ -1,4 +1,5 @@
 #include "cartRepository.h"
+#include "sqlite3.h"
 
 Cart CartRepository::findByUser(int userId) const {
     Cart cart;
@@ -31,7 +32,9 @@ CartItem CartRepository::findByProduct(int userId, int productId) const {
     if (sqlOk(sql, statement)) {
         sqlite3_bind_int(statement, 1, userId);
         sqlite3_bind_int(statement, 2, productId);
-        item = cartItemFromStatement(statement);
+        if (sqlite3_step(statement) == SQLITE_ROW){
+            item = cartItemFromStatement(statement);
+        }
         sqlite3_finalize(statement);
     }
     return item;

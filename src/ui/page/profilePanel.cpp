@@ -7,6 +7,7 @@
 
 #include <QStackedWidget>
 #include <QString>
+#include <QVBoxLayout>
 
 ProfilePanel::ProfilePanel(QWidget* parent): ElaDialog(parent) {
     initPanel();
@@ -22,11 +23,11 @@ void ProfilePanel::initPanel() {
 }
 
 void ProfilePanel::initLayout() {
-    layouts = new QStackedWidget();
-    userPanel = new UserPanel();
-    signupPanel = new SignupPanel();
-    loginPanel = new LoginPanel();
-    logoutPanel = new LogoutPanel();
+    layouts = new QStackedWidget(this);
+    userPanel = new UserPanel(this);
+    signupPanel = new SignupPanel(this);
+    loginPanel = new LoginPanel(this);
+    logoutPanel = new LogoutPanel(this);
 
     layouts->addWidget(userPanel);
     layouts->addWidget(signupPanel);
@@ -34,17 +35,19 @@ void ProfilePanel::initLayout() {
     layouts->addWidget(logoutPanel);
     layouts->setCurrentWidget(userPanel);
 
-    layouts->currentWidget();
+    auto* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->addWidget(layouts);
 }
 
 void ProfilePanel::show(UserRole role) {
     switch (role) {
         case UserRole::Admin:
-            return ;
-            
+            break;
         case UserRole::Guest:
+            break;
         case UserRole::User:
-        return;
+            break;
     }
 }
 

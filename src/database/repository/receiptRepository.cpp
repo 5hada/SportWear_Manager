@@ -23,8 +23,8 @@ std::vector<Receipt> ReceiptRepository::findByUser(int userId) const{
     return receipts;
 }
 
-Receipt ReceiptRepository::findById(int id) const{
-    Receipt receipt;
+std::optional<Receipt> ReceiptRepository::findById(int id) const{
+    std::optional<Receipt> receipt = std::nullopt;
     if (hasDatabase()) {
         constexpr auto sql =
             "SELECT id, user_id, used_point, total_price, ordered_at, is_canceled, canceled_at "

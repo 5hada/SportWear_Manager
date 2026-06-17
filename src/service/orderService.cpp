@@ -7,6 +7,7 @@
 #include "database/repository/orderRepository.h"
 #include "database/repository/cartRepository.h"
 #include "database/repository/productRepository.h"
+#include <optional>
 
 Receipts OrderService::getReceipts(int userId) {
     return receiptRepo->findByUser(userId);
@@ -46,7 +47,9 @@ bool OrderService::confirmOrder(int userId, int usedPoint){
 }
 
 bool OrderService::refund(int id){
-    Receipt receipt = receiptRepo->findById(id);
+    std::optional<Receipt> receipt_ = receiptRepo->findById(id);
+    if (receipt_ == std::nullopt) {return false;}
+    Receipt receipt = receipt_.value();
     receipt.setIsCanceled(true);
     if (receiptRepo->update(receipt)){
         return pointService->revert(receipt.getUserId(), receipt.getPoints(), receipt.getPaid());
