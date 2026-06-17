@@ -26,7 +26,7 @@ class MainWindow : public ElaWindow{
 
     QStackedWidget* productPages{nullptr};
     ProductGridPage* productGridPage{nullptr};
-    std::map<Category,ProductGridPage>* productCategoryPages{nullptr};
+    std::map<Category,ProductGridPage*> productCategoryPages;
     ProductDetailPage* productDetailPage{nullptr};
     ProfilePanel* profilePanel{nullptr};
     OrderPanel* orderPanel{nullptr};

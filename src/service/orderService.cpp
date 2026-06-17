@@ -8,6 +8,10 @@
 #include "database/repository/cartRepository.h"
 #include "database/repository/productRepository.h"
 
+Receipts OrderService::getReceipts(int userId) {
+    return receiptRepo->findByUser(userId);
+}
+
 
 Order& OrderService::makeOrder(int userId){
     clear();

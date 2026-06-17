@@ -11,3 +11,7 @@ void LoginPanel::initLayout() {
     setEditText("ID", "Password");
     setButtonText("Cancel", "Submit");
 }
+
+void LoginPanel::initConnect() {
+    
+}

@@ -6,6 +6,7 @@
 #include "profile/logoutPanel.h"
 
 #include <QStackedWidget>
+#include <QString>
 
 ProfilePanel::ProfilePanel(QWidget* parent): ElaDialog(parent) {
     initPanel();

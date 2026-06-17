@@ -6,6 +6,7 @@
 #include "app/eventHandler.h"
 
 #include "model/product/cartAction.h"
+#include "model/product/category.h"
 #include "model/product/product.h"
 #include "page/productDetailPage.h"
 #include "page/productGridPage.h"
@@ -54,7 +55,7 @@ void MainWindow::initContent() {
     productPages = new QStackedWidget(this);
     productGridPage = new ProductGridPage(this);
     for (auto& category: Categories){
-        productCategoryPages->insert_or_assign(category, ProductGridPage(this));
+        productCategoryPages.try_emplace(category, new ProductGridPage(this));
     }
     productDetailPage = new ProductDetailPage(this);
     profilePanel = new ProfilePanel(this);
@@ -83,7 +84,7 @@ void MainWindow::initContent() {
     addPageNode("Products", productPages, ElaIconType::Shirt);
     addExpanderNode("Categories", categoriesKey, ElaIconType::GridRound2);
     for (auto& category: Categories){
-        addPageNode(QString::fromStdString(categoryToString(category)), &productCategoryPages->at(category), categoriesKey, ElaIconType::Shirt);
+        addPageNode(QString::fromStdString(categoryToString(category)), productCategoryPages.at(category), categoriesKey, ElaIconType::Shirt);
     }
     addPageNode("Wish", wishPage, ElaIconType::Heart);
     addPageNode("Cart", cartPage, ElaIconType::CartShopping);
@@ -128,7 +129,7 @@ void MainWindow::connectNavigation() {
                     return;
                 }
                 for (auto& category: Categories){
-                    if (nodeKey == productCategoryPages->at(category).property("ElaPageKey").toString()) {
+                    if (nodeKey == productCategoryPages.at(category)->property("ElaPageKey").toString()) {
                         showProductCategoryPage(category);
                         return;
                     }
@@ -199,6 +200,10 @@ void MainWindow::connectPages() {
 void MainWindow::showProductPage() {
     productGridPage->setProducts(event.getAll());
     navigation(productGridPage->property("ElapageKey").toString());
+}
+
+void MainWindow::showProductCategoryPage(Category category) {
+    
 }
 
 void MainWindow::showDetailPage(int productId) {

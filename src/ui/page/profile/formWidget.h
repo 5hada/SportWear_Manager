@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QWidget>
+#include <qtmetamacros.h>
 
 using std::string;
 
@@ -9,6 +10,8 @@ class ElaPushButton;
 class ElaText;
 
 class FormWidget: public QWidget {
+    Q_OBJECT
+    
     ElaLineEdit* topEdit;
     ElaLineEdit* bottomEdit;
     ElaPushButton* leftButton;
@@ -31,6 +34,6 @@ public:
     void setButtonText(string leftButtonText, string rightButtonText);
 
 Q_SIGNALS:
-    bool leftButtonClicked();
-    bool rightButtonClicked(string topInput, string bottomInput);
+    void leftButtonClicked();
+    void rightButtonClicked(string topInput, string bottomInput);
 };

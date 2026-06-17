@@ -7,7 +7,7 @@
 class ElaFlowLayout;
 class QHBoxLayout;
 
-class ProductGridPage : public ElaScrollPage {
+class ProductGridPage: public ElaScrollPage {
     Q_OBJECT
 
     Products products;

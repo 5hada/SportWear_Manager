@@ -4,6 +4,8 @@
 
 using std::string;
 
+class QString;
+
 class QStackedWidget;
 class UserPanel;
 class SignupPanel;
@@ -32,7 +34,7 @@ public:
     void show(UserRole role);
      
 Q_SIGNALS:
-    void trySignup(string name, string password);
-    void tryLogin(string name, string password);
+    void trySignup(const QString& name, const QString& password);
+    void tryLogin(const QString& name, const QString& password);
     void tryLogout();
 };
