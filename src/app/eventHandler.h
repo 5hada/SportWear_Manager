@@ -21,19 +21,22 @@ public:
 
 
     string getUserInfo();
+    string getName();
+    int getPoint();
+    Cart getCart();
+    Order& getOrder(int productId = -1);
+    Products getAll();
+    Products getCategory(Category category);
+    Products getWishAll();
+    Product getProduct(int productId);
+    Receipts getReceipts();
 
 
     bool signup(string name, string password);
     bool login(string name, string password);
     bool logout();
     bool isLoggedIn();
-
-    string getName();
-    int getPoint();
-
-
-
-    Cart getCart();
+    
     bool handleCart(
         CartAction action,
         int productId = 0,
@@ -41,23 +44,20 @@ public:
         std::optional<bool> isSelected = std::nullopt
     );
 
-
-
-
     bool makeOrder(int productId = -1);
-    Order& getOrder(int productId = -1);
     bool confirmOrder(int usedPoint = 0);
-
-    Receipts getReceipts();
     bool refund(int receiptId);
-
-
-
-
-    Products getAll();
-    Products getCategory(Category category);
-    Products getWishAll();
-    Product getProduct(int productId);
-
     bool setWish(int productId);
 };
+
+
+
+
+
+
+
+
+
+
+
+

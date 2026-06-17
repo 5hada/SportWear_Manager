@@ -19,7 +19,7 @@ bool EventHandler::logout() {
 }
 
 bool EventHandler::isLoggedIn() {
-    return service.account.loggedIn();
+    return service.account.isLoggedIn();
 }
 
 string EventHandler::getName() {

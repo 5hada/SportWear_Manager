@@ -12,13 +12,17 @@ class User : public UserBase {
     int point = 0;
 
 public:
+    User();
     User(int id, std::string name, std::string password, int point = 0);
     User(std::string name, std::string password, int point = 0);
+    
+    bool isGuest();
+    void init();
 
     int getPoint() const {return point;}
-    void setPoint(int point) {this->point = point;}
+    bool setPoint(int point);
 
-    void addPoint(int point);
+    bool addPoint(int point);
     bool usePoint(int point);
     bool subPoint(int point);
 };

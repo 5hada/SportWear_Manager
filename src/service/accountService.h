@@ -1,18 +1,16 @@
 
-#include "model/user/guest.h"
-#include "model/user/userBase.h"
+#include "model/user/user.h"
 
 class UserRepository;
 
 class AccountService {
     UserRepository* userRepo{nullptr};
 
-    bool isLoggedIn = false;
-    UserBase currentUser;
-    Guest guest;
+    User currentUser;
 
+    void getUser();
 public:
-    AccountService(UserRepository* userRepo): userRepo(userRepo) {currentUser = guest;}
+    AccountService(UserRepository* userRepo): userRepo(userRepo) {}
 
     int getUserId() const {return currentUser.getId();}
     const std::string getUserName() const {return currentUser.getName();}
@@ -23,5 +21,5 @@ public:
     bool logout();
     bool signup(const std::string& name, const std::string& password);
 
-    bool loggedIn() {return isLoggedIn;}
+    bool isLoggedIn();
 };

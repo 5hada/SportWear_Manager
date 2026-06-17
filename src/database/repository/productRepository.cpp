@@ -89,7 +89,7 @@ bool ProductRepository::remove(int id) {
 
 Product ProductRepository::productFromStatement(sqlite3_stmt* statement) {
     Product product(
-        ProductItem{sqlite3_column_int(statement, 0), sqlite3_column_int(statement, 4), sqlite3_column_int(statement, 3)},
+        Item{sqlite3_column_int(statement, 0), sqlite3_column_int(statement, 4), sqlite3_column_int(statement, 3)},
         columnText(statement, 1),
         categoryFromString(columnText(statement, 2)));
     product.setDetail(columnText(statement, 5));
