@@ -23,7 +23,7 @@ bool ProductService::add(const Product& product) {
     return false;
 }
 
-bool ProductService::setPrice(int productId, int price) {
+bool ProductService::setPrice(int productId, long long price) {
     if (isExist(productId)) {
         Product product(getById(productId));
         product.setPrice(price);

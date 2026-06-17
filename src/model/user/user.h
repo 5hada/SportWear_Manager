@@ -9,12 +9,12 @@ enum class UserRole {
 };
 class User : public UserBase {
     UserRole role;
-    int point = 0;
+    long long point = 0;
 
 public:
     User();
-    User(int id, std::string name, std::string password, int point = 0);
-    User(std::string name, std::string password, int point = 0);
+    User(int id, std::string name, std::string password, long long point = 0);
+    User(std::string name, std::string password, long long point = 0);
     
     bool isGuest();
     void init();
@@ -22,10 +22,10 @@ public:
     UserRole getRole() const {return role;}
     void setRole(UserRole role) {this->role = role;}
 
-    int getPoint() const {return point;}
-    bool setPoint(int point);
+    long long getPoint() const {return point;}
+    bool setPoint(long long point);
 
-    bool addPoint(int point);
-    bool usePoint(int point);
-    bool subPoint(int point);
+    bool addPoint(long long point);
+    bool usePoint(long long point);
+    bool subPoint(long long point);
 };

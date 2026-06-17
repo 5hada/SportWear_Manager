@@ -37,10 +37,10 @@ public:
 
     bool makeListOrder(int userId);
     bool makeInstantOrder(int productId);
-    Order& getOrder();
-    Order& getClear();
+    Order getOrder();
+    Order getClear();
 
-    bool confirmOrder(int userId, int userPoint);
+    bool confirmOrder(int userId, long long userPoint);
     bool refund(int id, int userId);
 
     void clear();

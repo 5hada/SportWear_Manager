@@ -24,7 +24,8 @@ Receipts OrderService::getReceipts(int userId) {
 bool OrderService::makeListOrder(int userId) {
     clear();
     currentOrder.setUserId(userId);
-    int id, price;
+    int id;
+    long long price;
     for(auto& item: cartRepo->findByUser(userId).getItems()){
         if(item.selected()){
             id = item.getId();
@@ -46,18 +47,18 @@ bool OrderService::makeInstantOrder(int productId) {
     return true;
 }
 
-Order& OrderService::getOrder() {
+Order OrderService::getOrder() {
     return currentOrder;
 }
 
-Order& OrderService::getClear() {
+Order OrderService::getClear() {
     currentOrder.clear();
     return currentOrder;
 }
 
-bool OrderService::confirmOrder(int userId, int usedPoint) {
+bool OrderService::confirmOrder(int userId, long long usedPoint) {
     if(currentOrder.getUserId() != userId){return false;}
-    int totalPrice = currentOrder.getTotalPrice();
+    long long totalPrice = currentOrder.getTotalPrice();
     auto& items = currentOrder.getItems();
     Receipt newReceipt(userId, items, usedPoint, totalPrice);
     int receiptId = -1;

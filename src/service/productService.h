@@ -17,5 +17,5 @@ public:
 
     bool add(const Product &product);
     bool setStock(int productId, int stock);
-    bool setPrice(int productId, int price);
+    bool setPrice(int productId, long long price);
 };

@@ -19,6 +19,6 @@ public:
     // bool removeItem(int productId);
     // void clear();
 
-    int getTotalPrice() const;
+    long long getTotalPrice() const;
     int getTotalCount() const;
 };

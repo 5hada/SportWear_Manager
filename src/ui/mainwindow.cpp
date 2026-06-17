@@ -265,7 +265,7 @@ void MainWindow::connectPages() {
         refreshCart();
     });
 
-    connect(orderPanel, &OrderPanel::confirmRequested, this, [this](int usedPoint) {
+    connect(orderPanel, &OrderPanel::confirmRequested, this, [this](long long usedPoint) {
         if (!event.confirmOrder(usedPoint)) {
             MessageBar::Fail(this);
             return;

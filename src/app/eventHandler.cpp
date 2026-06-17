@@ -52,7 +52,7 @@ Order EventHandler::getOrder(int productId) {
     }
     return service.order.getClear();
 }
-bool EventHandler::confirmOrder(int usedPoint) {
+bool EventHandler::confirmOrder(long long usedPoint) {
     return service.order.confirmOrder(userId(), usedPoint);
 }
 

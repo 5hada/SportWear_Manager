@@ -63,7 +63,7 @@ bool UserRepository::insert(const User& user) {
     }
     sqlBindText(statement, 1, user.getName());
     sqlBindText(statement, 2, user.getPassword());
-    sqlite3_bind_int(statement, 3, user.getPoint());
+    sqlite3_bind_int64(statement, 3, user.getPoint());
     return sqlFin(statement);
 }
 
@@ -78,7 +78,7 @@ bool UserRepository::updatePoint(const User& user) {
     if (!sqlOk(sql, statement)) {
         return false;
     }
-    sqlite3_bind_int(statement, 1, user.getPoint());
+    sqlite3_bind_int64(statement, 1, user.getPoint());
     sqlite3_bind_int(statement, 2, user.getId());
     return sqlFin(statement);
 }
@@ -88,5 +88,5 @@ User UserRepository::userFromStatement(sqlite3_stmt* statement) {
         sqlite3_column_int(statement, 0),
         columnText(statement, 1),
         columnText(statement, 2),
-        sqlite3_column_int(statement, 3));
+        sqlite3_column_int64(statement, 3));
 }

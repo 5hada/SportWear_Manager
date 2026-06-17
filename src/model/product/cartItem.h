@@ -18,6 +18,6 @@ public:
 
     bool selected(){return isSelected;}
 
-    void setPrice(int price){Item::setPrice(price);}
+    void setPrice(long long price){Item::setPrice(price);}
     void setSelected(bool isSelected){this->isSelected = isSelected;}
 };

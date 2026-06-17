@@ -4,8 +4,8 @@ Receipt::Receipt(
     int id,
     int userId, 
     Items items,
-    int points,
-    int paid,
+    long long points,
+    long long paid,
     std::string date,
     bool isCanceled,
     std::string canceledAt
@@ -22,8 +22,8 @@ Receipt::Receipt(
 Receipt::Receipt(
     int userId, 
     Items items,
-    int points,
-    int paid
+    long long points,
+    long long paid
 ):
     userId(userId),
     items(items),
@@ -36,8 +36,8 @@ void Receipt::setData(
     int id,
     int userId,
     Items items,
-    int points,
-    int paid,
+    long long points,
+    long long paid,
     std::string date,
     bool isCanceled,
     std::string canceledAt

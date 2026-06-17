@@ -25,13 +25,13 @@ public:
     const string& getName() const {return name;}
     const string& getDetail() const {return detail;}
     Category getCategory() const {return category;}
-    int getPrice() const {return item.price;}
+    long long getPrice() const {return item.price;}
     int getStock() const {return item.count;}
 
     void setName(string name) {this->name = name;}
     void setDetail(string detail) {this->detail = detail;}
     void setCategory(Category category) {this->category = category;}
-    void setPrice(int price) {this->item.price = price;}
+    void setPrice(long long price) {this->item.price = price;}
     void setStock(int stock) {this->item.count = stock;}
 
     bool hasStock(int count) const;
