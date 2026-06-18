@@ -1,5 +1,6 @@
 #include "productService.h"
 #include <optional>
+#include <vector>
 
 
 Products ProductService::getAll() const {
@@ -7,6 +8,16 @@ Products ProductService::getAll() const {
         return {};
     }
     return productRepo->findAll();
+}
+
+Products ProductService::getByCategory(Category category) const {
+    Products products;
+    for (const auto& product : getAll()) {
+        if (category == Category::Unknown || product.getCategory() == category) {
+            products.emplace_back(product);
+        }
+    }
+    return products;
 }
 
 Product ProductService::getById(int id) const {
@@ -23,7 +34,7 @@ bool ProductService::add(const Product& product) {
     return false;
 }
 
-bool ProductService::setPrice(int productId, long long price) {
+bool ProductService::setPrice(int productId, int price) {
     if (isExist(productId)) {
         Product product(getById(productId));
         product.setPrice(price);

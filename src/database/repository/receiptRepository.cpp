@@ -58,8 +58,8 @@ int ReceiptRepository::insert(Receipt& receipt) {
     int receiptId = -1;
     if (sqlOk(sql, statement)) {
         sqlite3_bind_int(statement, 1, receipt.getUserId());
-        sqlite3_bind_int64(statement, 2, receipt.getPoints());
-        sqlite3_bind_int64(statement, 3, receipt.getPaid());
+        sqlite3_bind_int(statement, 2, receipt.getPoints());
+        sqlite3_bind_int(statement, 3, receipt.getPaid());
 
         if (sqlite3_step(statement) == SQLITE_DONE) {
             receiptId = static_cast<int>(
@@ -98,8 +98,8 @@ Receipt ReceiptRepository::receiptFromStatement(sqlite3_stmt* statement) {
         sqlite3_column_int(statement, 0),
         sqlite3_column_int(statement, 1),
         {},
-        sqlite3_column_int64(statement, 2),
-        sqlite3_column_int64(statement, 3),
+        sqlite3_column_int(statement, 2),
+        sqlite3_column_int(statement, 3),
         columnText(statement, 4),
         sqlite3_column_int(statement, 5),
         columnText(statement, 6));

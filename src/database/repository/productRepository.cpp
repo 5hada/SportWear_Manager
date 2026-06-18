@@ -47,7 +47,7 @@ bool ProductRepository::insert(const Product& product) {
         sqlBindText(statement, 1, product.getName());
         const auto category = categoryToString(product.getCategory());
         sqlBindText(statement, 2, category);
-        sqlite3_bind_int64(statement, 3, product.getPrice());
+        sqlite3_bind_int(statement, 3, product.getPrice());
         sqlite3_bind_int(statement, 4, product.getStock());
         sqlBindText(statement, 5, product.getDetail());
         return sqlFin(statement);
@@ -66,7 +66,7 @@ bool ProductRepository::update(const Product& product) {
         sqlBindText(statement, 1, product.getName());
         const auto category = categoryToString(product.getCategory());
         sqlBindText(statement, 2, category);
-        sqlite3_bind_int64(statement, 3, product.getPrice());
+        sqlite3_bind_int(statement, 3, product.getPrice());
         sqlite3_bind_int(statement, 4, product.getStock());
         sqlBindText(statement, 5, product.getDetail());
         sqlite3_bind_int(statement, 6, product.getId());
@@ -89,7 +89,7 @@ bool ProductRepository::remove(int id) {
 
 Product ProductRepository::productFromStatement(sqlite3_stmt* statement) {
     Product product(
-        Item{sqlite3_column_int(statement, 0), sqlite3_column_int(statement, 4), sqlite3_column_int64(statement, 3)},
+        Item{sqlite3_column_int(statement, 0), sqlite3_column_int(statement, 4), sqlite3_column_int(statement, 3)},
         columnText(statement, 1),
         categoryFromString(columnText(statement, 2)));
     product.setDetail(columnText(statement, 5));

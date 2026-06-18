@@ -16,6 +16,7 @@ class OrderService{
     PointService* pointService{nullptr};
 
     Order currentOrder;
+    bool currentOrderFromCart{false};
 
 public:
     OrderService(
@@ -36,11 +37,11 @@ public:
     Receipts getReceipts(int userId);
 
     bool makeListOrder(int userId);
-    bool makeInstantOrder(int productId);
+    bool makeInstantOrder(int userId, int productId);
     Order getOrder();
     Order getClear();
 
-    bool confirmOrder(int userId, long long userPoint);
+    bool confirmOrder(int userId, int userPoint);
     bool refund(int id, int userId);
 
     void clear();

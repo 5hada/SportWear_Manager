@@ -22,6 +22,6 @@ public:
     void setOrder(Order order);
 
 Q_SIGNALS:
-    void confirmRequested(long long usedPoint);
+    void confirmRequested(int usedPoint);
     void cancelRequested();
 };

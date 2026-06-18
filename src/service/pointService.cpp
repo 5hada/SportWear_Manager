@@ -4,11 +4,11 @@
 
 
 
-long long PointService::getPoint(int userId){
+int PointService::getPoint(int userId){
     return userRepo->findById(userId)->getPoint();
 }
 
-bool PointService::handlePoint(PointAction action, int userId, long long point){
+bool PointService::handlePoint(PointAction action, int userId, int point){
     std::optional<User> user = userRepo->findById(userId);
     if (user == std::nullopt) {return false;}
     switch (action){
@@ -28,17 +28,17 @@ bool PointService::handlePoint(PointAction action, int userId, long long point){
     return userRepo->updatePoint(user.value());
 }
 
-bool PointService::reward(int userId, long long totalPrice){
+bool PointService::reward(int userId, int totalPrice){
     if(userId <= 1) {return false;}
     std::optional<User> user = userRepo->findById(userId);
     user->addPoint(calPoint(totalPrice));
     return userRepo->updatePoint(user.value());
 }
 
-bool PointService::revert(int userId, long long usedPoint, long long totalPrice){
+bool PointService::revert(int userId, int usedPoint, int totalPrice){
     if(userId <= 1) {return false;}
     std::optional<User> user = userRepo->findById(userId);
-    long long value = usedPoint - calPoint(totalPrice);
+    int value = usedPoint - calPoint(totalPrice);
     if (value > 0){
         user->addPoint(value);
     }
@@ -48,6 +48,7 @@ bool PointService::revert(int userId, long long usedPoint, long long totalPrice)
     return userRepo->updatePoint(user.value());
 }
 
-long long PointService::calPoint(long long price){
-    return price * 5 / 100;
+int PointService::calPoint(int price){
+    float rate = 5;
+    return price*(rate/100);
 }

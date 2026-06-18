@@ -1,21 +1,28 @@
 #pragma once
 
 #include <ElaScrollPage.h>
+#include <QString>
 
 #include "model/product/receipt.h"
 
-class ElaFlowLayout;
+class ElaTableView;
+class QStandardItemModel;
 
 class ReceiptPage: public ElaScrollPage {
     Q_OBJECT
 
     Receipts receipts;
-    ElaFlowLayout* receiptLayout{nullptr};
+    ElaTableView* receiptTable{nullptr};
+    QStandardItemModel* model{nullptr};
 
     void rebuildReceipts();
-    void addReceiptCard(const Receipt& receipt);
+    int selectedReceiptId() const;
+    static QString itemSummary(const Receipt& receipt);
 public:
     explicit ReceiptPage(QWidget* parent = nullptr);
 
     void setReceipts(Receipts receipts);
+
+Q_SIGNALS:
+    void refundRequested(int receiptId);
 };

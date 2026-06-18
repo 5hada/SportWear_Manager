@@ -30,7 +30,7 @@ public:
     Product getProduct(int productId);
 
     Order getOrder(int productId = -1);
-    bool confirmOrder(long long usedPoint = 0);
+    bool confirmOrder(int usedPoint = 0);
     
     bool refund(int receiptId);
 

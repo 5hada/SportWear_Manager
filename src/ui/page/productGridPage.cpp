@@ -62,6 +62,7 @@ void ProductGridPage::initLayout() {
     addCentralWidget(centralWidget, true, false, 0);
 
     connect(searchEdit, &ElaLineEdit::textChanged, this, [this]() {
+        currentPage = 0;
         rebuildProducts();
     });
 }
@@ -72,11 +73,11 @@ void ProductGridPage::initIndexNavigation() {
     auto* leftArrow = new ElaIconButton(ElaIconType::AngleLeft);
     leftArrow->setFixedWidth(40);
     pageIndex = new ElaText("1");
-    pageIndex->setFixedWidth(30);
+    pageIndex->setFixedWidth(70);
     pageIndex->setFixedHeight(30);
     pageIndex->setAlignment(Qt::AlignCenter);
     pageIndex->setTextPixelSize(12);
-    auto* pageIndexInput = new ElaLineEdit();
+    pageIndexInput = new ElaLineEdit();
     pageIndexInput->setFixedWidth(50);
     pageIndexInput->setFixedHeight(30);
     auto* rightArrow = new ElaIconButton(ElaIconType::AngleRight);
@@ -99,10 +100,31 @@ void ProductGridPage::initIndexNavigation() {
     indexNavigation->addWidget(rightArrow);
     indexNavigation->addWidget(rightEndArrow);
     indexNavigation->addStretch();
+
+    connect(leftEndArrow, &ElaIconButton::clicked, this, [this]() {
+        setCurrentPage(0);
+    });
+    connect(leftArrow, &ElaIconButton::clicked, this, [this]() {
+        setCurrentPage(currentPage - 1);
+    });
+    connect(rightArrow, &ElaIconButton::clicked, this, [this]() {
+        setCurrentPage(currentPage + 1);
+    });
+    connect(rightEndArrow, &ElaIconButton::clicked, this, [this]() {
+        setCurrentPage(pageCount(filteredProducts().size()) - 1);
+    });
+    connect(pageIndexInput, &ElaLineEdit::textChanged, this, [this](const QString& text) {
+        bool ok = false;
+        const int page = text.toInt(&ok);
+        if (ok) {
+            setCurrentPage(page - 1);
+        }
+    });
 }
 
 void ProductGridPage::setProducts(std::vector<Product> products) {
     this->products = std::move(products);
+    currentPage = 0;
     rebuildProducts();
 }
 
@@ -114,12 +136,24 @@ void ProductGridPage::rebuildProducts() {
         delete item;
     }
 
-    for (const auto& product : products) {
-        if (!matchesSearch(product)) {
-            continue;
-        }
-        addProductCard(product);
+    const auto filtered = filteredProducts();
+    const int totalPages = pageCount(filtered.size());
+    if (currentPage >= totalPages) {
+        currentPage = totalPages - 1;
     }
+    if (currentPage < 0) {
+        currentPage = 0;
+    }
+
+    const int begin = currentPage * PageSize;
+    const int end = begin + PageSize < static_cast<int>(filtered.size())
+        ? begin + PageSize
+        : static_cast<int>(filtered.size());
+
+    for (int index = begin; index < end; ++index) {
+        addProductCard(filtered[index]);
+    }
+    updatePageControls(totalPages);
 }
 
 bool ProductGridPage::matchesSearch(const Product& product) const {
@@ -131,6 +165,47 @@ bool ProductGridPage::matchesSearch(const Product& product) const {
     return QString::fromStdString(product.getName()).contains(query, Qt::CaseInsensitive)
         || QString::fromStdString(product.getDetail()).contains(query, Qt::CaseInsensitive)
         || QString::fromStdString(categoryToString(product.getCategory())).contains(query, Qt::CaseInsensitive);
+}
+
+Products ProductGridPage::filteredProducts() const {
+    Products filtered;
+    for (const auto& product : products) {
+        if (matchesSearch(product)) {
+            filtered.emplace_back(product);
+        }
+    }
+    return filtered;
+}
+
+int ProductGridPage::pageCount(int itemCount) const {
+    if (itemCount <= 0) {
+        return 1;
+    }
+    return (itemCount + PageSize - 1) / PageSize;
+}
+
+void ProductGridPage::setCurrentPage(int page) {
+    const int totalPages = pageCount(filteredProducts().size());
+    if (page < 0) {
+        page = 0;
+    }
+    if (page >= totalPages) {
+        page = totalPages - 1;
+    }
+    if (currentPage == page) {
+        updatePageControls(totalPages);
+        return;
+    }
+    currentPage = page;
+    rebuildProducts();
+}
+
+void ProductGridPage::updatePageControls(int totalPages) {
+    pageIndex->setText(QString("%1 / %2").arg(currentPage + 1).arg(totalPages));
+    const QString currentPageText = QString::number(currentPage + 1);
+    if (pageIndexInput->text() != currentPageText) {
+        pageIndexInput->setText(currentPageText);
+    }
 }
 
 void ProductGridPage::addProductCard(const Product& product) {

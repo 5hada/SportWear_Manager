@@ -8,6 +8,7 @@ class QStackedWidget;
 class ElaPushButton;
 
 class EventHandler;
+class Order;
 
 class ProductDetailPage;
 class ProductGridPage;
@@ -36,6 +37,8 @@ class MainWindow : public ElaWindow{
     WishPage* wishPage{nullptr};
     Dialog* dialog{nullptr};
     ElaPushButton* cartButton{nullptr};
+    bool navigatingToProductDetail{false};
+    QString detailReturnNodeKey;
 
     QString categoriesKey;
     QString settingsKey;
@@ -52,8 +55,8 @@ class MainWindow : public ElaWindow{
 
     void showProductPage();
     void showProductCategoryPage(Category category);
-    void showDetailPage(int productId);
-    void showOrderPanel();
+    void showDetailPage(int productId, const QString& returnNodeKey = QString());
+    void showOrderPanel(const Order& order);
     void showReceiptPage();
     void showCartWidget();
     void showCartPage();

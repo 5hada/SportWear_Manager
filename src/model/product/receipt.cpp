@@ -4,8 +4,8 @@ Receipt::Receipt(
     int id,
     int userId, 
     Items items,
-    long long points,
-    long long paid,
+    int points,
+    int paid,
     std::string date,
     bool isCanceled,
     std::string canceledAt
@@ -22,8 +22,8 @@ Receipt::Receipt(
 Receipt::Receipt(
     int userId, 
     Items items,
-    long long points,
-    long long paid
+    int points,
+    int paid
 ):
     userId(userId),
     items(items),
@@ -36,8 +36,8 @@ void Receipt::setData(
     int id,
     int userId,
     Items items,
-    long long points,
-    long long paid,
+    int points,
+    int paid,
     std::string date,
     bool isCanceled,
     std::string canceledAt
@@ -52,8 +52,3 @@ void Receipt::setData(
     setCanceledAt(canceledAt);
 }
 
-void Receipt::setOrderItems(Items items) const{
-    for(Item& item: items){
-        items.emplace_back(Item(item.id, item.count, item.price));
-    }
-}

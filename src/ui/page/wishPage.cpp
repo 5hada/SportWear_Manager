@@ -1,9 +1,12 @@
 #include "wishPage.h"
 
+#include <ElaPushButton.h>
 #include <ElaTableView.h>
 #include <ElaText.h>
 #include <QHeaderView>
+#include <QItemSelectionModel>
 #include <QStandardItemModel>
+#include <QHBoxLayout>
 #include <QVBoxLayout>
 
 WishPage::WishPage(QWidget* parent): ElaScrollPage(parent) {
@@ -34,6 +37,33 @@ WishPage::WishPage(QWidget* parent): ElaScrollPage(parent) {
         wishTable->setColumnWidth(1, 260);
         wishTable->setColumnWidth(2, 120);
     });
+    connect(wishTable, &ElaTableView::doubleClicked, this, [this]() {
+        const int productId = selectedProductId();
+        if (productId >= 0) {
+            Q_EMIT productSelected(productId);
+        }
+    });
+
+    auto* openButton = new ElaPushButton("Open", this);
+    auto* removeButton = new ElaPushButton("Remove", this);
+    auto* buttonLayout = new QHBoxLayout();
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(openButton);
+    buttonLayout->addSpacing(10);
+    buttonLayout->addWidget(removeButton);
+
+    connect(openButton, &ElaPushButton::clicked, this, [this]() {
+        const int productId = selectedProductId();
+        if (productId >= 0) {
+            Q_EMIT productSelected(productId);
+        }
+    });
+    connect(removeButton, &ElaPushButton::clicked, this, [this]() {
+        const int productId = selectedProductId();
+        if (productId >= 0) {
+            Q_EMIT removeRequested(productId);
+        }
+    });
 
     auto* centralWidget = new QWidget(this);
     centralWidget->setWindowTitle("Wish List");
@@ -45,9 +75,15 @@ WishPage::WishPage(QWidget* parent): ElaScrollPage(parent) {
     centerLayout->addWidget(descText);
     centerLayout->addSpacing(12);
     centerLayout->addWidget(wishTable);
+    centerLayout->addLayout(buttonLayout);
     centerLayout->addStretch();
 
     addCentralWidget(centralWidget, true, false, 0);
+    rebuildRows();
+}
+
+void WishPage::setWishs(Products wishs) {
+    this->wishs = std::move(wishs);
     rebuildRows();
 }
 
@@ -62,4 +98,19 @@ void WishPage::rebuildRows() {
         row << new QStandardItem(QString::number(product.getStock()));
         model->appendRow(row);
     }
+}
+
+int WishPage::selectedProductId() const {
+    if (wishTable == nullptr || wishTable->selectionModel() == nullptr) {
+        return -1;
+    }
+
+    const auto selectedRows = wishTable->selectionModel()->selectedRows();
+    if (selectedRows.isEmpty()) {
+        return -1;
+    }
+
+    const int row = selectedRows.first().row();
+    const auto* productIdItem = model->item(row, 0);
+    return productIdItem == nullptr ? -1 : productIdItem->text().toInt();
 }

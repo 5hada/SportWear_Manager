@@ -11,6 +11,8 @@
 
 #include <string>
 #include <filesystem>
+#include <array>
+#include <set>
 
 class RepositoryProvider {
 public:
@@ -63,25 +65,68 @@ private:
     }
 
     void seedProducts() {
-        if (!databaseReady || !product.findAll().empty()) {
+        if (!databaseReady) {
             return;
         }
 
-        Product shirt(Item{1, 30, 29000}, "Training T-Shirt", Category::Top);
-        shirt.setDetail("Breathable short-sleeve training top.");
-        product.insert(shirt);
+        constexpr int targetProductCount = 240;
+        const auto existingProducts = product.findAll();
+        if (static_cast<int>(existingProducts.size()) >= targetProductCount) {
+            return;
+        }
 
-        Product pants(Item{2, 20, 49000}, "Running Pants", Category::Bottom);
-        pants.setDetail("Lightweight pants for daily running.");
-        product.insert(pants);
+        std::set<std::string> existingNames;
+        for (const auto& existingProduct : existingProducts) {
+            existingNames.insert(existingProduct.getName());
+        }
 
-        Product shoes(Item{3, 12, 89000}, "Court Shoes", Category::Shoes);
-        shoes.setDetail("Stable court shoes for indoor sports.");
-        product.insert(shoes);
+        struct CategorySeed {
+            Category category;
+            std::array<const char*, 4> names;
+            int basePrice;
+        };
 
-        Product bag(Item{4, 18, 39000}, "Gym Bag", Category::Accessory);
-        bag.setDetail("Compact bag with separated shoe storage.");
-        product.insert(bag);
+        constexpr std::array<CategorySeed, 4> categorySeeds{{
+            {Category::Top, {"Training Tee", "Compression Top", "Running Jacket", "Yoga Tank"}, 24000},
+            {Category::Bottom, {"Running Shorts", "Training Pants", "Compression Tights", "Track Joggers"}, 32000},
+            {Category::Shoes, {"Court Shoes", "Trail Runners", "Training Sneakers", "Recovery Slides"}, 58000},
+            {Category::Accessory, {"Gym Bag", "Sports Cap", "Wrist Wraps", "Performance Socks"}, 12000},
+        }};
+        constexpr std::array<const char*, 15> variants{
+            "Essential", "Core", "Pro", "Elite", "Aero",
+            "Flex", "Dry", "Thermal", "Light", "Power",
+            "Urban", "Endurance", "Studio", "Outdoor", "Recovery"
+        };
+
+        int inserted = 0;
+        for (int index = 0;
+             static_cast<int>(existingProducts.size()) + inserted < targetProductCount
+             && index < targetProductCount * 2;
+             ++index) {
+            const auto& categorySeed = categorySeeds[index % categorySeeds.size()];
+            const int nameIndex = (index / static_cast<int>(categorySeeds.size())) % categorySeed.names.size();
+            const int variantIndex = (index / static_cast<int>(categorySeeds.size() * categorySeed.names.size())) % variants.size();
+
+            const std::string name =
+                std::string(variants[variantIndex]) + " " + categorySeed.names[nameIndex];
+            if (existingNames.find(name) != existingNames.end()) {
+                continue;
+            }
+
+            const int stock = 8 + (index * 7) % 65;
+            const int price = categorySeed.basePrice + nameIndex * 7000 + variantIndex * 1200;
+            Product seededProduct(Item{0, stock, price}, name, categorySeed.category);
+            seededProduct.setDetail(
+                "Seed product for sportwear UI testing: " +
+                categoryToString(categorySeed.category) +
+                " / " +
+                variants[variantIndex]
+            );
+            if (product.insert(seededProduct)) {
+                existingNames.insert(name);
+                ++inserted;
+            }
+        }
     }
     bool databaseReady = false;
 };

@@ -17,33 +17,51 @@ Receipts OrderService::getReceipts(int userId) {
         Receipts receipt;
         return receipt;
     }
-    return receiptRepo->findByUser(userId);
+    Receipts receipts = receiptRepo->findByUser(userId);
+    for (auto& receipt : receipts) {
+        receipt.setOrderItems(orderRepo->findById(receipt.getId()));
+    }
+    return receipts;
 }
 
 
 bool OrderService::makeListOrder(int userId) {
     clear();
     currentOrder.setUserId(userId);
+    currentOrderFromCart = true;
     int id;
-    long long price;
-    for(auto& item: cartRepo->findByUser(userId).getItems()){
+    int price;
+    Cart cart = cartRepo->findByUser(userId);
+    for(auto& item: cart.getItems()){
         if(item.selected()){
             id = item.getId();
-            price = productRepo->findById(id)->getPrice();
+            auto product = productRepo->findById(id);
+            if (!product.has_value()) {
+                clear();
+                return false;
+            }
+            price = product->getPrice();
             Item newItem(id, item.getCount(), price);
             currentOrder.addItem(newItem);
         }
+    }
+    if (currentOrder.getItems().empty()) {
+        clear();
+        return false;
     }
     currentOrder.setAvailablePoints(pointService->getPoint(userId));
     return true;
 }
 
-bool OrderService::makeInstantOrder(int productId) {
+bool OrderService::makeInstantOrder(int userId, int productId) {
     clear();
-    if (!productRepo->findById(productId)) {return false;}
-    Item instantItem(productId, 1, productRepo->findById(productId)->getPrice());
+    auto product = productRepo->findById(productId);
+    if (!product.has_value()) {return false;}
+    currentOrder.setUserId(userId);
+    currentOrderFromCart = false;
+    Item instantItem(productId, 1, product->getPrice());
     currentOrder.addItem(instantItem);
-    currentOrder.setAvailablePoints(0);
+    currentOrder.setAvailablePoints(pointService->getPoint(userId));
     return true;
 }
 
@@ -56,17 +74,36 @@ Order OrderService::getClear() {
     return currentOrder;
 }
 
-bool OrderService::confirmOrder(int userId, long long usedPoint) {
+bool OrderService::confirmOrder(int userId, int usedPoint) {
     if(currentOrder.getUserId() != userId){return false;}
-    long long totalPrice = currentOrder.getTotalPrice();
+    if(currentOrder.getItems().empty()){return false;}
+    int totalPrice = currentOrder.getTotalPrice();
     auto& items = currentOrder.getItems();
     Receipt newReceipt(userId, items, usedPoint, totalPrice);
-    int receiptId = -1;
-    receiptId = receiptRepo->insert(newReceipt);
-    if(receiptId == -1){return false;}
-    if(!orderRepo->insert(receiptId, items)){return false;}
-    if(!cartRepo->removeSelected(userId)){return false;}
-    pointService->reward(userId, totalPrice);
+
+    if (!receiptRepo->beginTransaction()) {return false;}
+
+    int receiptId = receiptRepo->insert(newReceipt);
+    if(receiptId == -1){
+        receiptRepo->rollbackTransaction();
+        return false;
+    }
+    if(!orderRepo->insert(receiptId, items)){
+        receiptRepo->rollbackTransaction();
+        return false;
+    }
+    if(currentOrderFromCart && !cartRepo->removeSelected(userId)){
+        receiptRepo->rollbackTransaction();
+        return false;
+    }
+    if(userId > 1 && !pointService->reward(userId, totalPrice)){
+        receiptRepo->rollbackTransaction();
+        return false;
+    }
+    if(!receiptRepo->commitTransaction()){
+        receiptRepo->rollbackTransaction();
+        return false;
+    }
     clear();
     return true;
 }
@@ -76,6 +113,7 @@ bool OrderService::refund(int id, int userId) {
     if (receipt_ == std::nullopt) {return false;}
     Receipt receipt = receipt_.value();
     if (receipt.getUserId() != userId) {return false;}
+    if (receipt.getIsCanceled()) {return false;}
     receipt.setIsCanceled(true);
     if (receiptRepo->update(receipt)){
         return pointService->revert(receipt.getUserId(), receipt.getPoints(), receipt.getPaid());
@@ -86,4 +124,5 @@ bool OrderService::refund(int id, int userId) {
 
 void OrderService::clear() {
     currentOrder.clear();
+    currentOrderFromCart = false;
 }

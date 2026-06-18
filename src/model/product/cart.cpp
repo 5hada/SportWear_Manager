@@ -40,8 +40,8 @@ void Cart::addItem(CartItem item) {
 //     items.clear();
 // }
 
-long long Cart::getTotalPrice() const {
-    long long total = 0;
+int Cart::getTotalPrice() const {
+    int total = 0;
     for (const auto &item : items) {
         total += (item.price*item.count);
     }

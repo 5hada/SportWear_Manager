@@ -106,6 +106,10 @@ void MainWindow::connectNavigation() {
     connect(this, &ElaWindow::navigationNodeClicked, this,
             [this](ElaNavigationType::NavigationNodeType, const QString& nodeKey) {
                 if (nodeKey == productPages->property("ElaPageKey").toString()) {
+                    if (navigatingToProductDetail) {
+                        navigatingToProductDetail = false;
+                        return;
+                    }
                     productGridPage->setProducts(event.getProducts());
                     productPages->setCurrentWidget(productGridPage);
                     return;
@@ -198,8 +202,19 @@ void MainWindow::connectPages() {
     connect(productGridPage, &ProductGridPage::productSelected, this, [this](const Product& product) {
         showDetailPage(product.getId());
     });
+    for (auto& [category, page] : productCategoryPages) {
+        connect(page, &ProductGridPage::productSelected, this, [this, page](const Product& product) {
+            showDetailPage(product.getId(), page->property("ElaPageKey").toString());
+        });
+    }
 
     connect(productDetailPage, &ProductDetailPage::backRequested, this, [this]() {
+        if (!detailReturnNodeKey.isEmpty()) {
+            const QString returnNodeKey = detailReturnNodeKey;
+            detailReturnNodeKey.clear();
+            navigation(returnNodeKey);
+            return;
+        }
         productPages->setCurrentWidget(productGridPage);
     });
 
@@ -213,16 +228,33 @@ void MainWindow::connectPages() {
     });
 
     connect(productDetailPage, &ProductDetailPage::orderRequest, this, [this](int productId, int count) {
-        orderPanel->setOrder(event.getOrder(productId));
-        showOrderPanel();
+        showOrderPanel(event.getOrder(productId));
     });
 
     connect(productDetailPage, &ProductDetailPage::wishRequest, this, [this](int productId) {
-        event.setWish(productId);
+        if (!event.setWish(productId)) {
+            MessageBar::Fail(this);
+            return;
+        }
+        MessageBar::Success(this);
+        wishPage->setWishs(event.getWishs());
+    });
+
+    connect(wishPage, &WishPage::productSelected, this, [this](int productId) {
+        showDetailPage(productId, wishPage->property("ElaPageKey").toString());
+    });
+
+    connect(wishPage, &WishPage::removeRequested, this, [this](int productId) {
+        if (!event.setWish(productId, false)) {
+            MessageBar::Fail(this);
+            return;
+        }
+        wishPage->setWishs(event.getWishs());
+        MessageBar::Success(this);
     });
 
     connect(cartPage, &CartPage::orderRequested, this, [this]() {
-        showOrderPanel();
+        showOrderPanel(event.getOrder());
     });
 
     connect(cartPage, &CartPage::increaseRequested, this, [this, refreshCart](int productId) {
@@ -265,17 +297,28 @@ void MainWindow::connectPages() {
         refreshCart();
     });
 
-    connect(orderPanel, &OrderPanel::confirmRequested, this, [this](long long usedPoint) {
+    connect(orderPanel, &OrderPanel::confirmRequested, this, [this](int usedPoint) {
         if (!event.confirmOrder(usedPoint)) {
             MessageBar::Fail(this);
             return;
         }
+        orderPanel->hide();
         cartWidget->setCart(event.getCart());
         showReceiptPage();
     });
 
     connect(orderPanel, &OrderPanel::cancelRequested, this, [this]() {
         showCartPage();
+    });
+
+    connect(receiptPage, &ReceiptPage::refundRequested, this, [this](int receiptId) {
+        if (!event.refund(receiptId)) {
+            MessageBar::Fail(this);
+            return;
+        }
+        receiptPage->setReceipts(event.getReceipts());
+        updateUserInfo();
+        MessageBar::Success(this);
     });
 }
 
@@ -286,12 +329,16 @@ void MainWindow::showProductPage() {
 }
 
 void MainWindow::showProductCategoryPage(Category category) {
-    
+    auto* page = productCategoryPages.at(category);
+    page->setProducts(event.getProducts(std::nullopt, category));
 }
 
-void MainWindow::showDetailPage(int productId) {
+void MainWindow::showDetailPage(int productId, const QString& returnNodeKey) {
+   detailReturnNodeKey = returnNodeKey;
    productDetailPage->setProduct(event.getProduct(productId));
    productPages->setCurrentWidget(productDetailPage);
+   navigatingToProductDetail = true;
+   navigation(productPages->property("ElaPageKey").toString());
 }
 
 void MainWindow::showCartPage() {
@@ -306,8 +353,12 @@ void MainWindow::showWishPage() {
     navigation(wishPage->property("ElaPageKey").toString());
 }
 
-void MainWindow::showOrderPanel() {
-    orderPanel->setOrder(event.getOrder());
+void MainWindow::showOrderPanel(const Order& order) {
+    if (order.getItems().empty()) {
+        MessageBar::Fail(this);
+        return;
+    }
+    orderPanel->setOrder(order);
     orderPanel->moveToCenter();
     orderPanel->show();
 }

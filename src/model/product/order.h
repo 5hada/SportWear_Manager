@@ -5,31 +5,31 @@
 
 class Order{
     int userId;
-    long long availablePoints;
-    long long totalPrice;
+    int availablePoints;
+    int totalPrice;
 
     Items items;
 
-    void addPrice(long long price){totalPrice+=price;}
+    void addPrice(int price){totalPrice+=price;}
 public:
     Order(): userId(0), availablePoints(0), totalPrice(0) {};
-    Order(int userId, long long totalPrice, Items items): userId(userId), totalPrice(totalPrice) {
+    Order(int userId, int totalPrice, Items items): userId(userId), totalPrice(totalPrice) {
         setItems(items);
     }
-    Order(int userId, long long availablePoints, long long totalPrice, Items items):
+    Order(int userId, int availablePoints, int totalPrice, Items items):
         userId(userId), availablePoints(availablePoints), totalPrice(totalPrice) {
         setItems(items);
     }
 
 
     int getUserId() const {return userId;}
-    long long getAvailablePoints() const {return availablePoints;}
-    long long getTotalPrice() const {return totalPrice;}
+    int getAvailablePoints() const {return availablePoints;}
+    int getTotalPrice() const {return totalPrice;}
     const Items& getItems() const {return items;}
 
     void setUserId(int userId) {this->userId = userId;}
-    void setAvailablePoints(long long availablePoints) {this->availablePoints = availablePoints;}
-    void setTotalPrice(long long newPrice) {totalPrice = newPrice;}
+    void setAvailablePoints(int availablePoints) {this->availablePoints = availablePoints;}
+    void setTotalPrice(int newPrice) {totalPrice = newPrice;}
     void setItems(Items items) {this->items = items;}
 
     void addItem(Item item) {

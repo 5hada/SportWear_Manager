@@ -11,8 +11,8 @@ class Receipt {
     int id;
     int userId;
     Items items;
-    long long points;
-    long long paid;
+    int points;
+    int paid;
     std::string date;
     bool isCanceled;
     std::string canceledAt;
@@ -23,8 +23,8 @@ public:
         int id,
         int userId,
         Items items,
-        long long point,
-        long long paid,
+        int point,
+        int paid,
         std::string date,
         bool isCanceled = false,
         std::string canceledAt = ""
@@ -32,16 +32,16 @@ public:
     Receipt(
         int userId,
         Items items,
-        long long point,
-        long long paid
+        int point,
+        int paid
     );
     
 
     int getId() const { return id; }
     int getUserId() const { return userId; }
     Items getOrderItems() const{return items;}
-    long long getPoints() const { return points; }
-    long long getPaid() const { return paid; }
+    int getPoints() const { return points; }
+    int getPaid() const { return paid; }
     std::string getDate() const { return date; }
     bool getIsCanceled() const { return isCanceled; }
     std::string getCanceledAt() const {return canceledAt;}
@@ -49,8 +49,8 @@ public:
     void setId(int id) {this->id = id;}
     void setUserId(int userId){this->userId = userId;}
     void setOrderItems(Items items) {this->items = items;}
-    void setPoints(long long points){this->points = points;}
-    void setPaid(long long paid){this->paid = paid;}
+    void setPoints(int points){this->points = points;}
+    void setPaid(int paid){this->paid = paid;}
     void setDate(std::string date){this->date = date;}
     void setIsCanceled(bool isCanceled=false){this->isCanceled = isCanceled;}
     void setCanceledAt(std::string canceledAt=""){this->canceledAt = canceledAt;}
@@ -59,12 +59,11 @@ public:
         int id,
         int userId,
         Items items,
-        long long point,
-        long long paid,
+        int point,
+        int paid,
         std::string date,
         bool isCanceled = false,
         std::string canceledAt = ""
     );
 
-    void setOrderItems(Items items) const;
 };

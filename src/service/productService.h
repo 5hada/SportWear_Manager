@@ -9,7 +9,7 @@ public:
     ProductService(ProductRepository *productRepo): productRepo(productRepo) {}
 
     Products getAll() const;
-    // std::vector<Product> getByCategory() const;
+    Products getByCategory(Category category) const;
     Product getById(int id) const;
 
     bool isExist(const Product& product);
@@ -17,5 +17,5 @@ public:
 
     bool add(const Product &product);
     bool setStock(int productId, int stock);
-    bool setPrice(int productId, long long price);
+    bool setPrice(int productId, int price);
 };

@@ -6,14 +6,14 @@ class UserRepository;
 class PointService{
     UserRepository* userRepo{nullptr};
 
-    static long long calPoint(long long price);
+    static int calPoint(int price);
 public:
     PointService(UserRepository* userRepo): userRepo(userRepo) {}
 
-    long long getPoint(int userId);
+    int getPoint(int userId);
 
-    bool handlePoint(PointAction action, int userId, long long point);
+    bool handlePoint(PointAction action, int userId, int point);
 
-    bool reward(int userId, long long totalPrice);
-    bool revert(int userId, long long usedPoint, long long totalPrice);
+    bool reward(int userId, int totalPrice);
+    bool revert(int userId, int usedPoint, int totalPrice);
 };

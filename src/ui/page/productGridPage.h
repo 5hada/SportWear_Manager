@@ -16,7 +16,10 @@ class ProductGridPage: public ElaScrollPage {
     ElaFlowLayout* productLayout{nullptr};
     QHBoxLayout* indexNavigation;
     ElaText* pageIndex;
+    ElaLineEdit* pageIndexInput{nullptr};
     ElaLineEdit* searchEdit{nullptr};
+    int currentPage{0};
+    static constexpr int PageSize = 12;
 
     void initPage();
     void initLayout();
@@ -27,6 +30,10 @@ class ProductGridPage: public ElaScrollPage {
     void addProductCard(const Product& product);
     void rebuildProducts();
     bool matchesSearch(const Product& product) const;
+    Products filteredProducts() const;
+    int pageCount(int itemCount) const;
+    void setCurrentPage(int page);
+    void updatePageControls(int totalPages);
     void detailRequest(int productId);
 public:
     explicit ProductGridPage(QWidget* parent = nullptr);

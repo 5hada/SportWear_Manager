@@ -14,12 +14,12 @@ UserInfo EventHandler::getUser() {
 bool EventHandler::setUser(UserAction action, optional<string> name, optional<string> password) {
     switch (action) {
         case UserAction::Signup:
-            if (name == nullopt || password == nullopt) {
+            if (name != nullopt && password != nullopt) {
                 return service.account.signup(name.value(), password.value());
                 break;
             }
         case UserAction::Login:
-            if (name == nullopt || password == nullopt) {
+            if (name != nullopt && password != nullopt) {
                 return service.account.login(name.value(), password.value());
                 break;
             }
@@ -33,7 +33,10 @@ Products EventHandler::getProducts(optional<string> text, optional<Category> cat
     if (text == nullopt && category == nullopt) {
         return service.product.getAll();
     }
-    return service.product.getAll(); //임시
+    if (category != nullopt) {
+        return service.product.getByCategory(category.value());
+    }
+    return service.product.getAll();
 }
 Product EventHandler::getProduct(int productId) {
     return service.product.getById(productId);
@@ -46,13 +49,13 @@ Order EventHandler::getOrder(int productId) {
         }
     }
     else {
-        if (service.order.makeInstantOrder(productId)) {
+        if (service.order.makeInstantOrder(userId(), productId)) {
             return service.order.getOrder();
         }
     }
     return service.order.getClear();
 }
-bool EventHandler::confirmOrder(long long usedPoint) {
+bool EventHandler::confirmOrder(int usedPoint) {
     return service.order.confirmOrder(userId(), usedPoint);
 }
 

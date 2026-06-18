@@ -72,13 +72,11 @@ OrderPanel::OrderPanel(QWidget* parent): ElaDialog(parent) {
     });
     connect(cancelButton, &ElaPushButton::clicked, this, [this]() {
         emit cancelRequested();
-        close();
+        hide();
     });
 }
 
 void OrderPanel::setOrder(Order order) {
-    moveToCenter();
-    show();
     model->removeRows(0, model->rowCount());
 
     for (const auto& item : order.getItems()) {

@@ -37,7 +37,7 @@ bool OrderRepository::insert(int receiptId, Items items) const {
         sqlite3_bind_int(statement, 1, receiptId);
         sqlite3_bind_int(statement, 2, item.getId());      // product_id
         sqlite3_bind_int(statement, 3, item.getCount());   // count
-        sqlite3_bind_int64(statement, 4, item.getPrice()); // price_at_added
+        sqlite3_bind_int(statement, 4, item.getPrice());   // price_at_added
 
         if (sqlite3_step(statement) != SQLITE_DONE) {
             success = false;
@@ -55,7 +55,7 @@ Item OrderRepository::orderItemFromStatement(sqlite3_stmt* statement){
     return Item(            
             sqlite3_column_int(statement, 0),
             sqlite3_column_int(statement, 1),
-            sqlite3_column_int64(statement, 2)
+            sqlite3_column_int(statement, 2)
         );
 }
 

@@ -15,8 +15,13 @@ class WishPage: public ElaScrollPage {
     Products wishs;
 
     void rebuildRows();
+    int selectedProductId() const;
 public:
     explicit WishPage(QWidget* parent = nullptr);
 
-    void setWishs(Products wishs) {this->wishs = std::move(wishs);}
+    void setWishs(Products wishs);
+
+Q_SIGNALS:
+    void productSelected(int productId);
+    void removeRequested(int productId);
 };
