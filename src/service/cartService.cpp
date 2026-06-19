@@ -9,16 +9,22 @@ Cart CartService::getCart(int userId) const {
     if (checkReposExist()) {
         cart = cartRepo->findByUser(userId);
         for (auto& item : cart.getItems()){
-            item.setPrice(productRepo->findById(item.getId())->getPrice());
+            const auto product = productRepo->findById(item.getId());
+            if (product.has_value()) {
+                item.setPrice(product->getPrice());
+            }
         }
     }
     return cart;
 }
 
 bool CartService::add(int userId, int productId, int count, std::optional<bool> isSelected) {
-    if (count <= 0 || !checkProductExist(productId)) {return false;}
+    auto product = productRepo->findById(productId);
+    if (count <= 0 || !product.has_value()) {return false;}
 
     CartItem existingItem = cartRepo->findByProduct(userId, productId);
+    const int existingCount = existingItem.getId() < 0 ? 0 : existingItem.getCount();
+    if (existingCount + count > product->getStock()) {return false;}
     if (existingItem.getId() < 0) {
         return cartRepo->insert(userId, productId, count, isSelected.value_or(true));
     }
@@ -46,7 +52,8 @@ bool CartService::sub(int userId, int productId, int count, std::optional<bool> 
 }
 
 bool CartService::set(int userId, int productId, int count, std::optional<bool> isSelected) {
-    if (count <= 0 || !checkProductExist(productId)) {return false;}
+    auto product = productRepo->findById(productId);
+    if (count <= 0 || !product.has_value() || count > product->getStock()) {return false;}
     if(isSelected == std::nullopt){
         return cartRepo->updateCount(userId, productId, count);
     }

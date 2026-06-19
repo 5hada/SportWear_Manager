@@ -78,10 +78,20 @@ bool OrderService::confirmOrder(int userId, int usedPoint) {
     if(currentOrder.getUserId() != userId){return false;}
     if(currentOrder.getItems().empty()){return false;}
     int totalPrice = currentOrder.getTotalPrice();
+    if (usedPoint < 0 || usedPoint > currentOrder.getAvailablePoints() || usedPoint > totalPrice) {return false;}
+    const int paid = totalPrice - usedPoint;
     auto& items = currentOrder.getItems();
-    Receipt newReceipt(userId, items, usedPoint, totalPrice);
+    Receipt newReceipt(userId, items, usedPoint, paid);
 
     if (!receiptRepo->beginTransaction()) {return false;}
+
+    for (const auto& item : items) {
+        auto product = productRepo->findById(item.id);
+        if (!product.has_value() || !product->decreaseStock(item.count) || !productRepo->update(product.value())) {
+            receiptRepo->rollbackTransaction();
+            return false;
+        }
+    }
 
     int receiptId = receiptRepo->insert(newReceipt);
     if(receiptId == -1){
@@ -96,7 +106,11 @@ bool OrderService::confirmOrder(int userId, int usedPoint) {
         receiptRepo->rollbackTransaction();
         return false;
     }
-    if(userId > 1 && !pointService->reward(userId, totalPrice)){
+    if(usedPoint > 0 && !pointService->handlePoint(PointAction::Sub, userId, usedPoint)) {
+        receiptRepo->rollbackTransaction();
+        return false;
+    }
+    if(!pointService->reward(userId, paid)){
         receiptRepo->rollbackTransaction();
         return false;
     }
@@ -116,6 +130,19 @@ bool OrderService::refund(int id, int userId) {
     if (receipt.getIsCanceled()) {return false;}
     receipt.setIsCanceled(true);
     if (!receiptRepo->beginTransaction()) {return false;}
+    const auto items = orderRepo->findById(receipt.getId());
+    for (const auto& item : items) {
+        auto product = productRepo->findById(item.id);
+        if (!product.has_value()) {
+            receiptRepo->rollbackTransaction();
+            return false;
+        }
+        product->increaseStock(item.count);
+        if (!productRepo->update(product.value())) {
+            receiptRepo->rollbackTransaction();
+            return false;
+        }
+    }
     if (!receiptRepo->update(receipt)){
         receiptRepo->rollbackTransaction();
         return false;

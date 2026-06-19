@@ -15,7 +15,6 @@ class WishPage: public ElaScrollPage {
     Products wishs;
 
     void rebuildRows();
-    int selectedProductId() const;
 public:
     explicit WishPage(QWidget* parent = nullptr);
 
@@ -23,5 +22,6 @@ public:
 
 Q_SIGNALS:
     void productSelected(int productId);
+    void cartRequested(int productId);
     void removeRequested(int productId);
 };

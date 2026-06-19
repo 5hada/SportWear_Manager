@@ -1,6 +1,6 @@
 #include "productGridPage.h"
-#include "indexNavigation.h"
-#include "productCard.h"
+#include "ui/components/indexNavigation.h"
+#include "ui/components/productCard.h"
 
 #include "ElaLineEdit.h"
 #include <ElaComboBox.h>
@@ -32,6 +32,16 @@ void ProductGridPage::initLayout() {
     auto* titleText = new ElaText("Products", this);
     titleText->setTextPixelSize(35);
 
+    addButton = new ElaPushButton("Add", this);
+    addButton->setFixedSize(90, 34);
+    addButton->hide();
+
+    auto* titleRow = new QHBoxLayout();
+    titleRow->setContentsMargins(0, 0, 0, 0);
+    titleRow->addWidget(titleText);
+    titleRow->addStretch();
+    titleRow->addWidget(addButton);
+
     auto* descText = new ElaText("Browse sportwear inventory.", this);
     descText->setTextPixelSize(16);
 
@@ -60,7 +70,7 @@ void ProductGridPage::initLayout() {
 
     auto* titleLayout = new QVBoxLayout();
     titleLayout->setContentsMargins(20, 10, 20, 10);
-    titleLayout->addWidget(titleText);
+    titleLayout->addLayout(titleRow);
     titleLayout->addWidget(descText);
     titleLayout->addSpacing(12);
     titleLayout->addLayout(searchLayout);
@@ -95,6 +105,7 @@ void ProductGridPage::initConnect() {
     connect(searchEdit, &ElaLineEdit::returnPressed, this, [this]() {
         emit searchRequested(searchEdit->text().toStdString());
     });
+    connect(addButton, &ElaPushButton::clicked, this, &ProductGridPage::addRequested);
 
     connect(categoryCombo, QOverload<int>::of(&ElaComboBox::currentIndexChanged), this,
             [this](int index) {
@@ -131,6 +142,12 @@ void ProductGridPage::setCategory(Category category) {
         }
     }
     categoryCombo->setCurrentIndex(0);
+}
+
+void ProductGridPage::setAdminMode(bool isAdmin) {
+    if (addButton != nullptr) {
+        addButton->setVisible(isAdmin);
+    }
 }
 
 void ProductGridPage::setProductCards(const Products& products) {

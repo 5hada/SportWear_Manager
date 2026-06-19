@@ -1,5 +1,6 @@
 #include "cartWidget.h"
 #include "ElaTableView.h"
+#include "ui/common/tableItemUtil.h"
 
 #include <QHeaderView>
 #include <QStandardItemModel>
@@ -7,6 +8,7 @@
 CartWidget::CartWidget(QWidget* parent): ElaDockWidget("Cart", parent) {
     model = new QStandardItemModel(this);
     model->setHorizontalHeaderLabels({"Product ID", "Quantity", "Unit Price", "Total"});
+    centerHeaderItems(model);
 
     cartList = new ElaTableView(this);
     cartList->setModel(model);
@@ -21,10 +23,10 @@ void CartWidget::setCart(const Cart& cart) {
 
     for (const auto& item : cart.getItems()) {
         QList<QStandardItem*> row;
-        row << new QStandardItem(QString::number(item.id));
-        row << new QStandardItem(QString::number(item.count));
-        row << new QStandardItem(QString::number(item.price));
-        row << new QStandardItem(QString::number(item.price * item.count));
+        row << centeredItem(QString::number(item.id));
+        row << centeredItem(QString::number(item.count));
+        row << centeredItem(QString::number(item.price));
+        row << centeredItem(QString::number(item.price * item.count));
         model->appendRow(row);
     }
 }

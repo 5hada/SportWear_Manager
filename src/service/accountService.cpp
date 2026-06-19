@@ -38,5 +38,11 @@ UserInfo AccountService::getInfo() {
 
 
 void AccountService::updateInfo() {
+    if (userRepo != nullptr && currentUser.getId() > 0) {
+        const auto user = userRepo->findById(currentUser.getId());
+        if (user.has_value()) {
+            currentUser = user.value();
+        }
+    }
     userInfo = currentUser;
 }

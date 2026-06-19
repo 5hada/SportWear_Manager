@@ -1,8 +1,11 @@
 #include "orderPanel.h"
+#include "ui/common/tableItemUtil.h"
 
 #include <ElaPushButton.h>
+#include <ElaSpinBox.h>
 #include <ElaTableView.h>
 #include <ElaText.h>
+#include <algorithm>
 #include <QHeaderView>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
@@ -20,6 +23,7 @@ OrderPanel::OrderPanel(QWidget* parent): ElaDialog(parent) {
 
     model = new QStandardItemModel(this);
     model->setHorizontalHeaderLabels({"Product ID", "Quantity", "Unit Price", "Total"});
+    centerHeaderItems(model);
 
     orderTable = new ElaTableView(this);
     orderTable->setModel(model);
@@ -31,8 +35,11 @@ OrderPanel::OrderPanel(QWidget* parent): ElaDialog(parent) {
 
     totalText = new ElaText("Total: 0", this);
     totalText->setTextPixelSize(18);
-    pointText = new ElaText("Point to use: 0", this);
+    pointText = new ElaText("Available point: 0", this);
     pointText->setTextPixelSize(15);
+    pointSpin = new ElaSpinBox(this);
+    pointSpin->setRange(0, 0);
+    pointSpin->setFixedWidth(150);
     paidText = new ElaText("Payment: 0", this);
     paidText->setTextPixelSize(18);
 
@@ -43,6 +50,13 @@ OrderPanel::OrderPanel(QWidget* parent): ElaDialog(parent) {
     summaryLayout->setSpacing(8);
     summaryLayout->addWidget(totalText);
     summaryLayout->addWidget(pointText);
+    auto* pointUseLayout = new QHBoxLayout();
+    auto* pointUseLabel = new ElaText("Use point", this);
+    pointUseLabel->setTextPixelSize(15);
+    pointUseLayout->addWidget(pointUseLabel);
+    pointUseLayout->addWidget(pointSpin);
+    pointUseLayout->addStretch();
+    summaryLayout->addLayout(pointUseLayout);
     summaryLayout->addWidget(paidText);
 
     auto* buttonLayout = new QHBoxLayout();
@@ -68,11 +82,14 @@ OrderPanel::OrderPanel(QWidget* parent): ElaDialog(parent) {
     setLayout(centerLayout);
 
     connect(confirmButton, &ElaPushButton::clicked, this, [this]() {
-        emit confirmRequested(0);
+        emit confirmRequested(pointSpin->value());
     });
     connect(cancelButton, &ElaPushButton::clicked, this, [this]() {
         emit cancelRequested();
         hide();
+    });
+    connect(pointSpin, QOverload<int>::of(&ElaSpinBox::valueChanged), this, [this](int usedPoint) {
+        paidText->setText(QString("Payment: %1").arg(currentTotal - usedPoint));
     });
 }
 
@@ -81,14 +98,17 @@ void OrderPanel::setOrder(Order order) {
 
     for (const auto& item : order.getItems()) {
         QList<QStandardItem*> row;
-        row << new QStandardItem(QString::number(item.id));
-        row << new QStandardItem(QString::number(item.count));
-        row << new QStandardItem(QString::number(item.price));
-        row << new QStandardItem(QString::number(item.price * item.count));
+        row << centeredItem(QString::number(item.id));
+        row << centeredItem(QString::number(item.count));
+        row << centeredItem(QString::number(item.price));
+        row << centeredItem(QString::number(item.price * item.count));
         model->appendRow(row);
     }
 
-    totalText->setText(QString("Total: %1").arg(order.getTotalPrice()));
+    currentTotal = order.getTotalPrice();
+    totalText->setText(QString("Total: %1").arg(currentTotal));
     pointText->setText(QString("Available point: %1").arg(order.getAvailablePoints()));
-    paidText->setText(QString("Payment: %1").arg(order.getTotalPrice()));
+    pointSpin->setRange(0, std::min(order.getAvailablePoints(), currentTotal));
+    pointSpin->setValue(0);
+    paidText->setText(QString("Payment: %1").arg(currentTotal));
 }

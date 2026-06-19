@@ -18,6 +18,25 @@ std::vector<Review> ReviewRepository::findAll() const {
     return reviews;
 }
 
+std::optional<Review> ReviewRepository::findById(int id) const {
+    if (!hasDatabase()) {return std::nullopt;}
+
+    sqlite3_stmt* statement = nullptr;
+    constexpr auto sql =
+        "SELECT id, user_id, product_id, rating, comment FROM reviews WHERE id = ?";
+    if (!sqlOk(sql, statement)) {
+        return std::nullopt;
+    }
+
+    std::optional<Review> review = std::nullopt;
+    sqlite3_bind_int(statement, 1, id);
+    if (sqlite3_step(statement) == SQLITE_ROW) {
+        review = reviewFromStatement(statement);
+    }
+    sqlite3_finalize(statement);
+    return review;
+}
+
 std::vector<Review> ReviewRepository::findByProductId(int productId) const {
     std::vector<Review> reviews{};
     if (!hasDatabase()) {return reviews;}
@@ -76,12 +95,26 @@ bool ReviewRepository::update(const Review& review) {
     sqlite3_stmt* statement = nullptr;
     if (review.getId() < 0) {return false;}
     constexpr auto sql =
-        "UPDATE reviews SET comment = ? WHERE id = ? ";
+        "UPDATE reviews SET rating = ?, comment = ? WHERE id = ? ";
     if (!sqlOk(sql, statement)) {
         return false;
     }
-    sqlite3_bind_int(statement, 1, review.getId());
+    sqlite3_bind_int(statement, 1, review.getRating());
     sqlBindText(statement, 2, review.getComment());
+    sqlite3_bind_int(statement, 3, review.getId());
+    return sqlFin(statement);
+}
+
+bool ReviewRepository::remove(int id) {
+    if (!hasDatabase()) {return false;}
+
+    sqlite3_stmt* statement = nullptr;
+    constexpr auto sql =
+        "DELETE FROM reviews WHERE id = ?";
+    if (!sqlOk(sql, statement)) {
+        return false;
+    }
+    sqlite3_bind_int(statement, 1, id);
     return sqlFin(statement);
 }
 

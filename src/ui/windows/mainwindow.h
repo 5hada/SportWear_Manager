@@ -18,6 +18,7 @@ class EventHandler;
 
 class ProductGridPage;
 class ProductDetailPage;
+class ProductEditPage;
 class ProfilePanel;
 class OrderPanel;
 class ReceiptPage;
@@ -37,6 +38,7 @@ class MainWindow : public ElaWindow{
     QStackedWidget* productPages{nullptr};
     ProductGridPage* productGridPage{nullptr};
     ProductDetailPage* productDetailPage{nullptr};
+    ProductEditPage* productEditPage{nullptr};
     ReceiptPage* receiptPage{nullptr};
     CartPage* cartPage{nullptr};
     WishPage* wishPage{nullptr};
@@ -56,6 +58,7 @@ class MainWindow : public ElaWindow{
     QString profileKey;
     Category currentCategory{Category::Unknown};
     std::optional<std::string> currentKeyword{std::nullopt};
+    bool productEditReturnToDetail{false};
     
     void initWindow();
 
@@ -82,6 +85,8 @@ class MainWindow : public ElaWindow{
 
     void showProductPage();
     void showDetailPage();
+    void showProductAddPage();
+    void showProductEditPage();
     void showReceiptPage();
     void showCartPage();
     void showWishPage();
@@ -93,6 +98,7 @@ class MainWindow : public ElaWindow{
     void updateUserInfo();
     void refreshProductPage(int pageIndex = 0);
     void movePanelToWindowCenter(QWidget* panel);
+    void updateAdminControls();
 
     void openCartWidget();
     void closeCartWidget();

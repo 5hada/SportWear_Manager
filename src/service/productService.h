@@ -17,6 +17,9 @@ public:
     bool isExist(int id);
 
     bool add(const Product &product);
+    bool update(const Product& product);
+    bool decreaseStock(int productId, int count);
+    bool increaseStock(int productId, int count);
     bool setStock(int productId, int stock);
     bool setPrice(int productId, int price);
 };

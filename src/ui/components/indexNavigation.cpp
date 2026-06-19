@@ -11,6 +11,9 @@ IndexNavigation::IndexNavigation(QWidget* parent):
 }
 
 void IndexNavigation::init() {
+    setContentsMargins(0, 0, 0, 0);
+    setSpacing(0);
+
     auto* leftEndArrow = new ElaIconButton(ElaIconType::AnglesLeft);
     leftEndArrow->setFixedWidth(40);
     auto* leftArrow = new ElaIconButton(ElaIconType::AngleLeft);
@@ -33,39 +36,53 @@ void IndexNavigation::init() {
     indexLayout->addSpacing(20);
     indexLayout->addWidget(pageIndexInput);
 
-    auto* indexNavigation = new QHBoxLayout();
-    indexNavigation->addStretch();
-    indexNavigation->addWidget(leftEndArrow);
-    indexNavigation->addWidget(leftArrow);
-    indexNavigation->addSpacing(20);
-    indexNavigation->addLayout(indexLayout);
-    indexNavigation->addSpacing(20);
-    indexNavigation->addWidget(rightArrow);
-    indexNavigation->addWidget(rightEndArrow);
-    indexNavigation->addStretch();
+    addStretch();
+    addWidget(leftEndArrow);
+    addWidget(leftArrow);
+    addSpacing(20);
+    addLayout(indexLayout);
+    addSpacing(20);
+    addWidget(rightArrow);
+    addWidget(rightEndArrow);
+    addStretch();
 
     connect(leftEndArrow, &ElaIconButton::clicked, this, [this]() {
-        indexChanged(0);
+        if (currentIndex == 0) {
+            return;
+        }
+        Q_EMIT indexChanged(0);
         currentIndex = 0;
     });
     connect(leftArrow, &ElaIconButton::clicked, this, [this]() {
-        indexChanged(currentIndex - 1);
-        currentIndex--;
+        if (currentIndex <= 0) {
+            return;
+        }
+        const int nextIndex = currentIndex - 1;
+        Q_EMIT indexChanged(nextIndex);
+        currentIndex = nextIndex;
     });
     connect(rightArrow, &ElaIconButton::clicked, this, [this]() {
-        indexChanged(currentIndex + 1);
-        currentIndex++;
+        if (currentIndex >= maxIndex) {
+            return;
+        }
+        const int nextIndex = currentIndex + 1;
+        Q_EMIT indexChanged(nextIndex);
+        currentIndex = nextIndex;
     });
     connect(rightEndArrow, &ElaIconButton::clicked, this, [this]() {
-        indexChanged(maxIndex);
+        if (currentIndex == maxIndex) {
+            return;
+        }
+        Q_EMIT indexChanged(maxIndex);
         currentIndex = maxIndex;
     });
     connect(pageIndexInput, &ElaLineEdit::returnPressed, this, [this]() {
         bool ok = false;
         const int page = pageIndexInput->text().toInt(&ok);
-        if (ok) {
-            indexChanged(page - 1);
-            currentIndex = page - 1;
+        const int nextIndex = page - 1;
+        if (ok && nextIndex >= 0 && nextIndex <= maxIndex) {
+            Q_EMIT indexChanged(nextIndex);
+            currentIndex = nextIndex;
         }
     });
 }

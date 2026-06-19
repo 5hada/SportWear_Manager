@@ -17,11 +17,13 @@ void FormWidget::initLayout() {
     desc = new ElaText("Description.\nDescribing description");
     desc->setTextPixelSize(14);
     topEditText = new ElaText("Enter the text");
+    topEditText->setTextPixelSize(14);
     bottomEditText = new ElaText("Enter the text");
+    bottomEditText->setTextPixelSize(14);
     leftButtonText = new ElaText("Cancel");
     rightButtonText = new ElaText("Confirm");
     topEdit = new ElaLineEdit();
-    bottomEdit = new ElaLineEdit();
+    bottomEdit = new ElaLineEdit(); 
     bottomEdit->setEchoMode(QLineEdit::Password);
     leftButton = new ElaPushButton();
     rightButton = new ElaPushButton();

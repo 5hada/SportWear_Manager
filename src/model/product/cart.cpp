@@ -50,5 +50,9 @@ int Cart::getTotalPrice() const {
 
 
 int Cart::getTotalCount() const {
-    return items.size();
+    int total = 0;
+    for (const auto& item : items) {
+        total += item.count;
+    }
+    return total;
 }

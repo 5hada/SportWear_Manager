@@ -1,4 +1,5 @@
 #include "receiptPage.h"
+#include "ui/common/tableItemUtil.h"
 
 #include <ElaPushButton.h>
 #include <ElaTableView.h>
@@ -22,6 +23,7 @@ ReceiptPage::ReceiptPage(QWidget* parent): ElaScrollPage(parent) {
 
     model = new QStandardItemModel(this);
     model->setHorizontalHeaderLabels({"ID", "Date", "Items", "Paid", "Point", "Status"});
+    centerHeaderItems(model);
 
     receiptTable = new ElaTableView(this);
     receiptTable->setModel(model);
@@ -78,12 +80,12 @@ void ReceiptPage::rebuildReceipts() {
 
     for (const auto& receipt : receipts) {
         QList<QStandardItem*> row;
-        row << new QStandardItem(QString::number(receipt.getId()));
-        row << new QStandardItem(QString::fromStdString(receipt.getDate()));
-        row << new QStandardItem(itemSummary(receipt));
-        row << new QStandardItem(QString::number(receipt.getPaid()));
-        row << new QStandardItem(QString::number(receipt.getPoints()));
-        row << new QStandardItem(receipt.getIsCanceled() ? "Canceled" : "Paid");
+        row << centeredItem(QString::number(receipt.getId()));
+        row << centeredItem(QString::fromStdString(receipt.getDate()));
+        row << centeredItem(itemSummary(receipt));
+        row << centeredItem(QString::number(receipt.getPaid()));
+        row << centeredItem(QString::number(receipt.getPoints()));
+        row << centeredItem(receipt.getIsCanceled() ? "Canceled" : "Paid");
         model->appendRow(row);
     }
 }

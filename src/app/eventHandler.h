@@ -20,6 +20,7 @@ class EventHandler {
     ServiceProvider& service;
 
     int userId();
+    bool hasPurchasedProduct(int productId);
 public:
     EventHandler(ServiceProvider& service): service(service) {}
 
@@ -56,7 +57,11 @@ public:
     bool isWished(int productId);
     bool setWish(int productId, bool isWished = true);
 
+    int getUserId();
+    bool canWriteReview(int productId);
     Reviews getReviews(int productId);
+    bool saveReview(int reviewId, int productId, int rating, const string& comment);
+    bool deleteReview(int reviewId);
     bool setReview(Review review);
 
     bool updateProduct(Product product);

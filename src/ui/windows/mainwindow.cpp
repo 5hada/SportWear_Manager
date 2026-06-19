@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 
 #include "ElaPushButton.h"
-#include "messageBar.h"
+#include "ui/common/messageBar.h"
 // #include <ElaProgressRing.h>
 #include <QVBoxLayout>
 
@@ -11,19 +11,18 @@
 #include "model/product/category.h"
 
 #include "model/user/user.h"
-#include "page/productDetailPage.h"
-#include "page/productGridPage.h"
-#include "page/profilePanel.h"
-#include "page/orderPanel.h"
-#include "page/receiptPage.h"
-#include "page/wishPage.h"
-#include "page/cart/cartWidget.h"
-#include "page/cart//cartPage.h"
-#include "page/settingPanel.h"
+#include "ui/pages/product/productDetailPage.h"
+#include "ui/pages/product/productEditPage.h"
+#include "ui/pages/product/productGridPage.h"
+#include "ui/panels/profile/profilePanel.h"
+#include "ui/pages/order/orderPanel.h"
+#include "ui/pages/order/receiptPage.h"
+#include "ui/pages/wish/wishPage.h"
+#include "ui/pages/cart/cartWidget.h"
+#include "ui/pages/cart/cartPage.h"
+#include "ui/panels/settings/settingPanel.h"
 
-#include "dialog.h"
-#include "messageBar.h"
-#include "ui/messageBar.h"
+#include "ui/common/dialog.h"
 
 #include <ElaDef.h>
 #include <ElaIcon.h>
@@ -87,10 +86,12 @@ void MainWindow::initContent() {
     productGridPage = new ProductGridPage(event.getItemsPerPage(), this);
     refreshProductPage();
     productDetailPage = new ProductDetailPage(this);
+    productEditPage = new ProductEditPage(this);
     profilePanel = new ProfilePanel(this);
     profilePanel->hide();
     productPages->addWidget(productGridPage);
     productPages->addWidget(productDetailPage);
+    productPages->addWidget(productEditPage);
     productPages->setCurrentWidget(productGridPage);
 
     orderPanel = new OrderPanel(this);
@@ -124,6 +125,7 @@ void MainWindow::initContent() {
     addFooterNode("Settings", settingKey, 0,ElaIconType::GearComplex);
     
     addDockWidget(Qt::RightDockWidgetArea, cartWidget);
+    updateAdminControls();
 }
 
 void MainWindow::connectNavigation() {
@@ -161,6 +163,27 @@ void MainWindow::connectNavigation() {
 void MainWindow::connectPageRequests() {
     connectProductsPage();
     connectDetailPage();
+    connect(productEditPage, &ProductEditPage::saveRequested, this, [this](const Product& product) {
+        const bool isEdit = product.getId() > 0;
+        handleResult(event.updateProduct(product), [this, product, isEdit] {
+            refreshProductPage();
+            if (isEdit) {
+                event.setProduct(product.getId());
+                showDetailPage();
+            }
+            else {
+                showProductPage();
+            }
+        });
+    });
+    connect(productEditPage, &ProductEditPage::cancelRequested, this, [this]() {
+        if (productEditReturnToDetail) {
+            showDetailPage();
+        }
+        else {
+            showProductPage();
+        }
+    });
     connectReceiptPage();
     connectCartPage();
     connectWishPage();
@@ -188,6 +211,9 @@ void MainWindow::connectProductsPage() {
     connect(productGridPage, &ProductGridPage::pageIndexChanged, this, [this](int newIndex) {
         refreshProductPage(newIndex);
     });
+    connect(productGridPage, &ProductGridPage::addRequested, this, [this]() {
+        showProductAddPage();
+    });
 }
 
 void MainWindow::connectDetailPage() {
@@ -209,8 +235,41 @@ void MainWindow::connectDetailPage() {
 
     connect(productDetailPage, &ProductDetailPage::wishRequest, this, [this](int productId, bool isWished) {
         handleResult(event.setWish(productId, isWished), [this] {
-            productDetailPage->setProduct(event.getProduct(), event.isWished(event.getProduct().getId()));
+            const auto product = event.getProduct();
+            productDetailPage->setProduct(product, event.isWished(product.getId()));
+            productDetailPage->setReviews(event.getReviews(product.getId()));
             wishPage->setWishs(event.getWishs());
+        });
+    });
+    connect(productDetailPage, &ProductDetailPage::editRequest, this, [this](int productId) {
+        handleResult(event.setProduct(productId), [this] {
+            showProductEditPage();
+        });
+    });
+    connect(productDetailPage, &ProductDetailPage::reviewSaveRequested,
+            this, [this](int reviewId, int productId, int rating, const QString& comment) {
+        handleResult(event.saveReview(reviewId, productId, rating, comment.toStdString()), [this, productId] {
+            QTimer::singleShot(0, this, [this, productId]() {
+                productDetailPage->setReviewContext(
+                    event.getUserId(),
+                    event.getUser().getRole(),
+                    event.canWriteReview(productId)
+                );
+                productDetailPage->setReviews(event.getReviews(productId));
+            });
+        });
+    });
+    connect(productDetailPage, &ProductDetailPage::reviewDeleteRequested, this, [this](int reviewId) {
+        const int productId = event.getProduct().getId();
+        handleResult(event.deleteReview(reviewId), [this, productId] {
+            QTimer::singleShot(0, this, [this, productId]() {
+                productDetailPage->setReviewContext(
+                    event.getUserId(),
+                    event.getUser().getRole(),
+                    event.canWriteReview(productId)
+                );
+                productDetailPage->setReviews(event.getReviews(productId));
+            });
         });
     });
 }
@@ -232,7 +291,17 @@ void MainWindow::connectCartPage() {
     });
 
     connect(cartPage, &CartPage::cartRequest, this, [this](CartAction action, int productId, int count, std::optional<bool> isSelected) {
-        handleResult(event.handleCart(action, productId, count, isSelected));
+        if (!event.handleCart(action, productId, count, isSelected)) {
+            cartPage->restoreProductRow(productId);
+            MessageBar::Fail(this);
+            return;
+        }
+        MessageBar::Success(this);
+        const auto cart = event.getCart();
+        if (!cartPage->applyCartChange(action, productId, count, isSelected)) {
+            cartPage->setCart(cart);
+        }
+        cartWidget->setCart(cart);
     });
 }
 
@@ -240,6 +309,12 @@ void MainWindow::connectWishPage() {
     connect(wishPage, &WishPage::productSelected, this, [this](int productId) {
         handleResult(event.setProduct(productId), [this] {
             showDetailPage();
+        });
+    });
+    connect(wishPage, &WishPage::cartRequested, this, [this](int productId) {
+        handleResult(event.handleCart(CartAction::Add, productId, 1), [this] {
+            cartWidget->setCart(event.getCart());
+            openCartWidget();
         });
     });
 
@@ -257,6 +332,10 @@ void MainWindow::connectOrderPanel() {
     connect(orderPanel, &OrderPanel::confirmRequested, this, [this](int usedPoint) {
         handleResult(event.confirmOrder(usedPoint), [this] {
             showReceiptPage();
+            updateUserInfo();
+            cartPage->setCart(event.getCart());
+            cartWidget->setCart(event.getCart());
+            refreshProductPage();
             orderPanel->hide();
         });
     });
@@ -295,6 +374,12 @@ void MainWindow::connectCartWidget() {
     connect(cartButton, &ElaPushButton::pressed, this, [this]() {
         openCartWidget();
     });
+    connect(cartWidget, &CartWidget::visibilityChanged, this, [this](bool visible) {
+        if (!visible) {
+            adjustCartButton();
+            cartButton->show();
+        }
+    });
 }
 
 
@@ -313,7 +398,40 @@ void MainWindow::showProductPage() {
 void MainWindow::showDetailPage() {
     const auto product = event.getProduct();
     productDetailPage->setProduct(product, event.isWished(product.getId()));
+    productDetailPage->setReviewContext(
+        event.getUserId(),
+        event.getUser().getRole(),
+        event.canWriteReview(product.getId())
+    );
+    productDetailPage->setReviews(event.getReviews(product.getId()));
+    updateAdminControls();
     productPages->setCurrentWidget(productDetailPage);
+    if (getCurrentNavigationPageKey() != productsKey){
+        navigation(productsKey);
+    }
+}
+
+void MainWindow::showProductAddPage() {
+    if (event.getUser().getRole() != UserRole::Admin) {
+        MessageBar::Fail(this);
+        return;
+    }
+    productEditReturnToDetail = false;
+    productEditPage->setAddMode();
+    productPages->setCurrentWidget(productEditPage);
+    if (getCurrentNavigationPageKey() != productsKey){
+        navigation(productsKey);
+    }
+}
+
+void MainWindow::showProductEditPage() {
+    if (event.getUser().getRole() != UserRole::Admin) {
+        MessageBar::Fail(this);
+        return;
+    }
+    productEditReturnToDetail = true;
+    productEditPage->setEditMode(event.getProduct());
+    productPages->setCurrentWidget(productEditPage);
     if (getCurrentNavigationPageKey() != productsKey){
         navigation(productsKey);
     }
@@ -372,6 +490,18 @@ void MainWindow::updateUserInfo() {
             setUserInfoCardSubTitle("Not signed in");   
             break;
     }
+    updateAdminControls();
+    if (productPages != nullptr && productPages->currentWidget() == productDetailPage) {
+        const auto product = event.getProduct();
+        if (product.getId() > 0) {
+            productDetailPage->setReviewContext(
+                event.getUserId(),
+                event.getUser().getRole(),
+                event.canWriteReview(product.getId())
+            );
+            productDetailPage->setReviews(event.getReviews(product.getId()));
+        }
+    }
 }
 
 void MainWindow::refreshProductPage(int pageIndex) {
@@ -391,6 +521,16 @@ void MainWindow::movePanelToWindowCenter(QWidget* panel) {
     const int x = windowRect.x() + (windowRect.width() - panel->width()) / 2;
     const int y = windowRect.y() + (windowRect.height() - panel->height()) / 2;
     panel->move(x, y);
+}
+
+void MainWindow::updateAdminControls() {
+    const bool isAdmin = event.getUser().getRole() == UserRole::Admin;
+    if (productGridPage != nullptr) {
+        productGridPage->setAdminMode(isAdmin);
+    }
+    if (productDetailPage != nullptr) {
+        productDetailPage->setAdminMode(isAdmin);
+    }
 }
 
 

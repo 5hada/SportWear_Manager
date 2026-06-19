@@ -1,9 +1,9 @@
 #include "profilePanel.h"
 
-#include "profile/userPanel.h"
-#include "profile/signupPanel.h"
-#include "profile/loginPanel.h"
-#include "profile/logoutPanel.h"
+#include "ui/panels/profile/widgets/userPanel.h"
+#include "ui/panels/profile/widgets/signupPanel.h"
+#include "ui/panels/profile/widgets/loginPanel.h"
+#include "ui/panels/profile/widgets/logoutPanel.h"
 
 #include <QStackedWidget>
 #include <QString>

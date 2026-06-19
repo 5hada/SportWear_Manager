@@ -27,10 +27,32 @@ Product ProductService::getById(int id) const {
 }
 
 bool ProductService::add(const Product& product) {
-    if (getOptById(product.getId()) == std::nullopt){
+    if (!isRepoValid()) {return false;}
+    if (product.getPrice() < 0 || product.getStock() < 0 || product.getName().empty()) {return false;}
+    if (product.getId() <= 0 || getOptById(product.getId()) == std::nullopt){
         return productRepo->insert(product);
     }
     return false;
+}
+
+bool ProductService::update(const Product& product) {
+    if (!isRepoValid() || !isExist(product.getId())) {return false;}
+    if (product.getPrice() < 0 || product.getStock() < 0 || product.getName().empty()) {return false;}
+    return productRepo->update(product);
+}
+
+bool ProductService::decreaseStock(int productId, int count) {
+    if (count <= 0 || !isExist(productId)) {return false;}
+    Product product(getById(productId));
+    if (!product.decreaseStock(count)) {return false;}
+    return productRepo->update(product);
+}
+
+bool ProductService::increaseStock(int productId, int count) {
+    if (count <= 0 || !isExist(productId)) {return false;}
+    Product product(getById(productId));
+    product.increaseStock(count);
+    return productRepo->update(product);
 }
 
 bool ProductService::setPrice(int productId, int price) {

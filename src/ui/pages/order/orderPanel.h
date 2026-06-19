@@ -6,6 +6,7 @@
 class QStandardItemModel;
 class ElaTableView;
 class ElaText;
+class ElaSpinBox;
 
 class OrderPanel: public ElaDialog {
     Q_OBJECT
@@ -15,6 +16,8 @@ class OrderPanel: public ElaDialog {
     ElaText* totalText{nullptr};
     ElaText* pointText{nullptr};
     ElaText* paidText{nullptr};
+    ElaSpinBox* pointSpin{nullptr};
+    int currentTotal{0};
 
 public:
     explicit OrderPanel(QWidget* parent = nullptr);

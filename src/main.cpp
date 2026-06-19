@@ -1,5 +1,5 @@
 #include "app/appContext.h"
-#include "ui/mainwindow.h"
+#include "ui/windows/mainwindow.h"
 
 #include <QApplication>
 #include <QSplashScreen>

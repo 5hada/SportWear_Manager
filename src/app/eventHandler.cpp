@@ -8,6 +8,21 @@ int EventHandler::userId() {
     return service.account.getUserId();
 }
 
+bool EventHandler::hasPurchasedProduct(int productId) {
+    if (userId() <= 0) {return false;}
+    for (const auto& receipt : service.order.getReceipts(userId())) {
+        if (receipt.getIsCanceled()) {
+            continue;
+        }
+        for (const auto& item : receipt.getOrderItems()) {
+            if (item.id == productId) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 UserInfo EventHandler::getUser() {
     return service.account.getInfo();
 }
@@ -131,14 +146,81 @@ bool EventHandler::setWish(int productId, bool isWished) {
 }
 
 
+int EventHandler::getUserId() {
+    return userId();
+}
+
+bool EventHandler::canWriteReview(int productId) {
+    auto user = getUser();
+    if (user.getRole() == UserRole::Admin) {
+        return true;
+    }
+    if (user.getRole() == UserRole::Guest) {
+        return false;
+    }
+    return hasPurchasedProduct(productId);
+}
+
 Reviews EventHandler::getReviews(int productId) {
     return service.review.getAllFromProduct(productId);
 }
+
+bool EventHandler::saveReview(int reviewId, int productId, int rating, const string& comment) {
+    auto user = getUser();
+    if (user.getRole() == UserRole::Guest || rating < 1 || rating > 5) {
+        return false;
+    }
+
+    if (reviewId <= 0) {
+        if (!canWriteReview(productId)) {
+            return false;
+        }
+        return service.review.add(userId(), productId, rating, comment);
+    }
+
+    const auto existing = service.review.getById(reviewId);
+    if (!existing.has_value()) {
+        return false;
+    }
+    const bool canModify = user.getRole() == UserRole::Admin || existing->getUserId() == userId();
+    if (!canModify) {
+        return false;
+    }
+    return service.review.update(Review(
+        existing->getId(),
+        existing->getUserId(),
+        existing->getProductId(),
+        rating,
+        comment
+    ));
+}
+
+bool EventHandler::deleteReview(int reviewId) {
+    auto user = getUser();
+    if (user.getRole() == UserRole::Guest) {
+        return false;
+    }
+
+    const auto existing = service.review.getById(reviewId);
+    if (!existing.has_value()) {
+        return false;
+    }
+    const bool canDelete = user.getRole() == UserRole::Admin || existing->getUserId() == userId();
+    if (!canDelete) {
+        return false;
+    }
+    return service.review.remove(reviewId);
+}
+
 bool EventHandler::setReview(Review review) {
-    return false;
+    return saveReview(review.getId(), review.getProductId(), review.getRating(), review.getComment());
 }
 
 
 bool EventHandler::updateProduct(Product product) {
-    return false;
+    if (getUser().getRole() != UserRole::Admin) {return false;}
+    if (product.getId() <= 0) {
+        return service.product.add(product);
+    }
+    return service.product.update(product);
 }
