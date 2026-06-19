@@ -13,8 +13,8 @@
 #include <qboxlayout.h>
 #include <qdebug.h>
 
-ProductGridPage::ProductGridPage(int ItemsPerPage, QWidget* parent): ElaScrollPage(parent) {
-    ProductGridPage::ItemsPerPage = ItemsPerPage;
+ProductGridPage::ProductGridPage(int itemsPerPage, QWidget* parent): ElaScrollPage(parent) {
+    this->itemsPerPage = itemsPerPage;
     initPage();
     initLayout();
     initConnect();
@@ -48,7 +48,7 @@ void ProductGridPage::initLayout() {
     productLayout->setContentsMargins(0, 0, 0, 0);
     productLayout->setIsAnimation(true);
 
-    for (int i = 0; i < ItemsPerPage; ++i) {
+    for (int i = 0; i < itemsPerPage; ++i) {
         auto* productCard = new ProductCard(this);
         productCards.push_back(productCard);
         productLayout->addWidget(productCard);
@@ -94,13 +94,13 @@ void ProductGridPage::setContents(std::tuple<const Products&, int, int> contents
 
 void ProductGridPage::setProductCards(const Products& products) {
     int count = static_cast<int>(products.size());
-    if (count > ItemsPerPage) {count = ItemsPerPage;}
+    if (count > itemsPerPage) {count = itemsPerPage;}
     for (int i = 0; i < count; ++i) {
         productCards[i]->show();
         productCards[i]->setProduct(products[i]);
     }
-    if (count < ItemsPerPage) {
-        for (int i = count; i < ItemsPerPage; ++i) {
+    if (count < itemsPerPage) {
+        for (int i = count; i < itemsPerPage; ++i) {
             productCards[i]->hide();
         }
     }

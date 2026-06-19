@@ -24,7 +24,7 @@ class ProductGridPage: public ElaScrollPage {
 
     void setProductCards(const Products& products);
 
-    static int ItemsPerPage;
+    int itemsPerPage;
 public:
     ProductGridPage(int ItemsPerPage, QWidget* parent = nullptr);
 
