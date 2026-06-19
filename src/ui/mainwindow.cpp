@@ -82,7 +82,7 @@ void MainWindow::initContent() {
     updateUserInfo();
 
     for (auto& category: Categories){
-        productsKeys.insert_or_assign(category, QString::fromStdString(categoryToString(category)));
+        productsKeys.insert_or_assign(category, new QWidget());
     }
 
     productPages = new QStackedWidget(this);
@@ -187,8 +187,8 @@ void MainWindow::connectPageRequests() {
 }
 
 void MainWindow::connectProductsPage() {
-    connect(productGridPage, &ProductGridPage::productSelected, this, [this](const Product& product) {
-        handleResult(event.setProduct(product.getId()), [this] {
+    connect(productGridPage, &ProductGridPage::productSelected, this, [this](int productId) {
+        handleResult(event.setProduct(productId), [this] {
             showDetailPage();
         });
     });
