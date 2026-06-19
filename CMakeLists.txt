@@ -10,7 +10,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools)
+
+SET(CMAKE_PREFIX_PATH C:/Qt/6.6.2/mingw_64)
 
 add_subdirectory(external/ElaWidgetTools)
 
@@ -29,7 +30,7 @@ configure_file(
     "${CMAKE_CURRENT_BINARY_DIR}/schema.sql"
     COPYONLY
 )
-
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 qt_add_executable(SportWear_Manager
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}

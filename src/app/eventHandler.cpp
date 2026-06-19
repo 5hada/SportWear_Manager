@@ -29,32 +29,39 @@ bool EventHandler::setUser(UserAction action, optional<string> name, optional<st
     return false;
 }
 
-Products EventHandler::getProducts(optional<string> text, optional<Category> category) {
+std::tuple<const Products&, int, int> EventHandler::getProductsContents(optional<string> text, optional<Category> category) {
     if (text == nullopt && category == nullopt) {
-        return service.product.getAll();
+        return std::make_tuple(service.product.getAll(), 0, 0);
     }
     if (category != nullopt) {
-        return service.product.getByCategory(category.value());
+        return std::make_tuple(service.product.getByCategory(category.value()), 0, 0);
     }
-    return service.product.getAll();
+    return std::make_tuple(service.product.getAll(), 0, 0);
 }
 Product EventHandler::getProduct(int productId) {
     return service.product.getById(productId);
 }
 
-Order EventHandler::getOrder(int productId) {
-    if (productId < 0) {
+bool EventHandler::setOrder(int productId) {
+    if (productId == -1) {
         if (service.order.makeListOrder(userId())) {
-            return service.order.getOrder();
+            return true;
         }
     }
     else {
         if (service.order.makeInstantOrder(userId(), productId)) {
-            return service.order.getOrder();
+            return true;
         }
     }
-    return service.order.getClear();
+    service.order.getClear();
+    return false;
+
 }
+
+Order EventHandler::getOrder() {
+    return service.order.getOrder();
+}
+
 bool EventHandler::confirmOrder(int usedPoint) {
     return service.order.confirmOrder(userId(), usedPoint);
 }

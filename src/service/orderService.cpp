@@ -33,7 +33,7 @@ bool OrderService::makeListOrder(int userId) {
     int price;
     Cart cart = cartRepo->findByUser(userId);
     for(auto& item: cart.getItems()){
-        if(item.selected()){
+        if(item.isSelected()){
             id = item.getId();
             auto product = productRepo->findById(id);
             if (!product.has_value()) {

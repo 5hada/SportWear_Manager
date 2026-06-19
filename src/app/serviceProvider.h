@@ -6,6 +6,7 @@
 #include "service/orderService.h"
 #include "service/pointService.h"
 #include "service/productService.h"
+#include "service/searchService.h"
 #include "service/reviewService.h"
 #include "service/wishService.h"
 
@@ -17,6 +18,7 @@ public:
     PointService point;
     ProductService product;
     ReviewService review;
+    SearchService search;
     WishService wish;
 
     explicit ServiceProvider(RepositoryProvider& repo)
@@ -26,8 +28,10 @@ public:
           point(&repo.user),
           product(&repo.product),
           review(&repo.review),
+          search(),
           wish(&repo.wish, &repo.product)
     {
         order.setPointService(&point);
+        search.setProductService(&product);
     }
 };

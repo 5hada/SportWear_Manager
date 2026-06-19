@@ -70,7 +70,7 @@ void ProductDetailPage::initPage() {
 
     addCentralWidget(centralWidget, true, false, 0);
 
-    connect(backButton, &ElaIconButton::clicked, this, &ProductDetailPage::backRequested);
+    connect(backButton, &ElaIconButton::clicked, this, &ProductDetailPage::backRequest);
     connect(addCartButton, &ElaIconButton::clicked, this, [this]() {
         Q_EMIT cartRequest(product.getId());
     });

@@ -3,6 +3,8 @@
 #include "ElaScrollPage.h"
 #include "model/product/cart.h"
 
+#include "model/actions.h"
+
 class ElaTableView;
 class ElaText;
 class QStandardItemModel;
@@ -24,10 +26,7 @@ public:
     void setCart(const Cart& cart);
 
 Q_SIGNALS:
-    void increaseRequested(int productId);
-    void decreaseRequested(int productId);
-    void toggleSelectedRequested(int productId, bool isSelected);
-    void removeRequested(int productId);
-    void clearRequested();
     void orderRequested();
+
+    void cartRequest(CartAction action, int productId = -1, int count = 0, std::optional<bool> isSelected = std::nullopt);
 };

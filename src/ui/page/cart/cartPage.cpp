@@ -1,4 +1,5 @@
 #include "cartPage.h"
+#include "model/actions.h"
 
 #include <ElaPushButton.h>
 #include <ElaTableView.h>
@@ -81,28 +82,31 @@ CartPage::CartPage(QWidget* parent): ElaScrollPage(parent) {
     connect(decreaseButton, &ElaPushButton::clicked, this, [this]() {
         const int productId = selectedProductId();
         if (productId >= 0) {
-            Q_EMIT decreaseRequested(productId);
+            emit cartRequest(CartAction::Sub, productId, 1);
         }
     });
     connect(increaseButton, &ElaPushButton::clicked, this, [this]() {
         const int productId = selectedProductId();
         if (productId >= 0) {
-            Q_EMIT increaseRequested(productId);
+            emit cartRequest(CartAction::Add, productId, 1);
         }
     });
     connect(toggleButton, &ElaPushButton::clicked, this, [this]() {
         const int productId = selectedProductId();
         if (productId >= 0) {
-            Q_EMIT toggleSelectedRequested(productId, !selectedProductIsSelected());
+            emit cartRequest(CartAction::Toggle, productId, 0, !selectedProductIsSelected());
         }
     });
     connect(removeButton, &ElaPushButton::clicked, this, [this]() {
         const int productId = selectedProductId();
         if (productId >= 0) {
-            Q_EMIT removeRequested(productId);
+            emit cartRequest(CartAction::Del, productId);
         }
     });
-    connect(clearButton, &ElaPushButton::clicked, this, &CartPage::clearRequested);
+    connect(clearButton, &ElaPushButton::clicked, this, [this]() {
+        cartRequest(CartAction::Clear);
+    });
+
     connect(orderButton, &ElaPushButton::clicked, this, &CartPage::orderRequested);
 }
 
@@ -111,7 +115,7 @@ void CartPage::setCart(const Cart& cart) {
 
     for (const auto& item : cart.getItems()) {
         QList<QStandardItem*> row;
-        row << new QStandardItem(item.isSelected ? "Yes" : "No");
+        row << new QStandardItem(item.isSelected() ? "Yes" : "No");
         row << new QStandardItem(QString::number(item.id));
         row << new QStandardItem(QString::number(item.count));
         row << new QStandardItem(QString::number(item.price));

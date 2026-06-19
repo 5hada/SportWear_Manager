@@ -5,7 +5,7 @@
 #include <QVBoxLayout>
 
 UserPanel::UserPanel(QWidget* parent): QWidget(parent) {
-    titleText = new ElaText("User", this);
+    titleText = new ElaText("Guest", this);
     titleText->setTextPixelSize(26);
 
     descText = new ElaText("Choose an account action.", this);
@@ -16,12 +16,12 @@ UserPanel::UserPanel(QWidget* parent): QWidget(parent) {
     logoutButton = new ElaPushButton("Logout", this);
 
     auto* buttonLayout = new QHBoxLayout();
+    buttonLayout->addStretch();
     buttonLayout->addWidget(signupButton);
     buttonLayout->addSpacing(10);
     buttonLayout->addWidget(loginButton);
     buttonLayout->addSpacing(10);
     buttonLayout->addWidget(logoutButton);
-    buttonLayout->addStretch();
 
     auto* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(32, 28, 32, 28);
@@ -35,4 +35,27 @@ UserPanel::UserPanel(QWidget* parent): QWidget(parent) {
     connect(signupButton, &ElaPushButton::clicked, this, &UserPanel::signupRequested);
     connect(loginButton, &ElaPushButton::clicked, this, &UserPanel::loginRequested);
     connect(logoutButton, &ElaPushButton::clicked, this, &UserPanel::logoutRequested);
+}
+
+void UserPanel::setRole(const UserRole& role) {
+    switch (role) {
+        case UserRole::Guest:
+            titleText->setText("Welcome, Guest!");
+            signupButton->setVisible(true);
+            loginButton->setVisible(true);
+            logoutButton->setVisible(false);
+            break;
+        case UserRole::User:
+            titleText->setText("Welcome, User!");
+            signupButton->setVisible(false);
+            loginButton->setVisible(false);
+            logoutButton->setVisible(true);
+            break;
+        case UserRole::Admin:
+            titleText->setText("Welcome, Admin!");
+            signupButton->setVisible(false);
+            loginButton->setVisible(false);
+            logoutButton->setVisible(true);
+            break;
+    }
 }

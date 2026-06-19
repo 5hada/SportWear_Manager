@@ -12,10 +12,10 @@ Cart CartRepository::findByUser(int userId) const {
 
     if (sqlOk(sql, statement)) {
         sqlite3_bind_int(statement, 1, userId);
-
         while (sqlite3_step(statement) == SQLITE_ROW) {
             cart.addItem(cartItemFromStatement(statement));
         }
+        cart.setUserId(sqlite3_column_int(statement, 0));
         sqlite3_finalize(statement);
     }
     return cart;
@@ -144,9 +144,8 @@ bool CartRepository::clear(int userId) {
 
 CartItem CartRepository::cartItemFromStatement(sqlite3_stmt* statement){
     return CartItem(
-        sqlite3_column_int(statement, 1),
         sqlite3_column_int(statement, 2),
         sqlite3_column_int(statement, 0),
-        sqlite3_column_int(statement, 3)
+        sqlite3_column_int(statement, 3) == 1
     );
 }

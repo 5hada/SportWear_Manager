@@ -2,20 +2,24 @@
 #include "ui/mainwindow.h"
 
 #include <QApplication>
-#include <QLocale>
-#include <QTranslator>
+#include <QSplashScreen>
 
 #include <ElaApplication.h>
 
 int main(int argc, char *argv[]) {
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
 
+    QSplashScreen splash;
+    splash.setPixmap(QPixmap(":/images/loading.png"));
+    splash.show();
     ElaApplication::getInstance()->init();
 
-    AppContext app;
+    AppContext context;
 
-    MainWindow window(app.event);
+    MainWindow window(context.event);
     window.show();
 
-    return a.exec();
+    splash.finish(&window);
+
+    return app.exec();
 }

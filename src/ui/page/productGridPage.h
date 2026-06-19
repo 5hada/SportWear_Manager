@@ -1,45 +1,37 @@
 #pragma once
 
 #include <ElaScrollPage.h>
+#include <tuple>
 
 #include "model/product/product.h"
 
 class ElaFlowLayout;
 class ElaLineEdit;
-class ElaText;
-class QHBoxLayout;
+class ProductCard;
+class IndexNavigation;
 
 class ProductGridPage: public ElaScrollPage {
     Q_OBJECT
 
-    Products products;
     ElaFlowLayout* productLayout{nullptr};
-    QHBoxLayout* indexNavigation;
-    ElaText* pageIndex;
-    ElaLineEdit* pageIndexInput{nullptr};
     ElaLineEdit* searchEdit{nullptr};
-    int currentPage{0};
-    static constexpr int PageSize = 12;
+    IndexNavigation* indexNavigation{nullptr};
+    std::vector<ProductCard*> productCards;
 
     void initPage();
     void initLayout();
-    void initIndexNavigation();
     void initConnect();
-    void initCard();
 
-    void addProductCard(const Product& product);
-    void rebuildProducts();
-    bool matchesSearch(const Product& product) const;
-    Products filteredProducts() const;
-    int pageCount(int itemCount) const;
-    void setCurrentPage(int page);
-    void updatePageControls(int totalPages);
-    void detailRequest(int productId);
+    void setProductCards(const Products& products);
+
+    static int ItemsPerPage;
 public:
-    explicit ProductGridPage(QWidget* parent = nullptr);
+    ProductGridPage(int ItemsPerPage, QWidget* parent = nullptr);
 
-    void setProducts(Products products);
+    void setContents(std::tuple<const Products&, int, int>);
 
 Q_SIGNALS:
-    void productSelected(const Product& product);
+    void searchRequested(const string& keyword);
+    void pageIndexChanged(int newIndex);
+    void productSelected(int productId);
 };

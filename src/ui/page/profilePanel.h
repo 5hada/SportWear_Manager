@@ -20,6 +20,7 @@ class ProfilePanel: public ElaDialog{
     SignupPanel* signupPanel;
     LoginPanel* loginPanel;
     LogoutPanel* logoutPanel;
+    UserRole currentRole{UserRole::Guest};
 
     void initPanel();
     void initLayout();

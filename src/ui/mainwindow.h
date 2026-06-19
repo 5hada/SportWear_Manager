@@ -2,16 +2,19 @@
 
 #include "model/product/category.h"
 #include <ElaWindow.h>
-#include <map>
+#include <QString>
+#include <functional>
+
+class Order;
 
 class QStackedWidget;
 class ElaPushButton;
 
 class EventHandler;
-class Order;
+// class ElaProgressRing;
 
-class ProductDetailPage;
 class ProductGridPage;
+class ProductDetailPage;
 class ProfilePanel;
 class OrderPanel;
 class ReceiptPage;
@@ -19,57 +22,78 @@ class CartPage;
 class CartWidget;
 class WishPage;
 class Dialog;
+class SettingPanel;
 
 class MainWindow : public ElaWindow{
     Q_OBJECT
 
     EventHandler& event;
 
+    // ElaProgressRing* progressRing{nullptr};
+
     QStackedWidget* productPages{nullptr};
     ProductGridPage* productGridPage{nullptr};
-    std::map<Category,ProductGridPage*> productCategoryPages;
     ProductDetailPage* productDetailPage{nullptr};
-    ProfilePanel* profilePanel{nullptr};
-    OrderPanel* orderPanel{nullptr};
     ReceiptPage* receiptPage{nullptr};
-    CartWidget* cartWidget{nullptr};
     CartPage* cartPage{nullptr};
     WishPage* wishPage{nullptr};
+    
+    OrderPanel* orderPanel{nullptr};
+    SettingPanel* settingPanel{nullptr};
+    ProfilePanel* profilePanel{nullptr};
+    CartWidget* cartWidget{nullptr};
     Dialog* dialog{nullptr};
-    ElaPushButton* cartButton{nullptr};
-    bool navigatingToProductDetail{false};
-    QString detailReturnNodeKey;
 
+    ElaPushButton* cartButton{nullptr};
+
+    std::map<Category, QWidget*> productsKeys;
+    QString detailReturnNodeKey;
     QString categoriesKey;
-    QString settingsKey;
+    QString settingKey;
     QString profileKey;
+
+    bool navigatingToProductDetail{false};
     
     void initWindow();
+
+    // void showLoading();
+    // void hideLoading();
+
     void initContent();
     void initConnect();
 
     void connectNavigation();
-    void connectPages();
+    void connectPageRequests();
 
-    void updateUserInfo();
+    void connectProductsPage();
+    void connectDetailPage();
+    void connectReceiptPage();
+    void connectCartPage();
+    void connectWishPage();
 
-    void showProductPage();
-    void showProductCategoryPage(Category category);
+    void connectOrderPanel();
+    void connectSettingPanel();
+    void connectProfilePanel();
+    // void connectDialog();
+    void connectCartWidget();
+
+    void showProductPage(Category category = Category::Unknown);
     void showDetailPage(int productId, const QString& returnNodeKey = QString());
-    void showOrderPanel(const Order& order);
     void showReceiptPage();
-    void showCartWidget();
     void showCartPage();
     void showWishPage();
 
-    void showUserPanel();
-    void showLoginPanel();
-    void showLogoutPanel();
-    void showSignupPanel();
+    void showOrderPanel();
+    void showSettingPanel();
 
+    void showProfilePanel();
+    void updateUserInfo();
+
+    void openCartWidget();
+    void closeCartWidget();
     void adjustCartButton();
+
+    void handleResult(bool result, const std::function<void()>& callback = {});
 public:
-    MainWindow(
-        EventHandler& event
-    );
+    MainWindow(EventHandler& event);
 };

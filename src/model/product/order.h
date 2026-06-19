@@ -3,7 +3,7 @@
 #include "Item.h"
 
 
-class Order{
+class Order {
     int userId;
     int availablePoints;
     int totalPrice;

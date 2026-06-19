@@ -3,13 +3,17 @@
 #include "cartItem.h"
 
 class Cart {
+    int userId = 0;
     CartItems items;
 
 public:
     Cart() = default;
-    Cart(CartItems& items) { this->items = items; }
+    Cart(int userId, CartItems& items) : userId(userId), items(items) {}
     // ~Cart();
+    void setUserId(int userId) { this->userId = userId; }
+    void setItems(CartItems& items) { this->items = items; }
 
+    int getUserId() const { return userId; }
     CartItems &getItems() { return items;}
     const CartItems &getItems() const{ return items;}
 

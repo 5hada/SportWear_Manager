@@ -22,6 +22,7 @@ void FormWidget::initLayout() {
     rightButtonText = new ElaText("Confirm");
     topEdit = new ElaLineEdit();
     bottomEdit = new ElaLineEdit();
+    bottomEdit->setEchoMode(QLineEdit::Password);
     leftButton = new ElaPushButton();
     rightButton = new ElaPushButton();
 
@@ -57,9 +58,13 @@ void FormWidget::initLayout() {
 void FormWidget::initConnect() {
     connect(leftButton, &ElaPushButton::clicked, this, [this]() {
         emit leftButtonClicked();
+        topEdit->clear();
+        bottomEdit->clear();
     });
     connect(rightButton, &ElaPushButton::clicked, this, [this]() {
         emit rightButtonClicked(topEdit->text().toStdString(), bottomEdit->text().toStdString());
+        topEdit->clear();
+        bottomEdit->clear();
     });
 }
 

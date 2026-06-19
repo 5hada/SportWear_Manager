@@ -23,13 +23,16 @@ class EventHandler {
 public:
     EventHandler(ServiceProvider& service): service(service) {}
 
+    int getItemsPerPage() const {return 50;}
+
     UserInfo getUser();
     bool setUser(UserAction action, optional<string> name = nullopt, optional<string> password = nullopt);
 
-    Products getProducts(optional<string> text = nullopt, optional<Category> category = nullopt);
+    std::tuple<const Products&, int, int> getProductsContents(optional<string> text = nullopt, optional<Category> category = nullopt);
     Product getProduct(int productId);
 
-    Order getOrder(int productId = -1);
+    bool setOrder(int productId = -1);
+    Order getOrder();
     bool confirmOrder(int usedPoint = 0);
     
     bool refund(int receiptId);
@@ -37,7 +40,7 @@ public:
     Cart getCart();
     bool handleCart(
         CartAction action,
-        int productId = 0,
+        int productId = -1,
         int count = 0,
         std::optional<bool> isSelected = std::nullopt
     );
