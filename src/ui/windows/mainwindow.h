@@ -14,7 +14,6 @@ class ElaPushButton;
 class QWidget;
 
 class EventHandler;
-// class ElaProgressRing;
 
 class ProductGridPage;
 class ProductDetailPage;
@@ -32,8 +31,6 @@ class MainWindow : public ElaWindow{
     Q_OBJECT
 
     EventHandler& event;
-
-    // ElaProgressRing* progressRing{nullptr};
 
     QStackedWidget* productPages{nullptr};
     ProductGridPage* productGridPage{nullptr};
@@ -62,9 +59,6 @@ class MainWindow : public ElaWindow{
     
     void initWindow();
 
-    // void showLoading();
-    // void hideLoading();
-
     void initContent();
     void initConnect();
 
@@ -80,7 +74,6 @@ class MainWindow : public ElaWindow{
     void connectOrderPanel();
     void connectSettingPanel();
     void connectProfilePanel();
-    // void connectDialog();
     void connectCartWidget();
 
     void showProductPage();

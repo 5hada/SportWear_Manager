@@ -55,30 +55,6 @@ void MainWindow::initWindow() {
     addCentralWidget(landingText);
 }
 
-// void MainWindow::showLoading() {
-//     progressRing = new ElaProgressRing(this);
-//     progressRing->setFixedSize(100, 100);
-//     progressRing->move((width() - progressRing->width()) / 2, (height() - progressRing->height()) / 2);
-//     progressRing->show();
-//     auto* loadingText = new ElaText("Loading...", this);
-//     loadingText->setTextPixelSize(24);
-//     loadingText->setAlignment(Qt::AlignCenter);
-//     auto* loadingLayout = new QVBoxLayout();
-//     loadingLayout->addWidget(loadingText);
-//     loadingLayout->addWidget(progressRing);
-//     setLayout(loadingLayout);
-// }
-
-// void MainWindow::hideLoading() {
-//     if (progressRing) {
-//         progressRing->deleteLater();
-//         progressRing = nullptr;
-//     }
-//     if (layout()) {
-//         delete layout();
-//     }
-// }
-
 void MainWindow::initContent() {
     updateUserInfo();
 
