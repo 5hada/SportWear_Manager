@@ -5,6 +5,7 @@ class ProductService {
 
     bool isRepoValid() const;
     std::optional<Product> getOptById(int id) const;
+
 public:
     ProductService(ProductRepository *productRepo): productRepo(productRepo) {}
 

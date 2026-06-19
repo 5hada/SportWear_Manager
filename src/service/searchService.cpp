@@ -1,60 +1,93 @@
 #include "searchService.h"
 #include "productService.h"
+#include <sstream>
 
 
-Products SearchService::allProducts(int pageIndex) {
-    if (productService == nullptr || pageIndex < 0) {return {};}
-    if (currentProducts.empty() || currentSearchType != SearchType::All) {
-        currentProducts.clear();
-        currentProducts = productService->getAll();
-        currentSearchType = SearchType::All;
+bool SearchService::setMaxIndex() {
+    int size = (currentMode == SearchMode::Keyword) ? filteredProducts.size() : productsPool.size();
+    if (size < 0) {return false;}
+    if (size < ItemsPerPage) {
+        currentMaxIndex = 0;
     }
-    return filterIndex(pageIndex);
-}
-
-
-Products SearchService::getCategoryProducts(Category category, int pageIndex) {
-    if (productService == nullptr || pageIndex < 0) {return {};}
-    if (currentProducts.empty() || currentSearchType != SearchType::Category) {
-        currentProducts.clear();
-        currentProducts = productService->getByCategory(category);
-        currentCategory = category;
-        currentSearchType = SearchType::Category;
+    else {
+        currentMaxIndex = size / ItemsPerPage;
     }
-    return filterIndex(pageIndex);
+    return true;
 }
+int SearchService::getMaxIndex() const {return currentMaxIndex;}
 
 
-Products SearchService::searchProducts(const string& keyword, int pageIndex) {
-    if (productService == nullptr || pageIndex < 0 || currentProducts.empty()) {return {};}
-    return filterIndex(pageIndex);
+bool SearchService::setCurrentIndex(int newIndex) {
+    if (newIndex < 0 || newIndex > currentMaxIndex) {return false;}
+    currentIndex = newIndex;
+    return true;
 }
-
-Products SearchService::getProducts(SearchType type, optional<string> keyword, optional<Category> category, int pageIndex) {
-    if (productService == nullptr || pageIndex < 0) {return {};}
-    switch (type) {
-        case SearchType::All:
-            return allProducts(pageIndex);
-        case SearchType::Category:
-            if (!category.has_value()) {return {};}
-            return getCategoryProducts(category.value(), pageIndex);
-        default:
-            return {};
-     }
-}
+int SearchService::getCurrentIndex() const {return currentIndex;}
 
 
-Products SearchService::filterIndex(int pageIndex, Products products) const {
-    Products pool;
-    if (products.empty()) {
-        pool = currentProducts;
-    } else {
-        pool = products;
+
+bool SearchService::setProductsPool(optional<Category> category) {
+    if (productService == nullptr) {return false;}
+    setSearchMode(SearchMode::All);
+    productsPool.clear();
+    if (category == nullopt) {
+        productsPool = productService->getAll();
+        return true;
     }
-    if (pool.empty() || pageIndex < 0) {return {};}
-    const int begin = pageIndex * ItemsPerPage;
-    const int end = begin + ItemsPerPage < static_cast<int>(pool.size())
-            ? begin + ItemsPerPage
-            : static_cast<int>(pool.size());
-    return {pool.begin() + begin, pool.begin() + end};
+    else {
+        productsPool = productService->getByCategory(category.value());
+        return true;
+    }
+}
+
+bool SearchService::searchProducts(const string& keyword) {
+    if (productService == nullptr) {return false;}
+    setSearchMode(SearchMode::Keyword);
+    filteredProducts.clear();
+    std::vector<std::string> keywords;
+    std::stringstream ss(keyword);
+    std::string word;
+    while (ss >> word) {
+        keywords.push_back(word);
+    }
+
+    for (const auto& product : productsPool) {
+        bool matched = true;
+        for (const auto& word : keywords) {
+            if (product.getName().find(word) == std::string::npos) {
+                matched = false;
+                break;
+            }
+        }
+        if (matched) {
+            filteredProducts.push_back(product);
+        }
+    }
+    return true;
+}
+
+
+
+Products SearchService::getProducts() {
+    Products& pool = (currentMode == SearchMode::Keyword) ? filteredProducts : productsPool;
+    int begin = currentIndex*ItemsPerPage;
+    int end = (currentIndex == currentMaxIndex) ?
+        pool.size() : begin + ItemsPerPage;
+    return {pool.begin() + begin, pool.end() + end};
+}
+
+
+
+
+
+
+
+bool SearchService::setCurrentProduct(int productId) {
+    currentProduct = productService->getById(productId);
+    if (currentProduct.getId() != productId) {return false;}
+    return true;
+};
+
+Product SearchService::getCurrentProduct() const {
+    return currentProduct;
 }

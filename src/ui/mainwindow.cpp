@@ -141,6 +141,7 @@ void MainWindow::connectNavigation() {
     connect(this, &ElaWindow::navigationNodeClicked, this,
             [this](ElaNavigationType::NavigationNodeType, const QString& nodeKey) {
                 if (nodeKey == productPages->property("ElaPageKey").toString()) {
+                    prevNodeKey = nodeKey;
                     showProductPage();
                 }
                 else if (nodeKey == wishPage->property("ElaPageKey").toString()) {
@@ -161,7 +162,8 @@ void MainWindow::connectNavigation() {
                 else{
                     for (auto& category: Categories){
                         if (nodeKey == productsKeys.at(category)->property("ElaPageKey").toString()) {
-                            showProductPage(category);
+                            prevNodeKey = nodeKey;
+                            showProductPage();
                             break;
                         }
                     }
@@ -169,10 +171,6 @@ void MainWindow::connectNavigation() {
                 closeCartWidget();
             }
         );
-    
-        connect(cartButton, &ElaPushButton::pressed, this, [this]() {
-            openCartWidget();
-        });
 }
 
 void MainWindow::connectPageRequests() {
@@ -190,19 +188,15 @@ void MainWindow::connectPageRequests() {
 
 void MainWindow::connectProductsPage() {
     connect(productGridPage, &ProductGridPage::productSelected, this, [this](const Product& product) {
-        showDetailPage(product.getId());
+        handleResult(event.setProduct(product.getId()), [this] {
+            showDetailPage();
+        });
     });
 }
 
 void MainWindow::connectDetailPage() {
     connect(productDetailPage, &ProductDetailPage::backRequest, this, [this]() {
-        if (!detailReturnNodeKey.isEmpty()) {
-            const QString returnNodeKey = detailReturnNodeKey;
-            detailReturnNodeKey.clear();
-            navigation(returnNodeKey);
-            return;
-        }
-        productPages->setCurrentWidget(productGridPage);
+        showProductPage();
     });
 
     connect(productDetailPage, &ProductDetailPage::cartRequest, this, [this](int productId) {
@@ -245,16 +239,15 @@ void MainWindow::connectCartPage() {
 
 void MainWindow::connectWishPage() {
     connect(wishPage, &WishPage::productSelected, this, [this](int productId) {
-        showDetailPage(productId, wishPage->property("ElaPageKey").toString());
+        handleResult(event.setProduct(productId), [this] {
+            showDetailPage();
+        });
     });
 
     connect(wishPage, &WishPage::removeRequested, this, [this](int productId) {
-        if (!event.setWish(productId, false)) {
-            MessageBar::Fail(this);
-            return;
-        }
-        wishPage->setWishs(event.getWishs());
-        MessageBar::Success(this);
+        handleResult(event.setWish(productId, false), [this] {
+            showWishPage();
+        });
     });
 }
 
@@ -263,13 +256,10 @@ void MainWindow::connectWishPage() {
 
 void MainWindow::connectOrderPanel() {
     connect(orderPanel, &OrderPanel::confirmRequested, this, [this](int usedPoint) {
-        if (!event.confirmOrder(usedPoint)) {
-            MessageBar::Fail(this);
-            return;
-        }
-        orderPanel->hide();
-        cartWidget->setCart(event.getCart());
-        showReceiptPage();
+        handleResult(event.confirmOrder(usedPoint), [this] {
+            showReceiptPage();
+            orderPanel->hide();
+        });
     });
 
     connect(orderPanel, &OrderPanel::cancelRequested, this, [this]() {
@@ -282,63 +272,48 @@ void MainWindow::connectSettingPanel() {
 }
 
 void MainWindow::connectProfilePanel() {
-    const auto closeProfileAndShowProducts = [this]() {
-        profilePanel->hide();
-        QTimer::singleShot(0, this, [this]() {
-            showProductPage();
+    connect(profilePanel, &ProfilePanel::trySignup, this, [this](const QString& name, const QString& password) {
+        handleResult(event.setUser(UserAction::Signup, name.toStdString(), password.toStdString()), [this] {
+            updateUserInfo();
         });
-    };
-
-    connect(profilePanel, &ProfilePanel::trySignup, this, [this, closeProfileAndShowProducts](const QString& name, const QString& password) {
-        const auto success = event.setUser(UserAction::Signup,name.toStdString(), password.toStdString());
-        if (!success) {
-            MessageBar::Fail(this);
-            return;
-        }
-
-        updateUserInfo();
-        closeProfileAndShowProducts();
     });
-    connect(profilePanel, &ProfilePanel::tryLogin, this, [this, closeProfileAndShowProducts](const QString& name, const QString& password) {
-        const auto success = event.setUser(UserAction::Login, name.toStdString(), password.toStdString());
-        if (!success) {
-            MessageBar::Fail(this);
-            return;
-        }
-
-        updateUserInfo();
-        closeProfileAndShowProducts();
+    connect(profilePanel, &ProfilePanel::tryLogin, this, [this](const QString& name, const QString& password) {
+        handleResult(event.setUser(UserAction::Login, name.toStdString(), password.toStdString()), [this] {
+            updateUserInfo();
+        });
     });
-    connect(profilePanel, &ProfilePanel::tryLogout, this, [this, closeProfileAndShowProducts]() {
-        const auto success = event.setUser(UserAction::Logout);
-        if (!success) {
-            MessageBar::Fail(this);
-            return;
-        }
-
-        updateUserInfo();
-        closeProfileAndShowProducts();
+    connect(profilePanel, &ProfilePanel::tryLogout, this, [this]() {
+        handleResult(event.setUser(UserAction::Logout), [this] {
+            updateUserInfo();
+        });
     });
 }
 
 void MainWindow::connectCartWidget() {
-
+    connect(cartButton, &ElaPushButton::pressed, this, [this]() {
+        openCartWidget();
+    });
 }
 
 
 
-void MainWindow::showProductPage(Category category) {
-    productGridPage->setContents(event.getProductsContents(std::nullopt, category));
+
+void MainWindow::showProductPage() {
+    productGridPage->setContents(event.getProductsContents());
     productPages->setCurrentWidget(productGridPage);
-    navigation(productPages->property("ElaPageKey").toString());
+    // if (prevNodeKey == getCurrentNavigationPageKey()) {return;}
+    if (getCurrentNavigationPageKey() != productPages->property("ElaPageKey").toString()){
+        navigation(productPages->property("ElaPageKey").toString());
+    }
+
 }
 
-void MainWindow::showDetailPage(int productId, const QString& returnNodeKey) {
-   detailReturnNodeKey = returnNodeKey;
-   productDetailPage->setProduct(event.getProduct(productId));
-   productPages->setCurrentWidget(productDetailPage);
-   navigatingToProductDetail = true;
-   navigation(productPages->property("ElaPageKey").toString());
+void MainWindow::showDetailPage() {
+    productDetailPage->setProduct(event.getProduct());
+    productPages->setCurrentWidget(productDetailPage);
+    if (getCurrentNavigationPageKey() != productPages->property("ElaPageKey").toString()){
+        navigation(productPages->property("ElaPageKey").toString());
+    }
 }
 
 void MainWindow::showReceiptPage() {
@@ -355,7 +330,9 @@ void MainWindow::showCartPage() {
 
 void MainWindow::showWishPage() {
     wishPage->setWishs(event.getWishs());
-    navigation(wishPage->property("ElaPageKey").toString());
+    if (getCurrentNavigationPageKey() != wishPage->property("ElaPageKey").toString()){
+        navigation(wishPage->property("ElaPageKey").toString());
+    }
 }
 
 
@@ -390,6 +367,7 @@ void MainWindow::updateUserInfo() {
             setUserInfoCardSubTitle("Not signed in");   
             break;
     }
+    profilePanel->hide();
 }
 
 

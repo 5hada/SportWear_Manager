@@ -1,32 +1,54 @@
 
+#include "model/product/category.h"
 #include "model/product/product.h"
 #include <optional>
 
 using std::optional;
+using std::nullopt;
+
+enum class SearchMode {
+    All,
+    Keyword
+};
 
 class ProductService;
 
 class SearchService {
     ProductService* productService{nullptr};
 
-    Products currentProducts;
-    int currentMaxIndex{-1};
-    Category currentSearchType{Category::Unknown};
+    SearchMode currentMode = SearchMode::All;
+
+    Products productsPool;
+    Products filteredProducts;
+
+    int currentIndex = -1;
+    int currentMaxIndex = -1;
+
+    Product currentProduct;
 
     static constexpr int ItemsPerPage = 50;
+
+    void setSearchMode(SearchMode mode) {currentMode = mode;}
+    SearchMode getSearchMode() const {return currentMode;}
+
+    bool matchesSearch(const Product& product);
 public:
     SearchService() {}
 
     void setProductService(ProductService* productService) {this->productService = productService;}
 
-    Products allProducts(int pageIndex);
-    Products getCategoryProducts(Category category, int pageIndex);
 
-    Products filterIndex(int pageIndex, Products products = {}) const;
-    Products filterKeyword(const string& keyword, int pageIndex);
+    bool setMaxIndex();
+    int getMaxIndex() const;
 
-    int getMaxPageIndex(const string& keyword, Category category = Category::Unknown) const;
-    Products getProducts(const string& keyword, int pageIndex, Category category = Category::Unknown);
+    bool setCurrentIndex(int newIndex);
+    int getCurrentIndex() const;
 
-    Products searchProducts(const string& keyword, int pageIndex);
+    bool setProductsPool(optional<Category> category = nullopt);
+    bool searchProducts(const string& keyword);
+    Products getProducts();
+
+    
+    bool setCurrentProduct(int productId);
+    Product getCurrentProduct() const;
 };

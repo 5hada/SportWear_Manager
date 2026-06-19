@@ -47,12 +47,10 @@ class MainWindow : public ElaWindow{
     ElaPushButton* cartButton{nullptr};
 
     std::map<Category, QWidget*> productsKeys;
-    QString detailReturnNodeKey;
+    QString prevNodeKey;
     QString categoriesKey;
     QString settingKey;
     QString profileKey;
-
-    bool navigatingToProductDetail{false};
     
     void initWindow();
 
@@ -77,8 +75,8 @@ class MainWindow : public ElaWindow{
     // void connectDialog();
     void connectCartWidget();
 
-    void showProductPage(Category category = Category::Unknown);
-    void showDetailPage(int productId, const QString& returnNodeKey = QString());
+    void showProductPage();
+    void showDetailPage();
     void showReceiptPage();
     void showCartPage();
     void showWishPage();

@@ -28,8 +28,12 @@ public:
     UserInfo getUser();
     bool setUser(UserAction action, optional<string> name = nullopt, optional<string> password = nullopt);
 
-    std::tuple<const Products&, int, int> getProductsContents(optional<string> text = nullopt, optional<Category> category = nullopt);
-    Product getProduct(int productId);
+
+    bool setProducts(int index = -1, optional<string> keyword = nullopt, optional<Category> category = nullopt);
+    std::tuple<const Products&, int, int> getProductsContents();
+
+    bool setProduct(int productId);
+    Product getProduct();
 
     bool setOrder(int productId = -1);
     Order getOrder();
@@ -54,10 +58,7 @@ public:
     Reviews getReviews(int productId);
     bool setReview(Review review);
 
-    bool setProduct();
-
-
-    void errorCallback();
+    bool updateProduct(Product product);
 };
 
 

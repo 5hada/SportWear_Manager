@@ -2,6 +2,7 @@
 #include "model/actions.h"
 #include "serviceProvider.h"
 #include "model/product/category.h"
+#include <optional>
 
 int EventHandler::userId() {
     return service.account.getUserId();
@@ -29,17 +30,39 @@ bool EventHandler::setUser(UserAction action, optional<string> name, optional<st
     return false;
 }
 
-std::tuple<const Products&, int, int> EventHandler::getProductsContents(optional<string> text, optional<Category> category) {
-    if (text == nullopt && category == nullopt) {
-        return std::make_tuple(service.product.getAll(), 0, 0);
+
+
+bool EventHandler::setProducts(int index, optional<string> keyword, optional<Category> category) {
+    if (index != -1 && keyword == nullopt && category == nullopt) {return false;}
+    if (index != -1) {
+        if (!service.search.setCurrentIndex(index)) {return false;}
     }
     if (category != nullopt) {
-        return std::make_tuple(service.product.getByCategory(category.value()), 0, 0);
+        if (category == Category::Unknown) {
+            if(!service.search.setProductsPool()) {return false;}
+        }
+        else {
+            if (!service.search.setProductsPool(category.value())) {return false;}
+        }
     }
-    return std::make_tuple(service.product.getAll(), 0, 0);
+    if (keyword != nullopt) {
+        if (!service.search.searchProducts(keyword.value())) {return false;}
+    }
+    return true;
+
 }
-Product EventHandler::getProduct(int productId) {
-    return service.product.getById(productId);
+
+std::tuple<const Products&, int, int> EventHandler::getProductsContents() {
+    return std::make_tuple(service.search.getProducts(), service.search.getCurrentIndex(), service.search.getMaxIndex());
+}
+
+
+
+bool EventHandler::setProduct(int productId) {
+    return service.search.setCurrentProduct(productId);
+}
+Product EventHandler::getProduct() {
+    return service.search.getCurrentProduct();
 }
 
 bool EventHandler::setOrder(int productId) {
@@ -107,6 +130,6 @@ bool EventHandler::setReview(Review review) {
 }
 
 
-bool EventHandler::setProduct() {
+bool EventHandler::updateProduct(Product product) {
     return false;
 }
