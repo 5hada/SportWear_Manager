@@ -2,9 +2,9 @@
 
 #include "ElaScrollPage.h"
 
-#include "model/product/cart.h"
-#include "model/actions.h"
+#include "app/eventHandler.h"
 
+class ElaIconButton;
 class ElaTableView;
 class ElaText;
 class QStandardItemModel;
@@ -12,29 +12,24 @@ class QStandardItemModel;
 class CartPage: public ElaScrollPage {
     Q_OBJECT
 
-    Cart currentCart;
-    QStandardItemModel* model{nullptr};
     ElaTableView* cartTable{nullptr};
+    QStandardItemModel* model{nullptr};
+    ElaText* pageText{nullptr};
+    ElaIconButton* previousButton{nullptr};
+    ElaIconButton* nextButton{nullptr};
     ElaText* totalCountText{nullptr};
     ElaText* totalPriceText{nullptr};
 
-    int findRow(int productId) const;
-    CartItem* findItem(int productId);
-    void appendItemRow(const CartItem& item);
-    void updateItemRow(int row, const CartItem& item);
-    void removeProductRow(int productId);
-    void removeProductRowLater(int productId);
-    void resizeTableColumns();
-    void refreshSummary();
+    void clearRow(int row);
+    void setPageInfo(int currentPage, int maxPage);
 
 public:
     explicit CartPage(QWidget* parent = nullptr);
 
-    void setCart(const Cart& cart);
-    void syncCart(const Cart& cart);
-    void restoreProductRow(int productId);
+    void refreshContent(const CartPageContent& content);
 
 Q_SIGNALS:
+    void pageMoveRequested(int delta);
     void orderRequested();
 
     void cartRequest(CartAction action, int productId = -1, int count = 0, std::optional<bool> isSelected = std::nullopt);

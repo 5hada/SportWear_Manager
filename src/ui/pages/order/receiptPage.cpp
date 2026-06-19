@@ -1,14 +1,37 @@
 #include "receiptPage.h"
 #include "ui/common/tableItemUtil.h"
 
+#include <ElaIconButton.h>
 #include <ElaPushButton.h>
 #include <ElaTableView.h>
 #include <ElaText.h>
 #include <QHeaderView>
-#include <QItemSelectionModel>
-#include <QStandardItemModel>
 #include <QHBoxLayout>
+#include <QStandardItemModel>
 #include <QVBoxLayout>
+
+namespace {
+constexpr int FixedRowCount = 8;
+constexpr int ActionColumn = 6;
+
+void clearIndexWidget(ElaTableView* table, QStandardItemModel* model, int row, int column) {
+    const auto index = model->index(row, column);
+    if (table->indexWidget(index) != nullptr) {
+        table->setIndexWidget(index, nullptr);
+    }
+}
+
+QWidget* centeredWidget(QWidget* child, QWidget* parent) {
+    auto* container = new QWidget(parent);
+    auto* layout = new QHBoxLayout(container);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(6);
+    layout->addStretch();
+    layout->addWidget(child);
+    layout->addStretch();
+    return container;
+}
+}
 
 ReceiptPage::ReceiptPage(QWidget* parent): ElaScrollPage(parent) {
     setWindowTitle("Receipts");
@@ -21,38 +44,46 @@ ReceiptPage::ReceiptPage(QWidget* parent): ElaScrollPage(parent) {
     auto* descText = new ElaText("Purchase history.", this);
     descText->setTextPixelSize(16);
 
-    model = new QStandardItemModel(this);
-    model->setHorizontalHeaderLabels({"ID", "Date", "Items", "Paid", "Point", "Status"});
+    model = new QStandardItemModel(FixedRowCount, 7, this);
+    model->setHorizontalHeaderLabels({"ID", "Date", "Items", "Paid", "Point", "Status", "Actions"});
     centerHeaderItems(model);
+    for (int row = 0; row < FixedRowCount; ++row) {
+        for (int column = 0; column < model->columnCount(); ++column) {
+            model->setItem(row, column, centeredItem());
+        }
+    }
 
     receiptTable = new ElaTableView(this);
     receiptTable->setModel(model);
     receiptTable->setAlternatingRowColors(true);
-    receiptTable->verticalHeader()->setHidden(true);
-    receiptTable->horizontalHeader()->setStretchLastSection(true);
-    receiptTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
-    receiptTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    receiptTable->setFixedHeight(460);
+    receiptTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    receiptTable->setSelectionMode(QAbstractItemView::NoSelection);
+    receiptTable->setTextElideMode(Qt::ElideRight);
+    receiptTable->verticalHeader()->setVisible(false);
+    receiptTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    receiptTable->setColumnWidth(0, 70);
+    receiptTable->setColumnWidth(1, 160);
+    receiptTable->setColumnWidth(2, 300);
+    receiptTable->setColumnWidth(3, 100);
+    receiptTable->setColumnWidth(4, 90);
+    receiptTable->setColumnWidth(5, 100);
+    receiptTable->setColumnWidth(6, 120);
 
-    connect(receiptTable, &ElaTableView::tableViewShow, this, [this]() {
-        receiptTable->setColumnWidth(0, 70);
-        receiptTable->setColumnWidth(1, 160);
-        receiptTable->setColumnWidth(2, 300);
-        receiptTable->setColumnWidth(3, 120);
-        receiptTable->setColumnWidth(4, 90);
-    });
+    previousButton = new ElaIconButton(ElaIconType::AngleLeft, this);
+    previousButton->setFixedSize(30, 30);
+    pageText = new ElaText("1 / 1", this);
+    pageText->setFixedSize(70, 30);
+    pageText->setAlignment(Qt::AlignCenter);
+    pageText->setTextPixelSize(12);
+    nextButton = new ElaIconButton(ElaIconType::AngleRight, this);
+    nextButton->setFixedSize(30, 30);
 
-    auto* refundButton = new ElaPushButton("Refund", this);
-    auto* buttonLayout = new QHBoxLayout();
-    buttonLayout->addStretch();
-    buttonLayout->addWidget(refundButton);
-
-    connect(refundButton, &ElaPushButton::clicked, this, [this]() {
-        const int receiptId = selectedReceiptId();
-        if (receiptId >= 0) {
-            Q_EMIT refundRequested(receiptId);
-        }
-    });
+    auto* navigationLayout = new QHBoxLayout();
+    navigationLayout->setContentsMargins(0, 0, 0, 0);
+    navigationLayout->addStretch();
+    navigationLayout->addWidget(previousButton);
+    navigationLayout->addWidget(pageText);
+    navigationLayout->addWidget(nextButton);
 
     auto* centralWidget = new QWidget(this);
     centralWidget->setWindowTitle("Receipts");
@@ -63,49 +94,65 @@ ReceiptPage::ReceiptPage(QWidget* parent): ElaScrollPage(parent) {
     centerLayout->addWidget(titleText);
     centerLayout->addWidget(descText);
     centerLayout->addSpacing(12);
+    centerLayout->addLayout(navigationLayout);
     centerLayout->addWidget(receiptTable);
-    centerLayout->addLayout(buttonLayout);
     centerLayout->addStretch();
 
     addCentralWidget(centralWidget, true, false, 0);
+
+    connect(previousButton, &ElaIconButton::clicked, this, [this]() {
+        Q_EMIT pageMoveRequested(-1);
+    });
+    connect(nextButton, &ElaIconButton::clicked, this, [this]() {
+        Q_EMIT pageMoveRequested(1);
+    });
 }
 
-void ReceiptPage::setReceipts(Receipts receipts, std::vector<std::string> itemSummaries) {
-    this->receipts = std::move(receipts);
-    this->itemSummaries = std::move(itemSummaries);
-    rebuildReceipts();
+void ReceiptPage::clearRow(int row) {
+    for (int column = 0; column < model->columnCount(); ++column) {
+        model->item(row, column)->setText("");
+    }
+    clearIndexWidget(receiptTable, model, row, ActionColumn);
 }
 
-void ReceiptPage::rebuildReceipts() {
-    model->removeRows(0, model->rowCount());
+void ReceiptPage::setPageInfo(int currentPage, int maxPage) {
+    const int normalizedMax = maxPage < 0 ? 0 : maxPage;
+    const int normalizedCurrent = currentPage < 0 ? 0 : currentPage;
+    pageText->setText(QString("%1 / %2").arg(normalizedCurrent + 1).arg(normalizedMax + 1));
+    previousButton->setEnabled(normalizedCurrent > 0);
+    nextButton->setEnabled(normalizedCurrent < normalizedMax);
+}
 
-    for (int index = 0; index < static_cast<int>(receipts.size()); ++index) {
-        const auto& receipt = receipts[index];
-        const QString summary = index < static_cast<int>(itemSummaries.size())
-            ? QString::fromStdString(itemSummaries[index])
+void ReceiptPage::refreshContent(const ReceiptPageContent& content) {
+    setPageInfo(content.currentPage, content.maxPage);
+    for (int row = 0; row < FixedRowCount; ++row) {
+        clearRow(row);
+    }
+
+    for (int row = 0; row < static_cast<int>(content.receipts.size()); ++row) {
+        if (row >= FixedRowCount) {
+            break;
+        }
+        const auto& receipt = content.receipts[row];
+        const QString summary = row < static_cast<int>(content.itemSummaries.size())
+            ? QString::fromStdString(content.itemSummaries[row])
             : "No items";
-        QList<QStandardItem*> row;
-        row << centeredItem(QString::number(receipt.getId()));
-        row << centeredItem(QString::fromStdString(receipt.getDate()));
-        row << centeredItem(summary);
-        row << centeredItem(QString::number(receipt.getPaid()));
-        row << centeredItem(QString::number(receipt.getPoints()));
-        row << centeredItem(receipt.getIsCanceled() ? "Canceled" : "Paid");
-        model->appendRow(row);
-    }
-}
+        const bool refundable = row < static_cast<int>(content.refundable.size()) && content.refundable[row];
 
-int ReceiptPage::selectedReceiptId() const {
-    if (receiptTable == nullptr || receiptTable->selectionModel() == nullptr) {
-        return -1;
-    }
+        model->item(row, 0)->setText(QString::number(receipt.getId()));
+        model->item(row, 1)->setText(QString::fromStdString(receipt.getDate()));
+        model->item(row, 2)->setText(summary);
+        model->item(row, 3)->setText(QString::number(receipt.getPaid()));
+        model->item(row, 4)->setText(QString::number(receipt.getPoints()));
+        model->item(row, 5)->setText(receipt.getIsCanceled() ? "Canceled" : "Paid");
 
-    const auto selectedRows = receiptTable->selectionModel()->selectedRows();
-    if (selectedRows.isEmpty()) {
-        return -1;
+        if (refundable) {
+            auto* refundButton = new ElaPushButton("Refund", receiptTable);
+            refundButton->setFixedSize(82, 28);
+            connect(refundButton, &ElaPushButton::clicked, this, [this, receiptId = receipt.getId()]() {
+                Q_EMIT refundRequested(receiptId);
+            });
+            receiptTable->setIndexWidget(model->index(row, ActionColumn), centeredWidget(refundButton, receiptTable));
+        }
     }
-
-    const int row = selectedRows.first().row();
-    const auto* receiptIdItem = model->item(row, 0);
-    return receiptIdItem == nullptr ? -1 : receiptIdItem->text().toInt();
 }

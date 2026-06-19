@@ -8,9 +8,7 @@
 
 #include "ui/common/dialog.h"
 #include "ui/common/messageBar.h"
-#include "ui/pages/product/productDetailPage.h"
-#include "ui/pages/product/productEditPage.h"
-#include "ui/pages/product/productGridPage.h"
+#include "ui/pages/product/productPages.h"
 #include "ui/panels/profile/profilePanel.h"
 #include "ui/pages/order/orderPanel.h"
 #include "ui/pages/order/receiptPage.h"
@@ -27,7 +25,6 @@
 #include <QMessageBox>
 #include <QRect>
 #include <QTimer>
-#include <QStackedWidget>
 
 MainWindow::MainWindow(EventHandler& event): event(event) {
     initWindow();
@@ -51,17 +48,10 @@ void MainWindow::initWindow() {
 void MainWindow::initContent() {
     updateUserInfo();
 
-    productPages = new QStackedWidget(this);
-    productGridPage = new ProductGridPage(event.getItemsPerPage(), this);
+    productPages = new ProductPages(event.getItemsPerPage(), this);
     refreshProductPage();
-    productDetailPage = new ProductDetailPage(this);
-    productEditPage = new ProductEditPage(this);
     profilePanel = new ProfilePanel(this);
     profilePanel->hide();
-    productPages->addWidget(productGridPage);
-    productPages->addWidget(productDetailPage);
-    productPages->addWidget(productEditPage);
-    productPages->setCurrentWidget(productGridPage);
 
     orderPanel = new OrderPanel(this);
     orderPanel->hide();
@@ -106,13 +96,13 @@ void MainWindow::connectNavigation() {
                 QTimer::singleShot(0, this, [this, nodeKey]() {
                     if (nodeKey == homeKey || nodeKey == productsKey) {
                         refreshProductPage();
-                        productPages->setCurrentWidget(productGridPage);
+                        productPages->showGrid();
                     }
                     else if (nodeKey == wishPage->property("ElaPageKey").toString()) {
-                        wishPage->setWishs(event.getWishs());
+                        refreshWishPageContents();
                     }
                     else if (nodeKey == cartPage->property("ElaPageKey").toString()) {
-                        cartPage->setCart(event.getCart());
+                        refreshCartPageContents();
                     }
                     else if (nodeKey == receiptPage->property("ElaPageKey").toString()) {
                         refreshReceiptPageContents();
@@ -144,58 +134,58 @@ void MainWindow::connectPageRequests() {
 }
 
 void MainWindow::connectProductsPage() {
-    connect(productGridPage, &ProductGridPage::productSelected, this, [this](int productId) {
+    connect(productPages, &ProductPages::productSelected, this, [this](int productId) {
         handleResult(event.setProduct(productId), [this] {
             showDetailPage();
         });
     });
-    connect(productGridPage, &ProductGridPage::searchRequested, this, [this](const string& keyword) {
+    connect(productPages, &ProductPages::searchRequested, this, [this](const std::string& keyword) {
         currentKeyword = keyword.empty() ? std::nullopt : std::make_optional(keyword);
         refreshProductPage();
     });
-    connect(productGridPage, &ProductGridPage::categoryChanged, this, [this](Category category) {
+    connect(productPages, &ProductPages::categoryChanged, this, [this](Category category) {
         currentCategory = category;
         refreshProductPage();
     });
-    connect(productGridPage, &ProductGridPage::pageIndexChanged, this, [this](int newIndex) {
+    connect(productPages, &ProductPages::pageIndexChanged, this, [this](int newIndex) {
         refreshProductPage(newIndex);
     });
-    connect(productGridPage, &ProductGridPage::addRequested, this, [this]() {
+    connect(productPages, &ProductPages::addRequested, this, [this]() {
         showProductAddPage();
     });
 }
 
 void MainWindow::connectDetailPage() {
-    connect(productDetailPage, &ProductDetailPage::backRequest, this, [this]() {
+    connect(productPages, &ProductPages::backRequested, this, [this]() {
         showProductPage();
     });
 
-    connect(productDetailPage, &ProductDetailPage::cartRequest, this, [this](int productId) {
+    connect(productPages, &ProductPages::cartRequested, this, [this](int productId) {
         handleResult(event.handleCart(CartAction::Add, productId, 1), [this] {
             openCartWidget();
         });
     });
 
-    connect(productDetailPage, &ProductDetailPage::orderRequest, this, [this](int productId, int count) {
+    connect(productPages, &ProductPages::orderRequested, this, [this](int productId, int count) {
         handleResult(event.setOrder(productId), [this] {
             showOrderPanel();
         });
     });
 
-    connect(productDetailPage, &ProductDetailPage::wishRequest, this, [this](int productId, bool isWished) {
+    connect(productPages, &ProductPages::wishRequested, this, [this](int productId, bool isWished) {
         handleResult(event.setWish(productId, isWished), [this] {
             const auto product = event.getProduct();
-            productDetailPage->setProduct(product, event.isWished(product.getId()));
+            productPages->setProduct(product, event.isWished(product.getId()));
             refreshProductDetailReviews(product.getId());
-            wishPage->setWishs(event.getWishs());
+            refreshWishPageContents();
         });
     });
-    connect(productDetailPage, &ProductDetailPage::editRequest, this, [this](int productId) {
+    connect(productPages, &ProductPages::editRequested, this, [this](int productId) {
         handleResult(event.setProduct(productId), [this] {
             showProductEditPage();
         });
     });
-    connect(productDetailPage, &ProductDetailPage::reviewSaveRequested,
+    connect(productPages, &ProductPages::reviewSaveRequested,
             this, [this](int reviewId, int productId, int rating, const QString& comment) {
         handleResult(event.saveReview(reviewId, productId, rating, comment.toStdString()), [this, productId] {
             QTimer::singleShot(0, this, [this, productId]() {
@@ -203,7 +193,7 @@ void MainWindow::connectDetailPage() {
             });
         });
     });
-    connect(productDetailPage, &ProductDetailPage::reviewDeleteRequested, this, [this](int reviewId) {
+    connect(productPages, &ProductPages::reviewDeleteRequested, this, [this](int reviewId) {
         const int productId = event.getProduct().getId();
         handleResult(event.deleteReview(reviewId), [this, productId] {
             QTimer::singleShot(0, this, [this, productId]() {
@@ -214,7 +204,7 @@ void MainWindow::connectDetailPage() {
 }
 
 void MainWindow::connectEditPage() {
-    connect(productEditPage, &ProductEditPage::saveRequested,
+    connect(productPages, &ProductPages::productSaveRequested,
             this, [this](int productId, const QString& name, Category category, int price, int stock, const QString& detail) {
         const bool isEdit = productId > 0;
         handleResult(event.updateProductForm(productId, name.toStdString(), category, price, stock, detail.toStdString()), [this, productId, isEdit] {
@@ -228,7 +218,7 @@ void MainWindow::connectEditPage() {
             }
         });
     });
-    connect(productEditPage, &ProductEditPage::cancelRequested, this, [this]() {
+    connect(productPages, &ProductPages::productCancelRequested, this, [this]() {
         if (productEditReturnToDetail) {
             showDetailPage();
         }
@@ -239,15 +229,23 @@ void MainWindow::connectEditPage() {
 }
 
 void MainWindow::connectReceiptPage() {
+    connect(receiptPage, &ReceiptPage::pageMoveRequested, this, [this](int delta) {
+        receiptPage->refreshContent(event.moveReceiptPage(delta));
+    });
     connect(receiptPage, &ReceiptPage::refundRequested, this, [this](int receiptId) {
         handleResult(event.refund(receiptId), [this] {
-            showReceiptPage();
-            updateUserInfo();
+            QTimer::singleShot(0, this, [this]() {
+                refreshReceiptPageContents();
+                updateUserInfo();
+            });
         });
     });
 }
 
 void MainWindow::connectCartPage() {
+    connect(cartPage, &CartPage::pageMoveRequested, this, [this](int delta) {
+        cartPage->refreshContent(event.moveCartPage(delta));
+    });
     connect(cartPage, &CartPage::orderRequested, this, [this]() {
         handleResult(event.setOrder(), [this] {
             showOrderPanel();
@@ -256,33 +254,39 @@ void MainWindow::connectCartPage() {
 
     connect(cartPage, &CartPage::cartRequest, this, [this](CartAction action, int productId, int count, std::optional<bool> isSelected) {
         if (!event.handleCart(action, productId, count, isSelected)) {
-            cartPage->restoreProductRow(productId);
+            QTimer::singleShot(0, this, [this]() {
+                refreshCartPageContents();
+            });
             MessageBar::Fail(this);
             return;
         }
         MessageBar::Success(this);
-        const auto cart = event.getCart();
-        cartPage->syncCart(cart);
-        cartWidget->setCart(cart);
+        QTimer::singleShot(0, this, [this]() {
+            refreshCartPageContents();
+            cartWidget->setCart(event.getCart());
+        });
     });
 }
 
 void MainWindow::connectWishPage() {
-    connect(wishPage, &WishPage::productSelected, this, [this](int productId) {
-        handleResult(event.setProduct(productId), [this] {
-            showDetailPage();
-        });
+    connect(wishPage, &WishPage::pageMoveRequested, this, [this](int delta) {
+        wishPage->refreshContent(event.moveWishPage(delta));
     });
     connect(wishPage, &WishPage::cartRequested, this, [this](int productId) {
         handleResult(event.handleCart(CartAction::Add, productId, 1), [this] {
-            cartWidget->setCart(event.getCart());
-            openCartWidget();
+            QTimer::singleShot(0, this, [this]() {
+                refreshWishPageContents();
+                cartWidget->setCart(event.getCart());
+                openCartWidget();
+            });
         });
     });
 
     connect(wishPage, &WishPage::removeRequested, this, [this](int productId) {
         handleResult(event.setWish(productId, false), [this] {
-            showWishPage();
+            QTimer::singleShot(0, this, [this]() {
+                refreshWishPageContents();
+            });
         });
     });
 }
@@ -299,7 +303,7 @@ void MainWindow::connectOrderPanel() {
         handleResult(event.confirmOrder(usedPoint), [this] {
             showReceiptPage();
             updateUserInfo();
-            cartPage->setCart(event.getCart());
+            refreshCartPageContents();
             cartWidget->setCart(event.getCart());
             refreshProductPage();
             orderPanel->hide();
@@ -353,7 +357,7 @@ void MainWindow::connectCartWidget() {
 
 void MainWindow::showProductPage() {
     refreshProductPage();
-    productPages->setCurrentWidget(productGridPage);
+    productPages->showGrid();
     // if (prevNodeKey == getCurrentNavigationPageKey()) {return;}
     if (getCurrentNavigationPageKey() != productsKey){
         navigation(productsKey);
@@ -363,10 +367,10 @@ void MainWindow::showProductPage() {
 
 void MainWindow::showDetailPage() {
     const auto product = event.getProduct();
-    productDetailPage->setProduct(product, event.isWished(product.getId()));
+    productPages->setProduct(product, event.isWished(product.getId()));
     refreshProductDetailReviews(product.getId());
     updateAdminControls();
-    productPages->setCurrentWidget(productDetailPage);
+    productPages->showDetail();
     if (getCurrentNavigationPageKey() != productsKey){
         navigation(productsKey);
     }
@@ -378,8 +382,7 @@ void MainWindow::showProductAddPage() {
         return;
     }
     productEditReturnToDetail = false;
-    productEditPage->setAddMode();
-    productPages->setCurrentWidget(productEditPage);
+    productPages->showAddForm();
     if (getCurrentNavigationPageKey() != productsKey){
         navigation(productsKey);
     }
@@ -391,8 +394,7 @@ void MainWindow::showProductEditPage() {
         return;
     }
     productEditReturnToDetail = true;
-    productEditPage->setEditMode(event.getProduct());
-    productPages->setCurrentWidget(productEditPage);
+    productPages->showEditForm(event.getProduct());
     if (getCurrentNavigationPageKey() != productsKey){
         navigation(productsKey);
     }
@@ -406,14 +408,14 @@ void MainWindow::showReceiptPage() {
 }
 
 void MainWindow::showCartPage() {
-    cartPage->setCart(event.getCart());
+    refreshCartPageContents();
     if (getCurrentNavigationPageKey() != cartPage->property("ElaPageKey").toString()){
         navigation(cartPage->property("ElaPageKey").toString());
     }
 }
 
 void MainWindow::showWishPage() {
-    wishPage->setWishs(event.getWishs());
+    refreshWishPageContents();
     if (getCurrentNavigationPageKey() != wishPage->property("ElaPageKey").toString()){
         navigation(wishPage->property("ElaPageKey").toString());
     }
@@ -458,7 +460,7 @@ void MainWindow::updateUserInfo() {
             break;
     }
     updateAdminControls();
-    if (productPages != nullptr && productPages->currentWidget() == productDetailPage) {
+    if (productPages != nullptr && productPages->isDetailVisible()) {
         const auto product = event.getProduct();
         if (product.getId() > 0) {
             refreshProductDetailReviews(product.getId());
@@ -471,27 +473,29 @@ void MainWindow::refreshProductPage(int pageIndex) {
         MessageBar::Fail(this);
         return;
     }
-    productGridPage->setCategory(currentCategory);
-    productGridPage->setContents(event.getProductsContents());
+    productPages->setGridCategory(currentCategory);
+    productPages->setGridContents(event.getProductsContents());
 }
 
 void MainWindow::refreshProductDetailReviews(int productId) {
-    productDetailPage->setReviewContext(event.canWriteReview(productId));
-    productDetailPage->setReviews(
+    productPages->setReviewContext(event.canWriteReview(productId));
+    productPages->setReviews(
         event.getReviews(productId),
         event.getReviewSummary(productId),
         event.getManageableReviewIds(productId)
     );
 }
 
+void MainWindow::refreshCartPageContents() {
+    cartPage->refreshContent(event.getCartPageContent());
+}
+
+void MainWindow::refreshWishPageContents() {
+    wishPage->refreshContent(event.getWishPageContent());
+}
+
 void MainWindow::refreshReceiptPageContents() {
-    auto receipts = event.getReceipts();
-    std::vector<std::string> summaries;
-    summaries.reserve(receipts.size());
-    for (const auto& receipt : receipts) {
-        summaries.push_back(event.getReceiptItemSummary(receipt));
-    }
-    receiptPage->setReceipts(std::move(receipts), std::move(summaries));
+    receiptPage->refreshContent(event.getReceiptPageContent());
 }
 
 void MainWindow::movePanelToWindowCenter(QWidget* panel) {
@@ -506,11 +510,8 @@ void MainWindow::movePanelToWindowCenter(QWidget* panel) {
 
 void MainWindow::updateAdminControls() {
     const bool isAdmin = event.canManageProducts();
-    if (productGridPage != nullptr) {
-        productGridPage->setAdminMode(isAdmin);
-    }
-    if (productDetailPage != nullptr) {
-        productDetailPage->setAdminMode(isAdmin);
+    if (productPages != nullptr) {
+        productPages->setAdminMode(isAdmin);
     }
 }
 

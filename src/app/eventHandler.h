@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <optional>
 #include <vector>
@@ -15,13 +17,42 @@ using std::string;
 using std::optional;
 using std::nullopt;
 
+struct WishPageContent {
+    Products products;
+    int currentPage{0};
+    int maxPage{0};
+};
+
+struct CartPageContent {
+    Cart cart;
+    std::vector<std::string> productNames;
+    std::vector<int> itemTotals;
+    int totalCount{0};
+    int totalPrice{0};
+    int currentPage{0};
+    int maxPage{0};
+};
+
+struct ReceiptPageContent {
+    Receipts receipts;
+    std::vector<std::string> itemSummaries;
+    std::vector<bool> refundable;
+    int currentPage{0};
+    int maxPage{0};
+};
+
 class ServiceProvider;
 
 class EventHandler {
     ServiceProvider& service;
+    int wishPageIndex{0};
+    int cartPageIndex{0};
+    int receiptPageIndex{0};
 
     int userId();
     bool hasPurchasedProduct(int productId);
+    int pageMaxIndex(int totalCount, int pageSize) const;
+    void movePageIndex(int& pageIndex, int delta, int maxPageIndex);
 public:
     EventHandler(ServiceProvider& service): service(service) {}
 
@@ -49,6 +80,8 @@ public:
     bool refund(int receiptId);
 
     Cart getCart();
+    CartPageContent getCartPageContent(int pageSize = 8);
+    CartPageContent moveCartPage(int delta, int pageSize = 8);
     bool handleCart(
         CartAction action,
         int productId = -1,
@@ -58,8 +91,12 @@ public:
 
 
     Receipts getReceipts();
+    ReceiptPageContent getReceiptPageContent(int pageSize = 8);
+    ReceiptPageContent moveReceiptPage(int delta, int pageSize = 8);
     
     Products getWishs();
+    WishPageContent getWishPageContent(int pageSize = 8);
+    WishPageContent moveWishPage(int delta, int pageSize = 8);
     bool isWished(int productId);
     bool setWish(int productId, bool isWished = true);
 

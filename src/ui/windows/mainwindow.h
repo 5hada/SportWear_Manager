@@ -4,18 +4,17 @@
 #include <ElaWindow.h>
 #include <QString>
 #include <functional>
+#include <optional>
+#include <string>
 
 class Order;
 
-class QStackedWidget;
 class ElaPushButton;
 class QWidget;
 
 class EventHandler;
 
-class ProductGridPage;
-class ProductDetailPage;
-class ProductEditPage;
+class ProductPages;
 class ProfilePanel;
 class OrderPanel;
 class ReceiptPage;
@@ -30,10 +29,7 @@ class MainWindow : public ElaWindow{
 
     EventHandler& event;
 
-    QStackedWidget* productPages{nullptr};
-    ProductGridPage* productGridPage{nullptr};
-    ProductDetailPage* productDetailPage{nullptr};
-    ProductEditPage* productEditPage{nullptr};
+    ProductPages* productPages{nullptr};
     ReceiptPage* receiptPage{nullptr};
     CartPage* cartPage{nullptr};
     WishPage* wishPage{nullptr};
@@ -90,6 +86,8 @@ class MainWindow : public ElaWindow{
     void updateUserInfo();
     void refreshProductPage(int pageIndex = 0);
     void refreshProductDetailReviews(int productId);
+    void refreshCartPageContents();
+    void refreshWishPageContents();
     void refreshReceiptPageContents();
     void movePanelToWindowCenter(QWidget* panel);
     void updateAdminControls();

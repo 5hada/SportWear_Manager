@@ -2,9 +2,11 @@
 
 #include <ElaScrollPage.h>
 
-#include "model/product/product.h"
+#include "app/eventHandler.h"
 
 class ElaTableView;
+class ElaText;
+class ElaIconButton;
 class QStandardItemModel;
 
 class WishPage: public ElaScrollPage {
@@ -12,16 +14,20 @@ class WishPage: public ElaScrollPage {
 
     ElaTableView* wishTable{nullptr};
     QStandardItemModel* model{nullptr};
-    Products wishs;
+    ElaText* pageText{nullptr};
+    ElaIconButton* previousButton{nullptr};
+    ElaIconButton* nextButton{nullptr};
 
-    void rebuildRows();
+    void clearRow(int row);
+    void setPageInfo(int currentPage, int maxPage);
+
 public:
     explicit WishPage(QWidget* parent = nullptr);
 
-    void setWishs(Products wishs);
+    void refreshContent(const WishPageContent& content);
 
 Q_SIGNALS:
-    void productSelected(int productId);
+    void pageMoveRequested(int delta);
     void cartRequested(int productId);
     void removeRequested(int productId);
 };

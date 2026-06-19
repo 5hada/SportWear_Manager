@@ -25,6 +25,23 @@ bool EventHandler::hasPurchasedProduct(int productId) {
     return false;
 }
 
+int EventHandler::pageMaxIndex(int totalCount, int pageSize) const {
+    if (pageSize <= 0 || totalCount <= 0) {
+        return 0;
+    }
+    return (totalCount - 1) / pageSize;
+}
+
+void EventHandler::movePageIndex(int& pageIndex, int delta, int maxPageIndex) {
+    pageIndex += delta;
+    if (pageIndex < 0) {
+        pageIndex = 0;
+    }
+    if (pageIndex > maxPageIndex) {
+        pageIndex = maxPageIndex;
+    }
+}
+
 UserInfo EventHandler::getUser() {
     return service.account.getInfo();
 }
@@ -144,6 +161,44 @@ bool EventHandler::refund(int receiptId) {
 Cart EventHandler::getCart() {
     return service.cart.getCart(userId());
 }
+
+CartPageContent EventHandler::getCartPageContent(int pageSize) {
+    const Cart fullCart = getCart();
+    Cart pageCart;
+    pageCart.setUserId(fullCart.getUserId());
+    const int maxPage = pageMaxIndex(static_cast<int>(fullCart.getItems().size()), pageSize);
+    if (cartPageIndex > maxPage) {
+        cartPageIndex = maxPage;
+    }
+
+    CartItems pageItems;
+    const int begin = cartPageIndex * pageSize;
+    const int end = std::min(begin + pageSize, static_cast<int>(fullCart.getItems().size()));
+    for (int index = begin; index < end; ++index) {
+        pageItems.push_back(fullCart.getItems()[index]);
+    }
+    pageCart.setItems(pageItems);
+
+    CartPageContent content;
+    content.cart = pageCart;
+    content.currentPage = cartPageIndex;
+    content.maxPage = maxPage;
+    content.totalCount = fullCart.getTotalCount();
+    content.totalPrice = fullCart.getTotalPrice();
+    for (const auto& item : pageCart.getItems()) {
+        const auto product = service.product.getById(item.id);
+        content.productNames.push_back(product.getName().empty() ? "Unknown" : product.getName());
+        content.itemTotals.push_back(item.price * item.count);
+    }
+    return content;
+}
+
+CartPageContent EventHandler::moveCartPage(int delta, int pageSize) {
+    const Cart fullCart = getCart();
+    movePageIndex(cartPageIndex, delta, pageMaxIndex(static_cast<int>(fullCart.getItems().size()), pageSize));
+    return getCartPageContent(pageSize);
+}
+
 bool EventHandler::handleCart(CartAction action, int productId, int count, std::optional<bool> isSelected) {
     return service.cart.handleCart(action, userId(), productId, count, isSelected);
 }
@@ -153,9 +208,59 @@ Receipts EventHandler::getReceipts() {
     return service.order.getReceipts(userId());
 }
 
+ReceiptPageContent EventHandler::getReceiptPageContent(int pageSize) {
+    const auto receipts = getReceipts();
+    const int maxPage = pageMaxIndex(static_cast<int>(receipts.size()), pageSize);
+    if (receiptPageIndex > maxPage) {
+        receiptPageIndex = maxPage;
+    }
+
+    ReceiptPageContent content;
+    content.currentPage = receiptPageIndex;
+    content.maxPage = maxPage;
+    const int begin = receiptPageIndex * pageSize;
+    const int end = std::min(begin + pageSize, static_cast<int>(receipts.size()));
+    for (int index = begin; index < end; ++index) {
+        content.receipts.push_back(receipts[index]);
+        content.itemSummaries.push_back(getReceiptItemSummary(receipts[index]));
+        content.refundable.push_back(!receipts[index].getIsCanceled());
+    }
+    return content;
+}
+
+ReceiptPageContent EventHandler::moveReceiptPage(int delta, int pageSize) {
+    const auto receipts = getReceipts();
+    movePageIndex(receiptPageIndex, delta, pageMaxIndex(static_cast<int>(receipts.size()), pageSize));
+    return getReceiptPageContent(pageSize);
+}
+
 
 Products EventHandler::getWishs() {
     return service.wish.getWishs(userId());
+}
+
+WishPageContent EventHandler::getWishPageContent(int pageSize) {
+    const auto wishs = getWishs();
+    const int maxPage = pageMaxIndex(static_cast<int>(wishs.size()), pageSize);
+    if (wishPageIndex > maxPage) {
+        wishPageIndex = maxPage;
+    }
+
+    WishPageContent content;
+    content.currentPage = wishPageIndex;
+    content.maxPage = maxPage;
+    const int begin = wishPageIndex * pageSize;
+    const int end = std::min(begin + pageSize, static_cast<int>(wishs.size()));
+    for (int index = begin; index < end; ++index) {
+        content.products.push_back(wishs[index]);
+    }
+    return content;
+}
+
+WishPageContent EventHandler::moveWishPage(int delta, int pageSize) {
+    const auto wishs = getWishs();
+    movePageIndex(wishPageIndex, delta, pageMaxIndex(static_cast<int>(wishs.size()), pageSize));
+    return getWishPageContent(pageSize);
 }
 
 bool EventHandler::isWished(int productId) {
