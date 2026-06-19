@@ -232,10 +232,6 @@ void MainWindow::connectReceiptPage() {
 }
 
 void MainWindow::connectCartPage() {
-    const auto refreshCart = [this]() {
-        cartPage->setCart(event.getCart());
-    };
-
     connect(cartPage, &CartPage::orderRequested, this, [this]() {
         handleResult(event.setOrder(), [this] {
             showOrderPanel();
