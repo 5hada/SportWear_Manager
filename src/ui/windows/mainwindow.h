@@ -4,8 +4,6 @@
 #include <ElaWindow.h>
 #include <QString>
 #include <functional>
-#include <optional>
-#include <string>
 
 class Order;
 

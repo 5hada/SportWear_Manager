@@ -1,16 +1,13 @@
 #include "mainwindow.h"
 
-#include "ElaPushButton.h"
-#include "ui/common/messageBar.h"
-// #include <ElaProgressRing.h>
-#include <QVBoxLayout>
-
 #include "app/eventHandler.h"
 
 #include "model/actions.h"
+#include "model/user/user.h"
 #include "model/product/category.h"
 
-#include "model/user/user.h"
+#include "ui/common/dialog.h"
+#include "ui/common/messageBar.h"
 #include "ui/pages/product/productDetailPage.h"
 #include "ui/pages/product/productEditPage.h"
 #include "ui/pages/product/productGridPage.h"
@@ -22,19 +19,15 @@
 #include "ui/pages/cart/cartPage.h"
 #include "ui/panels/settings/settingPanel.h"
 
-#include "ui/common/dialog.h"
-
+#include "ElaPushButton.h"
 #include <ElaDef.h>
 #include <ElaIcon.h>
 #include <ElaText.h>
+#include <QVBoxLayout>
 #include <QMessageBox>
 #include <QRect>
 #include <QTimer>
-#include <functional>
-#include <optional>
-#include <qobject.h>
-#include <qpoint.h>
-#include <qstackedwidget.h>
+#include <QStackedWidget>
 
 MainWindow::MainWindow(EventHandler& event): event(event) {
     initWindow();
