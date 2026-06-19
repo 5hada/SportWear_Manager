@@ -2,9 +2,19 @@
 
 #include <QLabel>
 #include <ElaText.h>
+#include <QFontMetrics>
 #include <QVBoxLayout>
 
 
+namespace {
+void setElidedText(ElaText* label, const QString& text, int width) {
+    if (label == nullptr) {
+        return;
+    }
+    label->setToolTip(text);
+    label->setText(label->fontMetrics().elidedText(text, Qt::ElideRight, width));
+}
+}
 
 ProductCard::ProductCard(QWidget* parent): ElaPushButton(parent) {
     setCursor(Qt::PointingHandCursor);
@@ -31,7 +41,7 @@ ProductCard::ProductCard(QWidget* parent): ElaPushButton(parent) {
 
     nameText = new ElaText("Product Name", this);
     nameText->setTextPixelSize(18);
-    nameText->setWordWrap(true);
+    nameText->setWordWrap(false);
 
     categoryText = new ElaText("Category", this);
     categoryText->setTextPixelSize(13);
@@ -43,7 +53,7 @@ ProductCard::ProductCard(QWidget* parent): ElaPushButton(parent) {
     stockText->setTextPixelSize(14);
 
     detailText = new ElaText("Product Detail", this);
-    detailText->setWordWrap(true);
+    detailText->setWordWrap(false);
     detailText->setTextPixelSize(12);
 
     auto* metaLayout = new QHBoxLayout();
@@ -77,11 +87,13 @@ ProductCard::ProductCard(QWidget* parent): ElaPushButton(parent) {
 
 void ProductCard::setProduct(const Product& product) {
     productId = product.getId();
-    nameText->setText(QString::fromStdString(product.getName()));
-    categoryText->setText(QString::fromStdString(categoryToString(product.getCategory())));
-    priceText->setText(QString("Price %1").arg(product.getPrice()));
-    stockText->setText(QString("Stock %1").arg(product.getStock()));
-    detailText->setText(QString::fromStdString(product.getDetail().empty()
+    constexpr int textWidth = 190;
+    constexpr int metaWidth = 86;
+    setElidedText(nameText, QString::fromStdString(product.getName()), textWidth);
+    setElidedText(categoryText, QString::fromStdString(categoryToString(product.getCategory())), textWidth);
+    setElidedText(priceText, QString("Price %1").arg(product.getPrice()), metaWidth);
+    setElidedText(stockText, QString("Stock %1").arg(product.getStock()), metaWidth);
+    setElidedText(detailText, QString::fromStdString(product.getDetail().empty()
         ? "No detail."
-        : product.getDetail()));
+        : product.getDetail()), textWidth);
 }

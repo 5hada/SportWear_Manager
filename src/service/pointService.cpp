@@ -36,14 +36,16 @@ bool PointService::reward(int userId, int totalPrice){
 }
 
 bool PointService::revert(int userId, int usedPoint, int totalPrice){
-    if(userId <= 1) {return false;}
+    if(userId <= 1) {return true;}
     std::optional<User> user = userRepo->findById(userId);
+    if (user == std::nullopt) {return false;}
     int value = usedPoint - calPoint(totalPrice);
+    if (value == 0) {return true;}
     if (value > 0){
-        user->addPoint(value);
+        if (!user->addPoint(value)) {return false;}
     }
     else if (value < 0){
-        user->subPoint(-value);
+        if (!user->subPoint(-value)) {return false;}
     }
     return userRepo->updatePoint(user.value());
 }

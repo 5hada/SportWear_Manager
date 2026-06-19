@@ -4,11 +4,14 @@
 #include <ElaWindow.h>
 #include <QString>
 #include <functional>
+#include <optional>
+#include <string>
 
 class Order;
 
 class QStackedWidget;
 class ElaPushButton;
+class QWidget;
 
 class EventHandler;
 // class ElaProgressRing;
@@ -46,14 +49,13 @@ class MainWindow : public ElaWindow{
 
     ElaPushButton* cartButton{nullptr};
 
-    std::map<Category, QWidget*> productsKeys;
     QString prevNodeKey;
     QString homeKey;
     QString productsKey;
-    QString categoriesKey;
     QString settingKey;
     QString profileKey;
-    bool keepProductFilterOnNextNavigation{false};
+    Category currentCategory{Category::Unknown};
+    std::optional<std::string> currentKeyword{std::nullopt};
     
     void initWindow();
 
@@ -89,6 +91,8 @@ class MainWindow : public ElaWindow{
 
     void showProfilePanel();
     void updateUserInfo();
+    void refreshProductPage(int pageIndex = 0);
+    void movePanelToWindowCenter(QWidget* panel);
 
     void openCartWidget();
     void closeCartWidget();

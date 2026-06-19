@@ -112,6 +112,15 @@ Products EventHandler::getWishs() {
     return service.wish.getWishs(userId());
 }
 
+bool EventHandler::isWished(int productId) {
+    for (const auto& product : getWishs()) {
+        if (product.getId() == productId) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool EventHandler::setWish(int productId, bool isWished) {
     if (isWished) {
         return service.wish.add(userId(), productId);

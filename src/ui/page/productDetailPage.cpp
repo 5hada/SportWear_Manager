@@ -50,7 +50,7 @@ void ProductDetailPage::initPage() {
     textLayout->addWidget(detailText);
 
     auto* addCartButton = new ElaIconButton(ElaIconType::CartShopping, this);
-    auto* wishButton = new ElaPushButton("Add Wish", this);
+    wishButton = new ElaPushButton("Add Wish", this);
     auto* buyButton = new ElaPushButton("Buy Now", this);
     auto* buttonLayout = new QHBoxLayout();
     buttonLayout->setSpacing(10);
@@ -75,7 +75,7 @@ void ProductDetailPage::initPage() {
         Q_EMIT cartRequest(product.getId());
     });
     connect(wishButton, &ElaPushButton::clicked, this, [this]() {
-        Q_EMIT wishRequest(product.getId());
+        Q_EMIT wishRequest(product.getId(), !wished);
     });
     connect(buyButton, &ElaPushButton::clicked, this, [this]() {
         Q_EMIT orderRequest(product.getId(), 1);
@@ -83,8 +83,9 @@ void ProductDetailPage::initPage() {
     refresh();
 }
 
-void ProductDetailPage::setProduct(const Product& product) {
+void ProductDetailPage::setProduct(const Product& product, bool wished) {
     this->product = product;
+    this->wished = wished;
     refresh();
 }
 
@@ -95,4 +96,7 @@ void ProductDetailPage::refresh() {
     stockText->setText(QString("Stock: %1").arg(product.getStock()));
     detailText->setText(product.getDetail().empty() ?
         "No detail." : QString::fromStdString(product.getDetail()));
+    if (wishButton != nullptr) {
+        wishButton->setText(wished ? "Remove Wish" : "Add Wish");
+    }
 }

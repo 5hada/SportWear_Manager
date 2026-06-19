@@ -53,6 +53,7 @@ public:
     Receipts getReceipts();
     
     Products getWishs();
+    bool isWished(int productId);
     bool setWish(int productId, bool isWished = true);
 
     Reviews getReviews(int productId);

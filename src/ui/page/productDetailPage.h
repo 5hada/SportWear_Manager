@@ -5,6 +5,7 @@
 #include "model/product/product.h"
 
 class ElaText;
+class ElaPushButton;
 
 class ProductDetailPage : public ElaScrollPage {
     Q_OBJECT
@@ -14,6 +15,8 @@ class ProductDetailPage : public ElaScrollPage {
     ElaText* priceText{nullptr};
     ElaText* stockText{nullptr};
     ElaText* detailText{nullptr};
+    ElaPushButton* wishButton{nullptr};
+    bool wished{false};
     int selectedCount;
 
     void initPage();
@@ -23,11 +26,11 @@ public:
     explicit ProductDetailPage(QWidget* parent): ElaScrollPage(parent) {initPage();}
     ~ProductDetailPage() override = default;
 
-    void setProduct(const Product& product);
+    void setProduct(const Product& product, bool wished = false);
 
 Q_SIGNALS:
     void backRequest();
     void orderRequest(int productId, int count = 1);
     void cartRequest(int productId, int count = 1);
-    void wishRequest(int productId);
+    void wishRequest(int productId, bool isWished);
 };

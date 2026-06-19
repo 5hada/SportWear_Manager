@@ -3,11 +3,13 @@
 #include "productCard.h"
 
 #include "ElaLineEdit.h"
+#include <ElaComboBox.h>
 #include <ElaFlowLayout.h>
 #include <ElaText.h>
 #include <QLabel>
 #include <ElaPushButton.h>
 #include <QPixmap>
+#include <QSignalBlocker>
 #include <QString>
 #include <QVBoxLayout>
 #include <qboxlayout.h>
@@ -37,12 +39,31 @@ void ProductGridPage::initLayout() {
     searchEdit->setPlaceholderText("Search products");
     searchEdit->setFixedHeight(36);
 
+    categoryCombo = new ElaComboBox(this);
+    categoryCombo->setFixedSize(180, 36);
+    categoryCombo->addItem("All", QVariant::fromValue(static_cast<int>(Category::Unknown)));
+    for (auto category: Categories) {
+        if (category == Category::Unknown) {
+            continue;
+        }
+        categoryCombo->addItem(
+            QString::fromStdString(categoryToString(category)),
+            QVariant::fromValue(static_cast<int>(category))
+        );
+    }
+
+    auto* searchLayout = new QHBoxLayout();
+    searchLayout->setContentsMargins(0, 0, 0, 0);
+    searchLayout->setSpacing(10);
+    searchLayout->addWidget(searchEdit);
+    searchLayout->addWidget(categoryCombo);
+
     auto* titleLayout = new QVBoxLayout();
     titleLayout->setContentsMargins(20, 10, 20, 10);
     titleLayout->addWidget(titleText);
     titleLayout->addWidget(descText);
     titleLayout->addSpacing(12);
-    titleLayout->addWidget(searchEdit);
+    titleLayout->addLayout(searchLayout);
 
     productLayout = new ElaFlowLayout(0, 10, 10);
     productLayout->setContentsMargins(0, 0, 0, 0);
@@ -75,6 +96,12 @@ void ProductGridPage::initConnect() {
         emit searchRequested(searchEdit->text().toStdString());
     });
 
+    connect(categoryCombo, QOverload<int>::of(&ElaComboBox::currentIndexChanged), this,
+            [this](int index) {
+                const auto category = static_cast<Category>(categoryCombo->itemData(index).toInt());
+                emit categoryChanged(category);
+            });
+
     connect(indexNavigation, &IndexNavigation::indexChanged, this, [this](int newIndex) {
         emit pageIndexChanged(newIndex);
     });
@@ -90,6 +117,20 @@ void ProductGridPage::setContents(std::tuple<Products, int, int> contents) {
     const auto& [products, pageIndex, maxPageIndex] = contents;
     indexNavigation->setIndex(maxPageIndex, pageIndex);
     setProductCards(products);
+}
+
+void ProductGridPage::setCategory(Category category) {
+    if (categoryCombo == nullptr) {
+        return;
+    }
+    const QSignalBlocker blocker(categoryCombo);
+    for (int i = 0; i < categoryCombo->count(); ++i) {
+        if (static_cast<Category>(categoryCombo->itemData(i).toInt()) == category) {
+            categoryCombo->setCurrentIndex(i);
+            return;
+        }
+    }
+    categoryCombo->setCurrentIndex(0);
 }
 
 void ProductGridPage::setProductCards(const Products& products) {

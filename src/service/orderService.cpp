@@ -115,10 +115,20 @@ bool OrderService::refund(int id, int userId) {
     if (receipt.getUserId() != userId) {return false;}
     if (receipt.getIsCanceled()) {return false;}
     receipt.setIsCanceled(true);
-    if (receiptRepo->update(receipt)){
-        return pointService->revert(receipt.getUserId(), receipt.getPoints(), receipt.getPaid());
+    if (!receiptRepo->beginTransaction()) {return false;}
+    if (!receiptRepo->update(receipt)){
+        receiptRepo->rollbackTransaction();
+        return false;
     }
-    return false;
+    if (!pointService->revert(receipt.getUserId(), receipt.getPoints(), receipt.getPaid())) {
+        receiptRepo->rollbackTransaction();
+        return false;
+    }
+    if (!receiptRepo->commitTransaction()) {
+        receiptRepo->rollbackTransaction();
+        return false;
+    }
+    return true;
 }
 
 
