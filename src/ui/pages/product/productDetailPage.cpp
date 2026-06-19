@@ -8,6 +8,7 @@
 #include <ElaSpinBox.h>
 #include <ElaTableView.h>
 #include <ElaText.h>
+#include <algorithm>
 #include <QHeaderView>
 #include <QHBoxLayout>
 #include <QStandardItemModel>
@@ -173,16 +174,16 @@ void ProductDetailPage::setProduct(const Product& product, bool wished) {
     refresh();
 }
 
-void ProductDetailPage::setReviewContext(int userId, UserRole role, bool canWrite) {
-    currentUserId = userId;
-    currentUserRole = role;
+void ProductDetailPage::setReviewContext(bool canWrite) {
     canWriteReview = canWrite;
     resetReviewEditor();
     refreshReviews();
 }
 
-void ProductDetailPage::setReviews(const Reviews& reviews) {
+void ProductDetailPage::setReviews(const Reviews& reviews, const std::string& summary, const std::vector<int>& manageableReviewIds) {
     this->reviews = reviews;
+    this->reviewSummary = summary;
+    this->manageableReviewIds = manageableReviewIds;
     refreshReviews();
 }
 
@@ -203,7 +204,7 @@ void ProductDetailPage::refresh() {
         wishButton->setText(wished ? "Remove Wish" : "Add Wish");
     }
     if (reviewEditor != nullptr) {
-        reviewEditor->setVisible(currentUserRole != UserRole::Guest && canWriteReview);
+        reviewEditor->setVisible(canWriteReview);
     }
     refreshReviews();
 }
@@ -215,13 +216,11 @@ void ProductDetailPage::refreshReviews() {
 
     reviewModel->removeRows(0, reviewModel->rowCount());
     if (reviews.empty()) {
-        reviewSummaryText->setText("No reviews yet.");
+        reviewSummaryText->setText(QString::fromStdString(reviewSummary));
     }
     else {
-        int ratingSum = 0;
         int rowIndex = 0;
         for (const auto& review : reviews) {
-            ratingSum += review.getRating();
             QList<QStandardItem*> row;
             row << centeredItem(QString("%1 / 5").arg(review.getRating()));
             row << centeredItem(QString("User %1").arg(review.getUserId()));
@@ -229,7 +228,7 @@ void ProductDetailPage::refreshReviews() {
             row << centeredItem();
             reviewModel->appendRow(row);
 
-            const bool canManage = currentUserRole == UserRole::Admin || review.getUserId() == currentUserId;
+            const bool canManage = std::find(manageableReviewIds.begin(), manageableReviewIds.end(), review.getId()) != manageableReviewIds.end();
             if (canManage) {
                 auto* editReviewButton = new ElaPushButton("Edit", reviewTable);
                 editReviewButton->setFixedSize(68, 28);
@@ -253,10 +252,7 @@ void ProductDetailPage::refreshReviews() {
             }
             ++rowIndex;
         }
-        const double average = static_cast<double>(ratingSum) / static_cast<double>(reviews.size());
-        reviewSummaryText->setText(QString("%1 reviews - Average %2 / 5")
-                                       .arg(reviews.size())
-                                       .arg(average, 0, 'f', 1));
+        reviewSummaryText->setText(QString::fromStdString(reviewSummary));
     }
 
     reviewTable->resizeColumnsToContents();
@@ -280,7 +276,7 @@ void ProductDetailPage::resetReviewEditor() {
         reviewCancelButton->hide();
     }
     if (reviewEditor != nullptr) {
-        reviewEditor->setVisible(currentUserRole != UserRole::Guest && canWriteReview);
+        reviewEditor->setVisible(canWriteReview);
     }
 }
 

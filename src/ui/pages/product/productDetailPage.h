@@ -4,7 +4,9 @@
 
 #include "model/product/product.h"
 #include "model/review.h"
-#include "model/user/user.h"
+
+#include <string>
+#include <vector>
 
 class ElaPlainTextEdit;
 class ElaText;
@@ -34,9 +36,9 @@ class ProductDetailPage : public ElaScrollPage {
     ElaPushButton* wishButton{nullptr};
     ElaPushButton* editButton{nullptr};
     bool wished{false};
-    int currentUserId{0};
-    UserRole currentUserRole{UserRole::Guest};
     bool canWriteReview{false};
+    std::string reviewSummary{"No reviews yet."};
+    std::vector<int> manageableReviewIds;
     int editingReviewId{0};
     int selectedCount;
 
@@ -51,8 +53,8 @@ public:
     ~ProductDetailPage() override = default;
 
     void setProduct(const Product& product, bool wished = false);
-    void setReviewContext(int userId, UserRole role, bool canWrite);
-    void setReviews(const Reviews& reviews);
+    void setReviewContext(bool canWrite);
+    void setReviews(const Reviews& reviews, const std::string& summary, const std::vector<int>& manageableReviewIds);
     void setAdminMode(bool isAdmin);
 
 Q_SIGNALS:

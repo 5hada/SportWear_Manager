@@ -17,14 +17,15 @@ class OrderPanel: public ElaDialog {
     ElaText* pointText{nullptr};
     ElaText* paidText{nullptr};
     ElaSpinBox* pointSpin{nullptr};
-    int currentTotal{0};
 
 public:
     explicit OrderPanel(QWidget* parent = nullptr);
 
-    void setOrder(Order order);
+    void setOrder(Order order, int totalPrice, int availablePoints, int maxUsablePoint, int payment);
+    void setPayment(int payment);
 
 Q_SIGNALS:
+    void pointChanged(int usedPoint);
     void confirmRequested(int usedPoint);
     void cancelRequested();
 };

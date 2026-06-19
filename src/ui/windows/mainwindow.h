@@ -65,6 +65,7 @@ class MainWindow : public ElaWindow{
 
     void connectProductsPage();
     void connectDetailPage();
+    void connectEditPage();
     void connectReceiptPage();
     void connectCartPage();
     void connectWishPage();
@@ -88,6 +89,8 @@ class MainWindow : public ElaWindow{
     void showProfilePanel();
     void updateUserInfo();
     void refreshProductPage(int pageIndex = 0);
+    void refreshProductDetailReviews(int productId);
+    void refreshReceiptPageContents();
     void movePanelToWindowCenter(QWidget* panel);
     void updateAdminControls();
 

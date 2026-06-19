@@ -2,7 +2,9 @@
 #include "model/actions.h"
 #include "serviceProvider.h"
 #include "model/product/category.h"
+#include <algorithm>
 #include <optional>
+#include <sstream>
 
 int EventHandler::userId() {
     return service.account.getUserId();
@@ -80,6 +82,10 @@ Product EventHandler::getProduct() {
     return service.search.getCurrentProduct();
 }
 
+bool EventHandler::canManageProducts() {
+    return getUser().getRole() == UserRole::Admin;
+}
+
 bool EventHandler::setOrder(int productId) {
     if (productId == -1) {
         if (service.order.makeListOrder(userId())) {
@@ -98,6 +104,31 @@ bool EventHandler::setOrder(int productId) {
 
 Order EventHandler::getOrder() {
     return service.order.getOrder();
+}
+
+int EventHandler::getOrderTotalPrice() {
+    return getOrder().getTotalPrice();
+}
+
+int EventHandler::getOrderAvailablePoints() {
+    return getOrder().getAvailablePoints();
+}
+
+int EventHandler::getOrderMaxUsablePoint() {
+    const auto order = getOrder();
+    return std::min(order.getAvailablePoints(), order.getTotalPrice());
+}
+
+int EventHandler::getOrderPayment(int usedPoint) {
+    const auto order = getOrder();
+    const int maxUsablePoint = getOrderMaxUsablePoint();
+    if (usedPoint < 0) {
+        usedPoint = 0;
+    }
+    if (usedPoint > maxUsablePoint) {
+        usedPoint = maxUsablePoint;
+    }
+    return order.getTotalPrice() - usedPoint;
 }
 
 bool EventHandler::confirmOrder(int usedPoint) {
@@ -161,6 +192,40 @@ bool EventHandler::canWriteReview(int productId) {
     return hasPurchasedProduct(productId);
 }
 
+std::vector<int> EventHandler::getManageableReviewIds(int productId) {
+    std::vector<int> ids;
+    auto user = getUser();
+    if (user.getRole() == UserRole::Guest) {
+        return ids;
+    }
+
+    for (const auto& review : getReviews(productId)) {
+        if (user.getRole() == UserRole::Admin || review.getUserId() == userId()) {
+            ids.push_back(review.getId());
+        }
+    }
+    return ids;
+}
+
+string EventHandler::getReviewSummary(int productId) {
+    const auto reviews = getReviews(productId);
+    if (reviews.empty()) {
+        return "No reviews yet.";
+    }
+
+    int ratingSum = 0;
+    for (const auto& review : reviews) {
+        ratingSum += review.getRating();
+    }
+    const double average = static_cast<double>(ratingSum) / static_cast<double>(reviews.size());
+
+    std::ostringstream out;
+    out.setf(std::ios::fixed);
+    out.precision(1);
+    out << reviews.size() << " reviews - Average " << average << " / 5";
+    return out.str();
+}
+
 Reviews EventHandler::getReviews(int productId) {
     return service.review.getAllFromProduct(productId);
 }
@@ -218,9 +283,40 @@ bool EventHandler::setReview(Review review) {
 
 
 bool EventHandler::updateProduct(Product product) {
-    if (getUser().getRole() != UserRole::Admin) {return false;}
+    if (!canManageProducts()) {return false;}
     if (product.getId() <= 0) {
         return service.product.add(product);
     }
     return service.product.update(product);
+}
+
+bool EventHandler::updateProductForm(int productId, const string& name, Category category, int price, int stock, const string& detail) {
+    Product product(
+        Item{productId <= 0 ? 0 : productId, stock, price},
+        name,
+        category
+    );
+    product.setDetail(detail);
+    return updateProduct(product);
+}
+
+string EventHandler::getReceiptItemSummary(const Receipt& receipt) {
+    const auto items = receipt.getOrderItems();
+    if (items.empty()) {
+        return "No items";
+    }
+
+    int quantity = 0;
+    for (const auto& item : items) {
+        quantity += item.count;
+    }
+
+    const auto& first = items.front();
+    std::ostringstream out;
+    out << "Product #" << first.id << " x" << first.count;
+    if (items.size() > 1) {
+        out << " + " << (items.size() - 1) << " more";
+    }
+    out << " (" << quantity << " total)";
+    return out.str();
 }

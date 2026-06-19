@@ -1,5 +1,4 @@
 #include "cartPage.h"
-#include "model/actions.h"
 #include "ui/common/tableItemUtil.h"
 
 #include <ElaCheckBox.h>
@@ -102,58 +101,40 @@ void CartPage::setCart(const Cart& cart) {
     refreshSummary();
 }
 
-bool CartPage::applyCartChange(CartAction action, int productId, int count, std::optional<bool> isSelected) {
-    if (action == CartAction::Clear) {
-        currentCart.getItems().clear();
-        model->removeRows(0, model->rowCount());
-        refreshSummary();
-        return true;
+void CartPage::syncCart(const Cart& cart) {
+    if (currentCart.getItems().empty() && model->rowCount() == 0) {
+        setCart(cart);
+        return;
     }
 
-    auto* item = findItem(productId);
-    if (item == nullptr) {
-        return false;
+    std::vector<int> removedProductIds;
+    for (const auto& currentItem : currentCart.getItems()) {
+        const auto found = std::find_if(cart.getItems().begin(), cart.getItems().end(),
+                                       [productId = currentItem.id](const CartItem& item) {
+                                           return item.id == productId;
+                                       });
+        if (found == cart.getItems().end()) {
+            removedProductIds.push_back(currentItem.id);
+        }
     }
 
-    switch (action) {
-        case CartAction::Add:
-            item->setCount(item->getCount() + count);
-            updateItemRow(findRow(productId), *item);
-            refreshSummary();
-            return true;
-        case CartAction::Sub:
-            item->setCount(item->getCount() - count);
-            if (item->getCount() <= 0) {
-                removeProductRowLater(productId);
-            }
-            else {
-                updateItemRow(findRow(productId), *item);
-            }
-            refreshSummary();
-            return true;
-        case CartAction::Set:
-            if (count <= 0) {
-                return false;
-            }
-            item->setCount(count);
-            updateItemRow(findRow(productId), *item);
-            refreshSummary();
-            return true;
-        case CartAction::Toggle:
-            if (!isSelected.has_value()) {
-                return false;
-            }
-            item->setSelected(isSelected.value());
-            updateItemRow(findRow(productId), *item);
-            return true;
-        case CartAction::Del:
-            removeProductRowLater(productId);
-            refreshSummary();
-            return true;
-        case CartAction::Clear:
-            return true;
+    for (const auto& item : cart.getItems()) {
+        const int row = findRow(item.id);
+        if (row >= 0) {
+            updateItemRow(row, item);
+        }
+        else {
+            appendItemRow(item);
+        }
     }
-    return false;
+
+    for (int productId : removedProductIds) {
+        removeProductRowLater(productId);
+    }
+
+    currentCart = cart;
+    refreshSummary();
+    resizeTableColumns();
 }
 
 void CartPage::restoreProductRow(int productId) {
@@ -290,12 +271,6 @@ void CartPage::removeProductRow(int productId) {
 }
 
 void CartPage::removeProductRowLater(int productId) {
-    auto& items = currentCart.getItems();
-    items.erase(std::remove_if(items.begin(), items.end(), [productId](const CartItem& item) {
-                    return item.id == productId;
-                }),
-                items.end());
-
     const int row = findRow(productId);
     if (row >= 0) {
         cartTable->setRowHidden(row, true);

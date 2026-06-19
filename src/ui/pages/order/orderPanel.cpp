@@ -5,8 +5,8 @@
 #include <ElaSpinBox.h>
 #include <ElaTableView.h>
 #include <ElaText.h>
-#include <algorithm>
 #include <QHeaderView>
+#include <QSignalBlocker>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
 
@@ -89,11 +89,11 @@ OrderPanel::OrderPanel(QWidget* parent): ElaDialog(parent) {
         hide();
     });
     connect(pointSpin, QOverload<int>::of(&ElaSpinBox::valueChanged), this, [this](int usedPoint) {
-        paidText->setText(QString("Payment: %1").arg(currentTotal - usedPoint));
+        Q_EMIT pointChanged(usedPoint);
     });
 }
 
-void OrderPanel::setOrder(Order order) {
+void OrderPanel::setOrder(Order order, int totalPrice, int availablePoints, int maxUsablePoint, int payment) {
     model->removeRows(0, model->rowCount());
 
     for (const auto& item : order.getItems()) {
@@ -105,10 +105,14 @@ void OrderPanel::setOrder(Order order) {
         model->appendRow(row);
     }
 
-    currentTotal = order.getTotalPrice();
-    totalText->setText(QString("Total: %1").arg(currentTotal));
-    pointText->setText(QString("Available point: %1").arg(order.getAvailablePoints()));
-    pointSpin->setRange(0, std::min(order.getAvailablePoints(), currentTotal));
+    totalText->setText(QString("Total: %1").arg(totalPrice));
+    pointText->setText(QString("Available point: %1").arg(availablePoints));
+    const QSignalBlocker blocker(pointSpin);
+    pointSpin->setRange(0, maxUsablePoint);
     pointSpin->setValue(0);
-    paidText->setText(QString("Payment: %1").arg(currentTotal));
+    setPayment(payment);
+}
+
+void OrderPanel::setPayment(int payment) {
+    paidText->setText(QString("Payment: %1").arg(payment));
 }

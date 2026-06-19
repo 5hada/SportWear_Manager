@@ -115,7 +115,7 @@ void MainWindow::connectNavigation() {
                         cartPage->setCart(event.getCart());
                     }
                     else if (nodeKey == receiptPage->property("ElaPageKey").toString()) {
-                        receiptPage->setReceipts(event.getReceipts());
+                        refreshReceiptPageContents();
                     }
                     else if (nodeKey == settingKey) {
                         showSettingPanel();
@@ -132,27 +132,7 @@ void MainWindow::connectNavigation() {
 void MainWindow::connectPageRequests() {
     connectProductsPage();
     connectDetailPage();
-    connect(productEditPage, &ProductEditPage::saveRequested, this, [this](const Product& product) {
-        const bool isEdit = product.getId() > 0;
-        handleResult(event.updateProduct(product), [this, product, isEdit] {
-            refreshProductPage();
-            if (isEdit) {
-                event.setProduct(product.getId());
-                showDetailPage();
-            }
-            else {
-                showProductPage();
-            }
-        });
-    });
-    connect(productEditPage, &ProductEditPage::cancelRequested, this, [this]() {
-        if (productEditReturnToDetail) {
-            showDetailPage();
-        }
-        else {
-            showProductPage();
-        }
-    });
+    connectEditPage();
     connectReceiptPage();
     connectCartPage();
     connectWishPage();
@@ -206,7 +186,7 @@ void MainWindow::connectDetailPage() {
         handleResult(event.setWish(productId, isWished), [this] {
             const auto product = event.getProduct();
             productDetailPage->setProduct(product, event.isWished(product.getId()));
-            productDetailPage->setReviews(event.getReviews(product.getId()));
+            refreshProductDetailReviews(product.getId());
             wishPage->setWishs(event.getWishs());
         });
     });
@@ -219,12 +199,7 @@ void MainWindow::connectDetailPage() {
             this, [this](int reviewId, int productId, int rating, const QString& comment) {
         handleResult(event.saveReview(reviewId, productId, rating, comment.toStdString()), [this, productId] {
             QTimer::singleShot(0, this, [this, productId]() {
-                productDetailPage->setReviewContext(
-                    event.getUserId(),
-                    event.getUser().getRole(),
-                    event.canWriteReview(productId)
-                );
-                productDetailPage->setReviews(event.getReviews(productId));
+                refreshProductDetailReviews(productId);
             });
         });
     });
@@ -232,14 +207,34 @@ void MainWindow::connectDetailPage() {
         const int productId = event.getProduct().getId();
         handleResult(event.deleteReview(reviewId), [this, productId] {
             QTimer::singleShot(0, this, [this, productId]() {
-                productDetailPage->setReviewContext(
-                    event.getUserId(),
-                    event.getUser().getRole(),
-                    event.canWriteReview(productId)
-                );
-                productDetailPage->setReviews(event.getReviews(productId));
+                refreshProductDetailReviews(productId);
             });
         });
+    });
+}
+
+void MainWindow::connectEditPage() {
+    connect(productEditPage, &ProductEditPage::saveRequested,
+            this, [this](int productId, const QString& name, Category category, int price, int stock, const QString& detail) {
+        const bool isEdit = productId > 0;
+        handleResult(event.updateProductForm(productId, name.toStdString(), category, price, stock, detail.toStdString()), [this, productId, isEdit] {
+            refreshProductPage();
+            if (isEdit) {
+                event.setProduct(productId);
+                showDetailPage();
+            }
+            else {
+                showProductPage();
+            }
+        });
+    });
+    connect(productEditPage, &ProductEditPage::cancelRequested, this, [this]() {
+        if (productEditReturnToDetail) {
+            showDetailPage();
+        }
+        else {
+            showProductPage();
+        }
     });
 }
 
@@ -267,9 +262,7 @@ void MainWindow::connectCartPage() {
         }
         MessageBar::Success(this);
         const auto cart = event.getCart();
-        if (!cartPage->applyCartChange(action, productId, count, isSelected)) {
-            cartPage->setCart(cart);
-        }
+        cartPage->syncCart(cart);
         cartWidget->setCart(cart);
     });
 }
@@ -298,6 +291,10 @@ void MainWindow::connectWishPage() {
 
 
 void MainWindow::connectOrderPanel() {
+    connect(orderPanel, &OrderPanel::pointChanged, this, [this](int usedPoint) {
+        orderPanel->setPayment(event.getOrderPayment(usedPoint));
+    });
+
     connect(orderPanel, &OrderPanel::confirmRequested, this, [this](int usedPoint) {
         handleResult(event.confirmOrder(usedPoint), [this] {
             showReceiptPage();
@@ -367,12 +364,7 @@ void MainWindow::showProductPage() {
 void MainWindow::showDetailPage() {
     const auto product = event.getProduct();
     productDetailPage->setProduct(product, event.isWished(product.getId()));
-    productDetailPage->setReviewContext(
-        event.getUserId(),
-        event.getUser().getRole(),
-        event.canWriteReview(product.getId())
-    );
-    productDetailPage->setReviews(event.getReviews(product.getId()));
+    refreshProductDetailReviews(product.getId());
     updateAdminControls();
     productPages->setCurrentWidget(productDetailPage);
     if (getCurrentNavigationPageKey() != productsKey){
@@ -381,7 +373,7 @@ void MainWindow::showDetailPage() {
 }
 
 void MainWindow::showProductAddPage() {
-    if (event.getUser().getRole() != UserRole::Admin) {
+    if (!event.canManageProducts()) {
         MessageBar::Fail(this);
         return;
     }
@@ -394,7 +386,7 @@ void MainWindow::showProductAddPage() {
 }
 
 void MainWindow::showProductEditPage() {
-    if (event.getUser().getRole() != UserRole::Admin) {
+    if (!event.canManageProducts()) {
         MessageBar::Fail(this);
         return;
     }
@@ -407,7 +399,7 @@ void MainWindow::showProductEditPage() {
 }
 
 void MainWindow::showReceiptPage() {
-    receiptPage->setReceipts(event.getReceipts());
+    refreshReceiptPageContents();
     if (getCurrentNavigationPageKey() != receiptPage->property("ElaPageKey").toString()){
         navigation(receiptPage->property("ElaPageKey").toString());
     }
@@ -430,7 +422,13 @@ void MainWindow::showWishPage() {
 
 
 void MainWindow::showOrderPanel() {
-    orderPanel->setOrder(event.getOrder());
+    orderPanel->setOrder(
+        event.getOrder(),
+        event.getOrderTotalPrice(),
+        event.getOrderAvailablePoints(),
+        event.getOrderMaxUsablePoint(),
+        event.getOrderPayment(0)
+    );
     orderPanel->moveToCenter();
     orderPanel->show();
 }
@@ -463,12 +461,7 @@ void MainWindow::updateUserInfo() {
     if (productPages != nullptr && productPages->currentWidget() == productDetailPage) {
         const auto product = event.getProduct();
         if (product.getId() > 0) {
-            productDetailPage->setReviewContext(
-                event.getUserId(),
-                event.getUser().getRole(),
-                event.canWriteReview(product.getId())
-            );
-            productDetailPage->setReviews(event.getReviews(product.getId()));
+            refreshProductDetailReviews(product.getId());
         }
     }
 }
@@ -482,6 +475,25 @@ void MainWindow::refreshProductPage(int pageIndex) {
     productGridPage->setContents(event.getProductsContents());
 }
 
+void MainWindow::refreshProductDetailReviews(int productId) {
+    productDetailPage->setReviewContext(event.canWriteReview(productId));
+    productDetailPage->setReviews(
+        event.getReviews(productId),
+        event.getReviewSummary(productId),
+        event.getManageableReviewIds(productId)
+    );
+}
+
+void MainWindow::refreshReceiptPageContents() {
+    auto receipts = event.getReceipts();
+    std::vector<std::string> summaries;
+    summaries.reserve(receipts.size());
+    for (const auto& receipt : receipts) {
+        summaries.push_back(event.getReceiptItemSummary(receipt));
+    }
+    receiptPage->setReceipts(std::move(receipts), std::move(summaries));
+}
+
 void MainWindow::movePanelToWindowCenter(QWidget* panel) {
     if (panel == nullptr) {
         return;
@@ -493,7 +505,7 @@ void MainWindow::movePanelToWindowCenter(QWidget* panel) {
 }
 
 void MainWindow::updateAdminControls() {
-    const bool isAdmin = event.getUser().getRole() == UserRole::Admin;
+    const bool isAdmin = event.canManageProducts();
     if (productGridPage != nullptr) {
         productGridPage->setAdminMode(isAdmin);
     }

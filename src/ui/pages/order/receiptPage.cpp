@@ -70,19 +70,24 @@ ReceiptPage::ReceiptPage(QWidget* parent): ElaScrollPage(parent) {
     addCentralWidget(centralWidget, true, false, 0);
 }
 
-void ReceiptPage::setReceipts(Receipts receipts) {
+void ReceiptPage::setReceipts(Receipts receipts, std::vector<std::string> itemSummaries) {
     this->receipts = std::move(receipts);
+    this->itemSummaries = std::move(itemSummaries);
     rebuildReceipts();
 }
 
 void ReceiptPage::rebuildReceipts() {
     model->removeRows(0, model->rowCount());
 
-    for (const auto& receipt : receipts) {
+    for (int index = 0; index < static_cast<int>(receipts.size()); ++index) {
+        const auto& receipt = receipts[index];
+        const QString summary = index < static_cast<int>(itemSummaries.size())
+            ? QString::fromStdString(itemSummaries[index])
+            : "No items";
         QList<QStandardItem*> row;
         row << centeredItem(QString::number(receipt.getId()));
         row << centeredItem(QString::fromStdString(receipt.getDate()));
-        row << centeredItem(itemSummary(receipt));
+        row << centeredItem(summary);
         row << centeredItem(QString::number(receipt.getPaid()));
         row << centeredItem(QString::number(receipt.getPoints()));
         row << centeredItem(receipt.getIsCanceled() ? "Canceled" : "Paid");
@@ -103,24 +108,4 @@ int ReceiptPage::selectedReceiptId() const {
     const int row = selectedRows.first().row();
     const auto* receiptIdItem = model->item(row, 0);
     return receiptIdItem == nullptr ? -1 : receiptIdItem->text().toInt();
-}
-
-QString ReceiptPage::itemSummary(const Receipt& receipt) {
-    const auto items = receipt.getOrderItems();
-    if (items.empty()) {
-        return "No items";
-    }
-
-    int quantity = 0;
-    for (const auto& item : items) {
-        quantity += item.count;
-    }
-
-    const auto& first = items.front();
-    QString summary = QString("Product #%1 x%2").arg(first.id).arg(first.count);
-    if (items.size() > 1) {
-        summary += QString(" + %1 more").arg(items.size() - 1);
-    }
-    summary += QString(" (%1 total)").arg(quantity);
-    return summary;
 }

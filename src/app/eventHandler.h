@@ -1,5 +1,6 @@
 #include <string>
 #include <optional>
+#include <vector>
 
 #include "model/actions.h"
 #include "model/product/cart.h"
@@ -35,9 +36,14 @@ public:
 
     bool setProduct(int productId);
     Product getProduct();
+    bool canManageProducts();
 
     bool setOrder(int productId = -1);
     Order getOrder();
+    int getOrderTotalPrice();
+    int getOrderAvailablePoints();
+    int getOrderMaxUsablePoint();
+    int getOrderPayment(int usedPoint);
     bool confirmOrder(int usedPoint = 0);
     
     bool refund(int receiptId);
@@ -59,12 +65,16 @@ public:
 
     int getUserId();
     bool canWriteReview(int productId);
+    std::vector<int> getManageableReviewIds(int productId);
+    string getReviewSummary(int productId);
     Reviews getReviews(int productId);
     bool saveReview(int reviewId, int productId, int rating, const string& comment);
     bool deleteReview(int reviewId);
     bool setReview(Review review);
 
     bool updateProduct(Product product);
+    bool updateProductForm(int productId, const string& name, Category category, int price, int stock, const string& detail);
+    string getReceiptItemSummary(const Receipt& receipt);
 };
 
 

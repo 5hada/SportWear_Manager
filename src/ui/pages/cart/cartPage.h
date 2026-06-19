@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ElaScrollPage.h"
-#include "model/product/cart.h"
 
+#include "model/product/cart.h"
 #include "model/actions.h"
 
 class ElaTableView;
@@ -31,7 +31,7 @@ public:
     explicit CartPage(QWidget* parent = nullptr);
 
     void setCart(const Cart& cart);
-    bool applyCartChange(CartAction action, int productId = -1, int count = 0, std::optional<bool> isSelected = std::nullopt);
+    void syncCart(const Cart& cart);
     void restoreProductRow(int productId);
 
 Q_SIGNALS:

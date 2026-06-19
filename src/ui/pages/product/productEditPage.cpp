@@ -108,13 +108,14 @@ void ProductEditPage::initLayout() {
     addCentralWidget(centralWidget, true, false, 0);
 
     connect(saveButton, &ElaPushButton::clicked, this, [this]() {
-        Product edited(
-            Item{product.getId() <= 0 ? 0 : product.getId(), stockSpin->value(), priceSpin->value()},
-            nameEdit->text().toStdString(),
-            selectedCategory()
+        Q_EMIT saveRequested(
+            productId,
+            nameEdit->text(),
+            selectedCategory(),
+            priceSpin->value(),
+            stockSpin->value(),
+            detailEdit->toPlainText()
         );
-        edited.setDetail(detailEdit->toPlainText().toStdString());
-        Q_EMIT saveRequested(edited);
     });
     connect(cancelButton, &ElaPushButton::clicked, this, &ProductEditPage::cancelRequested);
 }
@@ -122,7 +123,7 @@ void ProductEditPage::initLayout() {
 void ProductEditPage::initConnect() {}
 
 void ProductEditPage::setAddMode() {
-    product = Product(Item{0, 0, 0}, "", Category::Top);
+    productId = 0;
     titleText->setText("Add Product");
     nameEdit->clear();
     setCategory(Category::Top);
@@ -132,7 +133,7 @@ void ProductEditPage::setAddMode() {
 }
 
 void ProductEditPage::setEditMode(const Product& product) {
-    this->product = product;
+    productId = product.getId();
     titleText->setText("Edit Product");
     nameEdit->setText(QString::fromStdString(product.getName()));
     setCategory(product.getCategory());

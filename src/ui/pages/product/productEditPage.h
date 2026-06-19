@@ -9,11 +9,12 @@ class ElaLineEdit;
 class ElaPlainTextEdit;
 class ElaSpinBox;
 class ElaText;
+class QString;
 
 class ProductEditPage : public ElaScrollPage {
     Q_OBJECT
 
-    Product product;
+    int productId{0};
     ElaText* titleText{nullptr};
     ElaLineEdit* nameEdit{nullptr};
     ElaComboBox* categoryCombo{nullptr};
@@ -34,6 +35,6 @@ public:
     void setEditMode(const Product& product);
 
 Q_SIGNALS:
-    void saveRequested(const Product& product);
+    void saveRequested(int productId, const QString& name, Category category, int price, int stock, const QString& detail);
     void cancelRequested();
 };
