@@ -28,7 +28,7 @@ class ProductGridPage: public ElaScrollPage {
 public:
     ProductGridPage(int ItemsPerPage, QWidget* parent = nullptr);
 
-    void setContents(std::tuple<const Products&, int, int>);
+    void setContents(std::tuple<Products, int, int>);
 
 Q_SIGNALS:
     void searchRequested(const string& keyword);

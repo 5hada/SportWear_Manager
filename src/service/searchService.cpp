@@ -6,11 +6,11 @@
 bool SearchService::setMaxIndex() {
     int size = (currentMode == SearchMode::Keyword) ? filteredProducts.size() : productsPool.size();
     if (size < 0) {return false;}
-    if (size < ItemsPerPage) {
+    if (size <= ItemsPerPage) {
         currentMaxIndex = 0;
     }
     else {
-        currentMaxIndex = size / ItemsPerPage;
+        currentMaxIndex = (size - 1) / ItemsPerPage;
     }
     return true;
 }
@@ -32,12 +32,13 @@ bool SearchService::setProductsPool(optional<Category> category) {
     productsPool.clear();
     if (category == nullopt) {
         productsPool = productService->getAll();
-        return true;
     }
     else {
         productsPool = productService->getByCategory(category.value());
-        return true;
     }
+    if (!setMaxIndex()) {return false;}
+    currentIndex = 0;
+    return true;
 }
 
 bool SearchService::searchProducts(const string& keyword) {
@@ -63,6 +64,8 @@ bool SearchService::searchProducts(const string& keyword) {
             filteredProducts.push_back(product);
         }
     }
+    if (!setMaxIndex()) {return false;}
+    currentIndex = 0;
     return true;
 }
 
@@ -70,10 +73,16 @@ bool SearchService::searchProducts(const string& keyword) {
 
 Products SearchService::getProducts() {
     Products& pool = (currentMode == SearchMode::Keyword) ? filteredProducts : productsPool;
+    if (pool.empty() || currentIndex < 0 || currentMaxIndex < 0) {
+        return {};
+    }
     int begin = currentIndex*ItemsPerPage;
+    if (begin < 0 || begin >= static_cast<int>(pool.size())) {
+        return {};
+    }
     int end = (currentIndex == currentMaxIndex) ?
         pool.size() : begin + ItemsPerPage;
-    return {pool.begin() + begin, pool.end() + end};
+    return {pool.begin() + begin, pool.begin() + end};
 }
 
 

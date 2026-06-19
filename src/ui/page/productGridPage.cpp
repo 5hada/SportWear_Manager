@@ -86,7 +86,7 @@ void ProductGridPage::initConnect() {
     }
 }
 
-void ProductGridPage::setContents(std::tuple<const Products&, int, int> contents) {
+void ProductGridPage::setContents(std::tuple<Products, int, int> contents) {
     const auto& [products, pageIndex, maxPageIndex] = contents;
     indexNavigation->setIndex(maxPageIndex, pageIndex);
     setProductCards(products);
@@ -94,14 +94,13 @@ void ProductGridPage::setContents(std::tuple<const Products&, int, int> contents
 
 void ProductGridPage::setProductCards(const Products& products) {
     int count = static_cast<int>(products.size());
-    if (count > itemsPerPage) {count = itemsPerPage;}
+    const int cardCount = static_cast<int>(productCards.size());
+    if (count > cardCount) {count = cardCount;}
     for (int i = 0; i < count; ++i) {
         productCards[i]->show();
         productCards[i]->setProduct(products[i]);
     }
-    if (count < itemsPerPage) {
-        for (int i = count; i < itemsPerPage; ++i) {
-            productCards[i]->hide();
-        }
+    for (int i = count; i < cardCount; ++i) {
+        productCards[i]->hide();
     }
 }

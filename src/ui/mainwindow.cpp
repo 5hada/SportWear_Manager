@@ -9,7 +9,7 @@
 
 #include "model/actions.h"
 #include "model/product/category.h"
-#include "model/product/product.h"
+
 #include "model/user/user.h"
 #include "page/productDetailPage.h"
 #include "page/productGridPage.h"
@@ -31,6 +31,7 @@
 #include <QMessageBox>
 #include <QTimer>
 #include <functional>
+#include <optional>
 #include <qobject.h>
 #include <qpoint.h>
 #include <qstackedwidget.h>
@@ -87,7 +88,7 @@ void MainWindow::initContent() {
 
     productPages = new QStackedWidget(this);
     productGridPage = new ProductGridPage(event.getItemsPerPage(), this);
-
+    event.setProducts(0, std::nullopt, Category::Unknown);
     productDetailPage = new ProductDetailPage(this);
     profilePanel = new ProfilePanel(this);
     profilePanel->hide();
@@ -114,8 +115,10 @@ void MainWindow::initContent() {
     adjustCartButton();
 
     addPageNode("Home", productPages, ElaIconType::House);
+    homeKey = productPages->property("ElaPageKey").toString();
 
     addPageNode("Products", productPages, ElaIconType::Shirt);
+    productsKey = productPages->property("ElaPageKey").toString();
     addExpanderNode("Categories", categoriesKey, ElaIconType::GridRound2);
     for (auto& category: Categories){
         if (category == Category::Unknown) {
@@ -137,38 +140,48 @@ void MainWindow::connectNavigation() {
     connect(this, &MainWindow::userInfoCardClicked, this, [=]() {
         showProfilePanel();
     });
-
     connect(this, &ElaWindow::navigationNodeClicked, this,
             [this](ElaNavigationType::NavigationNodeType, const QString& nodeKey) {
-                if (nodeKey == productPages->property("ElaPageKey").toString()) {
-                    prevNodeKey = nodeKey;
-                    showProductPage();
-                }
-                else if (nodeKey == wishPage->property("ElaPageKey").toString()) {
-                    showWishPage();
-                }
-                else if (nodeKey == cartPage->property("ElaPageKey").toString()) {
-                    showCartPage();
-                }
-                else if (nodeKey == receiptPage->property("ElaPageKey").toString()) {
-                    showReceiptPage();
-                }
-                else if (nodeKey == settingKey) {
-                    showSettingPanel();
-                }
-                else if (nodeKey == profileKey) {
-                    showProfilePanel();
-                }
-                else{
-                    for (auto& category: Categories){
-                        if (nodeKey == productsKeys.at(category)->property("ElaPageKey").toString()) {
-                            prevNodeKey = nodeKey;
-                            showProductPage();
-                            break;
+                QTimer::singleShot(0, this, [this, nodeKey]() {
+                    if (nodeKey == homeKey || nodeKey == productsKey) {
+                        if (keepProductFilterOnNextNavigation) {
+                            keepProductFilterOnNextNavigation = false;
+                        }
+                        else {
+                            event.setProducts(0, std::nullopt, Category::Unknown);
+                        }
+                        productGridPage->setContents(event.getProductsContents());
+                        productPages->setCurrentWidget(productGridPage);
+                    }
+                    else if (nodeKey == wishPage->property("ElaPageKey").toString()) {
+                        wishPage->setWishs(event.getWishs());
+                    }
+                    else if (nodeKey == cartPage->property("ElaPageKey").toString()) {
+                        cartPage->setCart(event.getCart());
+                    }
+                    else if (nodeKey == receiptPage->property("ElaPageKey").toString()) {
+                        receiptPage->setReceipts(event.getReceipts());
+                    }
+                    else if (nodeKey == settingKey) {
+                        showSettingPanel();
+                    }
+                    else if (nodeKey == profileKey) {
+                        showProfilePanel();
+                    }
+                    else {
+                        for (auto& category: Categories) {
+                            if (nodeKey == productsKeys.at(category)->property("ElaPageKey").toString()) {
+                                event.setProducts(0, std::nullopt, category);
+                                productGridPage->setContents(event.getProductsContents());
+                                productPages->setCurrentWidget(productGridPage);
+                                keepProductFilterOnNextNavigation = true;
+                                navigation(productsKey);
+                                break;
+                            }
                         }
                     }
-                }
-                closeCartWidget();
+                    closeCartWidget();
+                });
             }
         );
 }
@@ -275,16 +288,19 @@ void MainWindow::connectProfilePanel() {
     connect(profilePanel, &ProfilePanel::trySignup, this, [this](const QString& name, const QString& password) {
         handleResult(event.setUser(UserAction::Signup, name.toStdString(), password.toStdString()), [this] {
             updateUserInfo();
+        profilePanel->hide();
         });
     });
     connect(profilePanel, &ProfilePanel::tryLogin, this, [this](const QString& name, const QString& password) {
         handleResult(event.setUser(UserAction::Login, name.toStdString(), password.toStdString()), [this] {
             updateUserInfo();
+        profilePanel->hide();
         });
     });
     connect(profilePanel, &ProfilePanel::tryLogout, this, [this]() {
         handleResult(event.setUser(UserAction::Logout), [this] {
             updateUserInfo();
+        profilePanel->hide();
         });
     });
 }
@@ -318,7 +334,9 @@ void MainWindow::showDetailPage() {
 
 void MainWindow::showReceiptPage() {
     receiptPage->setReceipts(event.getReceipts());
-    navigation(receiptPage->property("ElaPageKey").toString());
+    if (getCurrentNavigationPageKey() != receiptPage->property("ElaPageKey").toString()){
+        navigation(receiptPage->property("ElaPageKey").toString());
+    }
 }
 
 void MainWindow::showCartPage() {
@@ -367,7 +385,6 @@ void MainWindow::updateUserInfo() {
             setUserInfoCardSubTitle("Not signed in");   
             break;
     }
-    profilePanel->hide();
 }
 
 

@@ -48,9 +48,12 @@ class MainWindow : public ElaWindow{
 
     std::map<Category, QWidget*> productsKeys;
     QString prevNodeKey;
+    QString homeKey;
+    QString productsKey;
     QString categoriesKey;
     QString settingKey;
     QString profileKey;
+    bool keepProductFilterOnNextNavigation{false};
     
     void initWindow();
 

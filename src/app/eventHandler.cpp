@@ -33,10 +33,7 @@ bool EventHandler::setUser(UserAction action, optional<string> name, optional<st
 
 
 bool EventHandler::setProducts(int index, optional<string> keyword, optional<Category> category) {
-    if (index != -1 && keyword == nullopt && category == nullopt) {return false;}
-    if (index != -1) {
-        if (!service.search.setCurrentIndex(index)) {return false;}
-    }
+    if (index == -1 && keyword == nullopt && category == nullopt) {return false;}
     if (category != nullopt) {
         if (category == Category::Unknown) {
             if(!service.search.setProductsPool()) {return false;}
@@ -48,11 +45,14 @@ bool EventHandler::setProducts(int index, optional<string> keyword, optional<Cat
     if (keyword != nullopt) {
         if (!service.search.searchProducts(keyword.value())) {return false;}
     }
+    if (index != -1) {
+        if (!service.search.setCurrentIndex(index)) {return false;}
+    }
     return true;
 
 }
 
-std::tuple<const Products&, int, int> EventHandler::getProductsContents() {
+std::tuple<Products, int, int> EventHandler::getProductsContents() {
     return std::make_tuple(service.search.getProducts(), service.search.getCurrentIndex(), service.search.getMaxIndex());
 }
 

@@ -30,7 +30,7 @@ public:
 
 
     bool setProducts(int index = -1, optional<string> keyword = nullopt, optional<Category> category = nullopt);
-    std::tuple<const Products&, int, int> getProductsContents();
+    std::tuple<Products, int, int> getProductsContents();
 
     bool setProduct(int productId);
     Product getProduct();
