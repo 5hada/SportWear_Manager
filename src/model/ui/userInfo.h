@@ -1,6 +1,6 @@
 #pragma once
 
-#include "user.h"
+#include "model/user/user.h"
 #include <string>
 
 using std::string;

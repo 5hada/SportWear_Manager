@@ -105,6 +105,7 @@ void ProductGridPage::initConnect() {
     connect(searchEdit, &ElaLineEdit::returnPressed, this, [this]() {
         emit searchRequested(searchEdit->text().toStdString());
     });
+
     connect(addButton, &ElaPushButton::clicked, this, &ProductGridPage::addRequested);
 
     connect(categoryCombo, QOverload<int>::of(&ElaComboBox::currentIndexChanged), this,
@@ -124,9 +125,21 @@ void ProductGridPage::initConnect() {
     }
 }
 
+
+
+
 void ProductGridPage::setContents(const ProductGridPageContent& content) {
-    indexNavigation->setIndex(content.maxPage, content.currentPage);
-    setProductCards(content.products);
+    indexNavigation->setIndex(content.indexData.maxPage, content.indexData.currentPage);
+    int count = content.rows.size();
+    const int cardCount = productCards.size();
+    if (count > cardCount) {count = cardCount;}
+    for (int i = 0; i < count; ++i) {
+        productCards[i]->show();
+        productCards[i]->setContent(content.rows[i]);
+    }
+    for (int i = count; i < cardCount; ++i) {
+        productCards[i]->hide();
+    }
 }
 
 void ProductGridPage::setCategory(Category category) {
@@ -143,21 +156,10 @@ void ProductGridPage::setCategory(Category category) {
     categoryCombo->setCurrentIndex(0);
 }
 
+
+
 void ProductGridPage::setAdminMode(bool isAdmin) {
     if (addButton != nullptr) {
         addButton->setVisible(isAdmin);
-    }
-}
-
-void ProductGridPage::setProductCards(const Products& products) {
-    int count = static_cast<int>(products.size());
-    const int cardCount = static_cast<int>(productCards.size());
-    if (count > cardCount) {count = cardCount;}
-    for (int i = 0; i < count; ++i) {
-        productCards[i]->show();
-        productCards[i]->setProduct(products[i]);
-    }
-    for (int i = count; i < cardCount; ++i) {
-        productCards[i]->hide();
     }
 }

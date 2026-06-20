@@ -1,5 +1,6 @@
 #include "orderPanel.h"
-#include "ui/common/tableItemUtil.h"
+
+#include "ui/components/tableItem.h"
 
 #include <ElaPushButton.h>
 #include <ElaSpinBox.h>
@@ -97,19 +98,19 @@ OrderPanel::OrderPanel(QWidget* parent): ElaDialog(parent) {
         hide();
     });
     connect(pointSpin, QOverload<int>::of(&ElaSpinBox::valueChanged), this, [this](int usedPoint) {
-        Q_EMIT pointChanged(usedPoint);
+        emit pointChanged(usedPoint);
     });
 }
 
 void OrderPanel::setContent(const OrderPanelContent& content) {
     model->removeRows(0, model->rowCount());
 
-    for (const auto& item : content.order.getItems()) {
+    for (const auto& item : content.rows) {
         QList<QStandardItem*> row;
-        row << centeredItem(QString::number(item.id));
+        row << centeredItem(QString::number(item.productId));
         row << centeredItem(QString::number(item.count));
-        row << centeredItem(QString::number(item.price));
-        row << centeredItem(QString::number(item.price * item.count));
+        row << centeredItem(QString::number(item.unitPrice));
+        row << centeredItem(QString::number(item.totalPrice));
         model->appendRow(row);
     }
 

@@ -7,9 +7,9 @@ class Cart {
     CartItems items;
 
 public:
-    Cart() = default;
+    Cart(): items() {}
     Cart(int userId, CartItems& items) : userId(userId), items(items) {}
-    // ~Cart();
+
     void setUserId(int userId) { this->userId = userId; }
     void setItems(CartItems& items) { this->items = items; }
 
@@ -19,9 +19,6 @@ public:
 
     void addItem(int productId, int count);
     void addItem(CartItem item);
-    // bool subItem(int productId, int count);
-    // bool removeItem(int productId);
-    // void clear();
 
     int getTotalPrice() const;
     int getTotalCount() const;

@@ -18,6 +18,6 @@ public:
 
     bool isSelected() const {return selected;}
 
-    void setPrice(int price){Item::setPrice(price);}
-    void setSelected(bool isSelected){this->selected = isSelected;}
+    void setPrice(int price) {Item::setPrice(price);}
+    void setSelected(bool isSelected) {this->selected = isSelected;}
 };

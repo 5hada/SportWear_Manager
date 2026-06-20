@@ -1,6 +1,6 @@
 #include "cartWidget.h"
 #include "ElaTableView.h"
-#include "ui/common/tableItemUtil.h"
+#include "ui/components/tableItem.h"
 
 #include <QHeaderView>
 #include <QStandardItemModel>

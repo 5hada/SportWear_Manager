@@ -1,5 +1,5 @@
 #include "cartPage.h"
-#include "ui/common/tableItemUtil.h"
+#include "ui/components/tableItem.h"
 
 #include <ElaCheckBox.h>
 #include <ElaIconButton.h>
@@ -139,27 +139,27 @@ CartPage::CartPage(QWidget* parent): ElaScrollPage(parent) {
 
         connect(selectedCheck, &ElaCheckBox::clicked, this, [this, row](bool checked) {
             if (rows[row].productId > 0) {
-                Q_EMIT cartRequest(CartAction::Toggle, rows[row].productId, 0, checked);
+                emit cartRequest(CartAction::Toggle, rows[row].productId, 0, checked);
             }
         });
         connect(quantitySpin, QOverload<int>::of(&ElaSpinBox::valueChanged), this, [this, row](int value) {
             if (rows[row].productId > 0 && rows[row].quantityCell->isVisible()) {
-                Q_EMIT cartRequest(CartAction::Set, rows[row].productId, value);
+                emit cartRequest(CartAction::Set, rows[row].productId, value);
             }
         });
         connect(decreaseButton, &ElaPushButton::clicked, this, [this, row]() {
             if (rows[row].productId > 0) {
-                Q_EMIT cartRequest(CartAction::Sub, rows[row].productId, 1);
+                emit cartRequest(CartAction::Sub, rows[row].productId, 1);
             }
         });
         connect(increaseButton, &ElaPushButton::clicked, this, [this, row]() {
             if (rows[row].productId > 0) {
-                Q_EMIT cartRequest(CartAction::Add, rows[row].productId, 1);
+                emit cartRequest(CartAction::Add, rows[row].productId, 1);
             }
         });
         connect(removeButton, &ElaPushButton::clicked, this, [this, row]() {
             if (rows[row].productId > 0) {
-                Q_EMIT cartRequest(CartAction::Del, rows[row].productId);
+                emit cartRequest(CartAction::Del, rows[row].productId);
             }
         });
     }
@@ -218,14 +218,14 @@ CartPage::CartPage(QWidget* parent): ElaScrollPage(parent) {
     addCentralWidget(centralWidget, true, false, 0);
 
     connect(clearButton, &ElaPushButton::clicked, this, [this]() {
-        Q_EMIT cartRequest(CartAction::Clear);
+        emit cartRequest(CartAction::Clear);
     });
     connect(orderButton, &ElaPushButton::clicked, this, &CartPage::orderRequested);
     connect(previousButton, &ElaIconButton::clicked, this, [this]() {
-        Q_EMIT pageMoveRequested(-1);
+        emit pageMoveRequested(-1);
     });
     connect(nextButton, &ElaIconButton::clicked, this, [this]() {
-        Q_EMIT pageMoveRequested(1);
+        emit pageMoveRequested(1);
     });
 }
 
@@ -253,37 +253,33 @@ void CartPage::setPageInfo(int currentPage, int maxPage) {
 }
 
 void CartPage::refreshContent(const CartPageContent& content) {
-    setPageInfo(content.currentPage, content.maxPage);
+    setPageInfo(content.indexData.currentPage, content.indexData.maxPage);
     for (int row = 0; row < FixedRowCount; ++row) {
         clearRow(row);
     }
 
     int row = 0;
-    for (const auto& item : content.cart.getItems()) {
+    for (const auto& item : content.rows) {
         if (row >= FixedRowCount) {
             break;
         }
-        const int itemTotal = row < static_cast<int>(content.itemTotals.size()) ? content.itemTotals[row] : 0;
-        const QString productName = row < static_cast<int>(content.productNames.size())
-            ? QString::fromStdString(content.productNames[row])
-            : QString("Unknown");
         {
             const QSignalBlocker blocker(rows[row].selectedCheck);
-            rows[row].selectedCheck->setChecked(item.isSelected());
+            rows[row].selectedCheck->setChecked(item.selected);
         }
         {
             const QSignalBlocker blocker(rows[row].quantitySpin);
             rows[row].quantitySpin->setValue(item.count);
         }
 
-        rows[row].productId = item.id;
+        rows[row].productId = item.productId;
         rows[row].selectedCell->show();
         rows[row].selectedCheck->show();
-        model->item(row, 1)->setText(productName);
+        model->item(row, 1)->setText(QString::fromStdString(item.name.empty() ? "Unknown" : item.name));
         rows[row].quantityCell->show();
         rows[row].quantitySpin->show();
-        model->item(row, 3)->setText(QString::number(item.price));
-        model->item(row, 4)->setText(QString::number(itemTotal));
+        model->item(row, 3)->setText(QString::number(item.unitPrice));
+        model->item(row, 4)->setText(QString::number(item.totalPrice));
         rows[row].actions->show();
         rows[row].decreaseButton->show();
         rows[row].increaseButton->show();

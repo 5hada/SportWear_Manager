@@ -1,5 +1,5 @@
 #include "wishPage.h"
-#include "ui/common/tableItemUtil.h"
+#include "ui/components/tableItem.h"
 
 #include <ElaIconButton.h>
 #include <ElaPushButton.h>
@@ -54,13 +54,19 @@ void applyFixedTableLayout(ElaTableView* table, std::initializer_list<int> width
 }
 
 WishPage::WishPage(QWidget* parent): ElaScrollPage(parent) {
+    initWindow();
+    initLayout();
+}
+
+void WishPage::initWindow() {
     setWindowTitle("Wish List");
     setTitleVisible(false);
     setContentsMargins(2, 2, 0, 0);
+}
 
+void WishPage::initLayout() {
     auto* titleText = new ElaText("Wish List", this);
     titleText->setTextPixelSize(35);
-
     auto* descText = new ElaText("Products saved for later purchase.", this);
     descText->setTextPixelSize(16);
 
@@ -106,12 +112,12 @@ WishPage::WishPage(QWidget* parent): ElaScrollPage(parent) {
 
         connect(cartButton, &ElaPushButton::clicked, this, [this, row]() {
             if (rows[row].productId > 0) {
-                Q_EMIT cartRequested(rows[row].productId);
+                emit cartRequested(rows[row].productId);
             }
         });
         connect(removeButton, &ElaPushButton::clicked, this, [this, row]() {
             if (rows[row].productId > 0) {
-                Q_EMIT removeRequested(rows[row].productId);
+                emit removeRequested(rows[row].productId);
             }
         });
     }
@@ -148,10 +154,10 @@ WishPage::WishPage(QWidget* parent): ElaScrollPage(parent) {
     addCentralWidget(centralWidget, true, false, 0);
 
     connect(previousButton, &ElaIconButton::clicked, this, [this]() {
-        Q_EMIT pageMoveRequested(-1);
+        emit pageMoveRequested(-1);
     });
     connect(nextButton, &ElaIconButton::clicked, this, [this]() {
-        Q_EMIT pageMoveRequested(1);
+        emit pageMoveRequested(1);
     });
 }
 
@@ -174,20 +180,20 @@ void WishPage::setPageInfo(int currentPage, int maxPage) {
 }
 
 void WishPage::refreshContent(const WishPageContent& content) {
-    setPageInfo(content.currentPage, content.maxPage);
+    setPageInfo(content.indexData.currentPage, content.indexData.maxPage);
     for (int row = 0; row < FixedRowCount; ++row) {
         clearRow(row);
     }
 
     int row = 0;
-    for (const auto& product : content.products) {
+    for (const auto& content : content.rows) {
         if (row >= FixedRowCount) {
             break;
         }
-        model->item(row, 0)->setText(product.getName().empty() ? "Sample Product" : QString::fromStdString(product.getName()));
-        model->item(row, 1)->setText(QString::number(product.getPrice()));
-        model->item(row, 2)->setText(QString::number(product.getStock()));
-        rows[row].productId = product.getId();
+        model->item(row, 0)->setText(content.name.empty() ? "Sample Product" : QString::fromStdString(content.name));
+        model->item(row, 1)->setText(QString::number(content.price));
+        model->item(row, 2)->setText(QString::number(content.stock));
+        rows[row].productId = content.id;
         rows[row].actions->show();
         rows[row].cartButton->show();
         rows[row].removeButton->show();

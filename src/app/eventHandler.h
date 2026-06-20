@@ -10,7 +10,7 @@
 #include "model/product/receipt.h"
 #include "model/product/product.h"
 #include "model/product/category.h"
-#include "model/user/userInfo.h"
+#include "model/ui/userInfo.h"
 #include "model/review.h"
 #include "model/ui/cartPageContent.h"
 #include "model/ui/orderPanelContent.h"
@@ -27,9 +27,9 @@ class ServiceProvider;
 
 class EventHandler {
     ServiceProvider& service;
-    int wishPageIndex{0};
-    int cartPageIndex{0};
-    int receiptPageIndex{0};
+    int wishPageIndex = 0;
+    int cartPageIndex = 0;
+    int receiptPageIndex = 0;
 
     int userId();
     bool hasPurchasedProduct(int productId);
@@ -88,7 +88,7 @@ public:
     std::vector<int> getManageableReviewIds(int productId);
     string getReviewSummary(int productId);
     Reviews getReviews(int productId);
-    ProductReviewContent getProductReviewContent(int productId);
+    ReviewContent getReviewContent(int productId);
     bool saveReview(int reviewId, int productId, int rating, const string& comment);
     bool deleteReview(int reviewId);
     bool setReview(Review review);

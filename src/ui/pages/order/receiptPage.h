@@ -19,7 +19,7 @@ class ReceiptPage: public ElaScrollPage {
     struct RowWidgets {
         QWidget* refundCell{nullptr};
         ElaPushButton* refundButton{nullptr};
-        int receiptId{-1};
+        int receiptId = -1;
     };
 
     ElaTableView* receiptTable{nullptr};

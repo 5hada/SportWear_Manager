@@ -20,7 +20,7 @@ class WishPage: public ElaScrollPage {
         QWidget* actions{nullptr};
         ElaPushButton* cartButton{nullptr};
         ElaPushButton* removeButton{nullptr};
-        int productId{-1};
+        int productId = -1;
     };
 
     ElaTableView* wishTable{nullptr};
@@ -29,6 +29,9 @@ class WishPage: public ElaScrollPage {
     ElaIconButton* previousButton{nullptr};
     ElaIconButton* nextButton{nullptr};
     std::vector<RowWidgets> rows;
+
+    void initWindow();
+    void initLayout();
 
     void clearRow(int row);
     void setPageInfo(int currentPage, int maxPage);

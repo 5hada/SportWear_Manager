@@ -50,7 +50,7 @@ void IndexNavigation::init() {
         if (currentIndex == 0) {
             return;
         }
-        Q_EMIT indexChanged(0);
+        emit indexChanged(0);
         currentIndex = 0;
     });
     connect(leftArrow, &ElaIconButton::clicked, this, [this]() {
@@ -58,7 +58,7 @@ void IndexNavigation::init() {
             return;
         }
         const int nextIndex = currentIndex - 1;
-        Q_EMIT indexChanged(nextIndex);
+        emit indexChanged(nextIndex);
         currentIndex = nextIndex;
     });
     connect(rightArrow, &ElaIconButton::clicked, this, [this]() {
@@ -66,14 +66,14 @@ void IndexNavigation::init() {
             return;
         }
         const int nextIndex = currentIndex + 1;
-        Q_EMIT indexChanged(nextIndex);
+        emit indexChanged(nextIndex);
         currentIndex = nextIndex;
     });
     connect(rightEndArrow, &ElaIconButton::clicked, this, [this]() {
         if (currentIndex == maxIndex) {
             return;
         }
-        Q_EMIT indexChanged(maxIndex);
+        emit indexChanged(maxIndex);
         currentIndex = maxIndex;
     });
     connect(pageIndexInput, &ElaLineEdit::returnPressed, this, [this]() {
@@ -81,7 +81,7 @@ void IndexNavigation::init() {
         const int page = pageIndexInput->text().toInt(&ok);
         const int nextIndex = page - 1;
         if (ok && nextIndex >= 0 && nextIndex <= maxIndex) {
-            Q_EMIT indexChanged(nextIndex);
+            emit indexChanged(nextIndex);
             currentIndex = nextIndex;
         }
     });

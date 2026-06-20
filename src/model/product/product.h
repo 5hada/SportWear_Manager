@@ -18,8 +18,6 @@ public:
     Product(): item() {}
     Product(Item item, string name, Category category)
         : item(item), name(std::move(name)), category(category) {}
-    // Product(int count, int price, string name, Category category)
-    //     : item(count, price), name(std::move(name)), category(category) {}
 
     int getId() const {return item.id;}
     const string& getName() const {return name;}

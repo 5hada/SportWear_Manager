@@ -1,9 +1,9 @@
 #include "profilePanel.h"
 
-#include "ui/panels/profile/widgets/userPanel.h"
-#include "ui/panels/profile/widgets/signupPanel.h"
-#include "ui/panels/profile/widgets/loginPanel.h"
-#include "ui/panels/profile/widgets/logoutPanel.h"
+#include "widgets/userPanel.h"
+#include "widgets/signupPanel.h"
+#include "widgets/loginPanel.h"
+#include "widgets/logoutPanel.h"
 
 #include <QStackedWidget>
 #include <QString>
@@ -47,13 +47,13 @@ void ProfilePanel::initLayout() {
     connect(signupPanel, &SignupPanel::leftButtonClicked, this, &ProfilePanel::setUser);
     connect(signupPanel, &SignupPanel::rightButtonClicked, this,
             [this](const string& name, const string& password) {
-                Q_EMIT trySignup(QString::fromStdString(name), QString::fromStdString(password));
+                emit trySignup(QString::fromStdString(name), QString::fromStdString(password));
             });
 
     connect(loginPanel, &LoginPanel::leftButtonClicked, this, &ProfilePanel::setUser);
     connect(loginPanel, &LoginPanel::rightButtonClicked, this,
             [this](const string& name, const string& password) {
-                Q_EMIT tryLogin(QString::fromStdString(name), QString::fromStdString(password));
+                emit tryLogin(QString::fromStdString(name), QString::fromStdString(password));
             });
 
     connect(logoutPanel, &LogoutPanel::cancelRequested, this, &ProfilePanel::setUser);

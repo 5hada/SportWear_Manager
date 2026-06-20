@@ -6,6 +6,7 @@
 
 class Receipt;
 
+using std::string;
 using Receipts = std::vector<Receipt>;
 class Receipt {
     int id;
@@ -13,9 +14,9 @@ class Receipt {
     Items items;
     int points;
     int paid;
-    std::string date;
+    string date;
     bool isCanceled;
-    std::string canceledAt;
+    string canceledAt;
 
 public:
     Receipt() = default;
@@ -25,9 +26,9 @@ public:
         Items items,
         int point,
         int paid,
-        std::string date,
+        string date,
         bool isCanceled = false,
-        std::string canceledAt = ""
+        string canceledAt = ""
     );
     Receipt(
         int userId,
@@ -42,18 +43,18 @@ public:
     Items getOrderItems() const{return items;}
     int getPoints() const { return points; }
     int getPaid() const { return paid; }
-    std::string getDate() const { return date; }
+    string getDate() const { return date; }
     bool getIsCanceled() const { return isCanceled; }
-    std::string getCanceledAt() const {return canceledAt;}
+    string getCanceledAt() const {return canceledAt;}
 
     void setId(int id) {this->id = id;}
-    void setUserId(int userId){this->userId = userId;}
+    void setUserId(int userId) {this->userId = userId;}
     void setOrderItems(Items items) {this->items = items;}
-    void setPoints(int points){this->points = points;}
-    void setPaid(int paid){this->paid = paid;}
-    void setDate(std::string date){this->date = date;}
-    void setIsCanceled(bool isCanceled=false){this->isCanceled = isCanceled;}
-    void setCanceledAt(std::string canceledAt=""){this->canceledAt = canceledAt;}
+    void setPoints(int points) {this->points = points;}
+    void setPaid(int paid) {this->paid = paid;}
+    void setDate(string date) {this->date = date;}
+    void setIsCanceled(bool isCanceled = false) {this->isCanceled = isCanceled;}
+    void setCanceledAt(string canceledAt = "") {this->canceledAt = canceledAt;}
 
     void setData(
         int id,
@@ -61,9 +62,9 @@ public:
         Items items,
         int point,
         int paid,
-        std::string date,
+        string date,
         bool isCanceled = false,
-        std::string canceledAt = ""
+        string canceledAt = ""
     );
 
 };

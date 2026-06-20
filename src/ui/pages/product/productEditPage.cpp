@@ -108,7 +108,7 @@ void ProductEditPage::initLayout() {
     addCentralWidget(centralWidget, true, false, 0);
 
     connect(saveButton, &ElaPushButton::clicked, this, [this]() {
-        Q_EMIT saveRequested(
+        emit saveRequested(
             productId,
             nameEdit->text(),
             selectedCategory(),

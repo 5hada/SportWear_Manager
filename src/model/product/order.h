@@ -10,7 +10,7 @@ class Order {
 
     Items items;
 
-    void addPrice(int price){totalPrice+=price;}
+    void addPrice(int price) {totalPrice+=price;}
 public:
     Order(): userId(0), availablePoints(0), totalPrice(0) {};
     Order(int userId, int totalPrice, Items items): userId(userId), totalPrice(totalPrice) {

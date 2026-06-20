@@ -87,10 +87,10 @@ bool EventHandler::setProducts(int index, optional<string> keyword, optional<Cat
 }
 
 ProductGridPageContent EventHandler::getProductsContents() {
-    ProductGridPageContent content;
-    content.products = service.search.getProducts();
-    content.currentPage = service.search.getCurrentIndex();
-    content.maxPage = service.search.getMaxIndex();
+    ProductGridPageContent content(PageNavigationContent(service.search.getCurrentIndex(), service.search.getMaxIndex()));
+    for (const auto& product : service.search.getProducts()) {
+        content << product;
+    }
     return content;
 }
 
@@ -129,7 +129,10 @@ Order EventHandler::getOrder() {
 
 OrderPanelContent EventHandler::getOrderPanelContent(int usedPoint) {
     OrderPanelContent content;
-    content.order = getOrder();
+    const auto order = getOrder();
+    for (const auto& item : order.getItems()) {
+        content << OrderRowContent(item);
+    }
     content.totalPrice = getOrderTotalPrice();
     content.availablePoints = getOrderAvailablePoints();
     content.maxUsablePoint = getOrderMaxUsablePoint();
@@ -178,31 +181,20 @@ Cart EventHandler::getCart() {
 
 CartPageContent EventHandler::getCartPageContent(int pageSize) {
     const Cart fullCart = getCart();
-    Cart pageCart;
-    pageCart.setUserId(fullCart.getUserId());
     const int maxPage = pageMaxIndex(static_cast<int>(fullCart.getItems().size()), pageSize);
     if (cartPageIndex > maxPage) {
         cartPageIndex = maxPage;
     }
 
-    CartItems pageItems;
+    CartPageContent content(PageNavigationContent(cartPageIndex, maxPage));
+    content.totalCount = fullCart.getTotalCount();
+    content.totalPrice = fullCart.getTotalPrice();
     const int begin = cartPageIndex * pageSize;
     const int end = std::min(begin + pageSize, static_cast<int>(fullCart.getItems().size()));
     for (int index = begin; index < end; ++index) {
-        pageItems.push_back(fullCart.getItems()[index]);
-    }
-    pageCart.setItems(pageItems);
-
-    CartPageContent content;
-    content.cart = pageCart;
-    content.currentPage = cartPageIndex;
-    content.maxPage = maxPage;
-    content.totalCount = fullCart.getTotalCount();
-    content.totalPrice = fullCart.getTotalPrice();
-    for (const auto& item : pageCart.getItems()) {
+        const auto& item = fullCart.getItems()[index];
         const auto product = service.product.getById(item.id);
-        content.productNames.push_back(product.getName().empty() ? "Unknown" : product.getName());
-        content.itemTotals.push_back(item.price * item.count);
+        content << CartRowContent(item, product.getName().empty() ? "Unknown" : product.getName());
     }
     return content;
 }
@@ -229,15 +221,11 @@ ReceiptPageContent EventHandler::getReceiptPageContent(int pageSize) {
         receiptPageIndex = maxPage;
     }
 
-    ReceiptPageContent content;
-    content.currentPage = receiptPageIndex;
-    content.maxPage = maxPage;
+    ReceiptPageContent content(PageNavigationContent(receiptPageIndex, maxPage));
     const int begin = receiptPageIndex * pageSize;
     const int end = std::min(begin + pageSize, static_cast<int>(receipts.size()));
     for (int index = begin; index < end; ++index) {
-        content.receipts.push_back(receipts[index]);
-        content.itemSummaries.push_back(getReceiptItemSummary(receipts[index]));
-        content.refundable.push_back(!receipts[index].getIsCanceled());
+        content << ReceiptRowContent(receipts[index], getReceiptItemSummary(receipts[index]));
     }
     return content;
 }
@@ -260,13 +248,11 @@ WishPageContent EventHandler::getWishPageContent(int pageSize) {
         wishPageIndex = maxPage;
     }
 
-    WishPageContent content;
-    content.currentPage = wishPageIndex;
-    content.maxPage = maxPage;
+    WishPageContent content(PageNavigationContent(wishPageIndex, maxPage));
     const int begin = wishPageIndex * pageSize;
     const int end = std::min(begin + pageSize, static_cast<int>(wishs.size()));
     for (int index = begin; index < end; ++index) {
-        content.products.push_back(wishs[index]);
+        content << wishs[index];
     }
     return content;
 }
@@ -349,12 +335,15 @@ Reviews EventHandler::getReviews(int productId) {
     return service.review.getAllFromProduct(productId);
 }
 
-ProductReviewContent EventHandler::getProductReviewContent(int productId) {
-    ProductReviewContent content;
+ReviewContent EventHandler::getReviewContent(int productId) {
+    ReviewContent content;
     content.canWrite = canWriteReview(productId);
-    content.reviews = getReviews(productId);
     content.summary = getReviewSummary(productId);
-    content.manageableReviewIds = getManageableReviewIds(productId);
+    const auto manageableReviewIds = getManageableReviewIds(productId);
+    for (const auto& review : getReviews(productId)) {
+        const bool canManage = std::find(manageableReviewIds.begin(), manageableReviewIds.end(), review.getId()) != manageableReviewIds.end();
+        content << ReviewRow(review, canManage);
+    }
     return content;
 }
 

@@ -86,14 +86,18 @@ ProductCard::ProductCard(QWidget* parent): ElaPushButton(parent) {
 }
 
 void ProductCard::setProduct(const Product& product) {
-    productId = product.getId();
+    setContent(ProductCardContent(product));
+}
+
+void ProductCard::setContent(const ProductCardContent& content) {
+    productId = content.id;
     constexpr int textWidth = 190;
     constexpr int metaWidth = 86;
-    setElidedText(nameText, QString::fromStdString(product.getName()), textWidth);
-    setElidedText(categoryText, QString::fromStdString(categoryToString(product.getCategory())), textWidth);
-    setElidedText(priceText, QString("Price %1").arg(product.getPrice()), metaWidth);
-    setElidedText(stockText, QString("Stock %1").arg(product.getStock()), metaWidth);
-    setElidedText(detailText, QString::fromStdString(product.getDetail().empty()
+    setElidedText(nameText, QString::fromStdString(content.name), textWidth);
+    setElidedText(categoryText, QString::fromStdString(content.category), textWidth);
+    setElidedText(priceText, QString("Price %1").arg(content.price), metaWidth);
+    setElidedText(stockText, QString("Stock %1").arg(content.stock), metaWidth);
+    setElidedText(detailText, QString::fromStdString(content.detail.empty()
         ? "No detail."
-        : product.getDetail()), textWidth);
+        : content.detail), textWidth);
 }

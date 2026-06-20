@@ -8,6 +8,11 @@
 #include <QVBoxLayout>
 
 ProductPages::ProductPages(int itemsPerPage, QWidget* parent): QWidget(parent) {
+    initWidgets(itemsPerPage);
+    initConnect();
+}
+
+void ProductPages::initWidgets(int itemsPerPage) {
     stack = new QStackedWidget(this);
     gridPage = new ProductGridPage(itemsPerPage, this);
     detailPage = new ProductDetailPage(this);
@@ -21,7 +26,9 @@ ProductPages::ProductPages(int itemsPerPage, QWidget* parent): QWidget(parent) {
     auto* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(stack);
+}
 
+void ProductPages::initConnect() {
     connect(gridPage, &ProductGridPage::productSelected, this, &ProductPages::productSelected);
     connect(gridPage, &ProductGridPage::searchRequested, this, &ProductPages::searchRequested);
     connect(gridPage, &ProductGridPage::categoryChanged, this, &ProductPages::categoryChanged);
@@ -39,6 +46,9 @@ ProductPages::ProductPages(int itemsPerPage, QWidget* parent): QWidget(parent) {
     connect(editPage, &ProductEditPage::saveRequested, this, &ProductPages::productSaveRequested);
     connect(editPage, &ProductEditPage::cancelRequested, this, &ProductPages::productCancelRequested);
 }
+
+
+
 
 void ProductPages::showGrid() {
     stack->setCurrentWidget(gridPage);
@@ -58,9 +68,14 @@ void ProductPages::showEditForm(const Product& product) {
     stack->setCurrentWidget(editPage);
 }
 
+
+
 bool ProductPages::isDetailVisible() const {
     return stack->currentWidget() == detailPage;
 }
+
+
+
 
 void ProductPages::setGridCategory(Category category) {
     gridPage->setCategory(category);
@@ -74,7 +89,7 @@ void ProductPages::setProduct(const Product& product, bool wished) {
     detailPage->setProduct(product, wished);
 }
 
-void ProductPages::setReviewContent(const ProductReviewContent& content) {
+void ProductPages::setReviewContent(const ReviewContent& content) {
     detailPage->setReviewContent(content);
 }
 

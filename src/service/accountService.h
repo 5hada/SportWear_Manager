@@ -1,6 +1,6 @@
 
 #include "model/user/user.h"
-#include "model/user/userInfo.h"
+#include "model/ui/userInfo.h"
 
 class UserRepository;
 

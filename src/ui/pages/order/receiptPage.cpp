@@ -1,5 +1,5 @@
 #include "receiptPage.h"
-#include "ui/common/tableItemUtil.h"
+#include "ui/components/tableItem.h"
 
 #include <ElaIconButton.h>
 #include <ElaPushButton.h>
@@ -96,7 +96,7 @@ ReceiptPage::ReceiptPage(QWidget* parent): ElaScrollPage(parent) {
 
         connect(refundButton, &ElaPushButton::clicked, this, [this, row]() {
             if (rows[row].receiptId > 0) {
-                Q_EMIT refundRequested(rows[row].receiptId);
+                emit refundRequested(rows[row].receiptId);
             }
         });
     }
@@ -133,10 +133,10 @@ ReceiptPage::ReceiptPage(QWidget* parent): ElaScrollPage(parent) {
     addCentralWidget(centralWidget, true, false, 0);
 
     connect(previousButton, &ElaIconButton::clicked, this, [this]() {
-        Q_EMIT pageMoveRequested(-1);
+        emit pageMoveRequested(-1);
     });
     connect(nextButton, &ElaIconButton::clicked, this, [this]() {
-        Q_EMIT pageMoveRequested(1);
+        emit pageMoveRequested(1);
     });
 }
 
@@ -158,29 +158,25 @@ void ReceiptPage::setPageInfo(int currentPage, int maxPage) {
 }
 
 void ReceiptPage::refreshContent(const ReceiptPageContent& content) {
-    setPageInfo(content.currentPage, content.maxPage);
+    setPageInfo(content.indexData.currentPage, content.indexData.maxPage);
     for (int row = 0; row < FixedRowCount; ++row) {
         clearRow(row);
     }
 
-    for (int row = 0; row < static_cast<int>(content.receipts.size()); ++row) {
+    for (int row = 0; row < static_cast<int>(content.rows.size()); ++row) {
         if (row >= FixedRowCount) {
             break;
         }
-        const auto& receipt = content.receipts[row];
-        const QString summary = row < static_cast<int>(content.itemSummaries.size())
-            ? QString::fromStdString(content.itemSummaries[row])
-            : "No items";
-        const bool refundable = row < static_cast<int>(content.refundable.size()) && content.refundable[row];
+        const auto& receipt = content.rows[row];
 
-        model->item(row, 0)->setText(QString::number(receipt.getId()));
-        model->item(row, 1)->setText(QString::fromStdString(receipt.getDate()));
-        model->item(row, 2)->setText(summary);
-        model->item(row, 3)->setText(QString::number(receipt.getPaid()));
-        model->item(row, 4)->setText(receipt.getIsCanceled() ? "Canceled" : "Paid");
+        model->item(row, 0)->setText(QString::number(receipt.id));
+        model->item(row, 1)->setText(QString::fromStdString(receipt.date));
+        model->item(row, 2)->setText(QString::fromStdString(receipt.itemSummary.empty() ? "No items" : receipt.itemSummary));
+        model->item(row, 3)->setText(QString::number(receipt.paid));
+        model->item(row, 4)->setText(QString::fromStdString(receipt.status));
 
-        rows[row].receiptId = refundable ? receipt.getId() : -1;
-        if (refundable) {
+        rows[row].receiptId = receipt.refundable ? receipt.id : -1;
+        if (receipt.refundable) {
             rows[row].refundCell->show();
             rows[row].refundButton->show();
         }

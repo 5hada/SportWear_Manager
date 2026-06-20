@@ -6,16 +6,16 @@
 #include "model/user/user.h"
 #include "model/product/category.h"
 
-#include "ui/common/dialog.h"
-#include "ui/common/messageBar.h"
+#include "ui/components/dialog.h"
+#include "ui/components/messageBar.h"
 #include "ui/pages/product/productPages.h"
-#include "ui/panels/profile/profilePanel.h"
+#include "ui/pages/profile/profilePanel.h"
 #include "ui/pages/order/orderPanel.h"
 #include "ui/pages/order/receiptPage.h"
 #include "ui/pages/wish/wishPage.h"
 #include "ui/pages/cart/cartWidget.h"
 #include "ui/pages/cart/cartPage.h"
-#include "ui/panels/settings/settingPanel.h"
+#include "ui/pages/settings/settingPanel.h"
 
 #include "ElaPushButton.h"
 #include <ElaDef.h>
@@ -472,7 +472,7 @@ void MainWindow::refreshProductPage(int pageIndex) {
 }
 
 void MainWindow::refreshProductDetailReviews(int productId) {
-    productPages->setReviewContent(event.getProductReviewContent(productId));
+    productPages->setReviewContent(event.getReviewContent(productId));
 }
 
 void MainWindow::refreshCartPageContents() {

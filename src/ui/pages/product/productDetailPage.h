@@ -3,7 +3,6 @@
 #include <ElaScrollPage.h>
 
 #include "model/product/product.h"
-#include "model/review.h"
 #include "model/ui/reviewContent.h"
 
 #include <string>
@@ -20,20 +19,23 @@ class QWidget;
 class ProductDetailPage : public ElaScrollPage {
     Q_OBJECT
 
-    struct ReviewRowWidgets {
+    struct ReviewRowWidget {
+        ReviewRow review;
+        int reviewId = -1;
+
         QWidget* actions{nullptr};
         ElaPushButton* editButton{nullptr};
         ElaPushButton* deleteButton{nullptr};
-        Review review;
-        int reviewId{-1};
     };
 
     Product product;
-    Reviews reviews;
+    std::vector<ReviewRow> reviews;
+
     ElaText* nameText{nullptr};
     ElaText* priceText{nullptr};
     ElaText* stockText{nullptr};
     ElaText* detailText{nullptr};
+
     ElaText* reviewSummaryText{nullptr};
     QWidget* reviewEditor{nullptr};
     ElaSpinBox* reviewRatingSpin{nullptr};
@@ -42,30 +44,32 @@ class ProductDetailPage : public ElaScrollPage {
     ElaPushButton* reviewCancelButton{nullptr};
     ElaTableView* reviewTable{nullptr};
     QStandardItemModel* reviewModel{nullptr};
+
     ElaPushButton* wishButton{nullptr};
     ElaPushButton* editButton{nullptr};
-    bool wished{false};
-    bool canWriteReview{false};
-    std::string reviewSummary{"No reviews yet."};
-    std::vector<int> manageableReviewIds;
-    std::vector<ReviewRowWidgets> reviewRows;
-    int editingReviewId{0};
-    int selectedCount;
 
-    void initPage();
+    bool wished = false;
+    bool canWriteReview = false;
+
+    std::string reviewSummary{"No reviews yet."};
+    std::vector<ReviewRowWidget> reviewRows;
+    int editingReviewId = 0;
+
+    void initWindow();
+    void initLayout();
+
     void refresh();
     void refreshReviews();
     void ensureReviewRows(int count);
     void clearReviewRow(int row);
     void resetReviewEditor();
-    void beginReviewEdit(const Review& review);
+    void beginReviewEdit(const ReviewRow& review);
 
 public:
-    explicit ProductDetailPage(QWidget* parent): ElaScrollPage(parent) {initPage();}
-    ~ProductDetailPage() override = default;
+    explicit ProductDetailPage(QWidget* parent);
 
     void setProduct(const Product& product, bool wished = false);
-    void setReviewContent(const ProductReviewContent& content);
+    void setReviewContent(const ReviewContent& content);
     void setAdminMode(bool isAdmin);
 
 Q_SIGNALS:
