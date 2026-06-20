@@ -1,5 +1,6 @@
+#pragma once
 
-#include "model/user/user.h"
+#include "model/ui/userInfo.h"
 #include <ElaDialog.h>
 
 using std::string;
@@ -20,7 +21,7 @@ class ProfilePanel: public ElaDialog{
     SignupPanel* signupPanel;
     LoginPanel* loginPanel;
     LogoutPanel* logoutPanel;
-    UserRole currentRole{UserRole::Guest};
+    UserInfo currentUser;
 
     void initPanel();
     void initLayout();
@@ -32,7 +33,7 @@ class ProfilePanel: public ElaDialog{
 public:
     explicit ProfilePanel(QWidget* parent = nullptr);
 
-    void show(UserRole role);
+    void show(const UserInfo& user);
      
 Q_SIGNALS:
     void trySignup(const QString& name, const QString& password);

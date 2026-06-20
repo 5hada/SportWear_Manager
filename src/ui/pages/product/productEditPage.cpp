@@ -132,14 +132,14 @@ void ProductEditPage::setAddMode() {
     detailEdit->clear();
 }
 
-void ProductEditPage::setEditMode(const Product& product) {
-    productId = product.getId();
+void ProductEditPage::setEditMode(const ProductFormContent& content) {
+    productId = content.id;
     titleText->setText("Edit Product");
-    nameEdit->setText(QString::fromStdString(product.getName()));
-    setCategory(product.getCategory());
-    priceSpin->setValue(product.getPrice());
-    stockSpin->setValue(product.getStock());
-    detailEdit->setPlainText(QString::fromStdString(product.getDetail()));
+    nameEdit->setText(QString::fromStdString(content.name));
+    setCategory(content.category);
+    priceSpin->setValue(content.price);
+    stockSpin->setValue(content.stock);
+    detailEdit->setPlainText(QString::fromStdString(content.detail));
 }
 
 void ProductEditPage::setCategory(Category category) {

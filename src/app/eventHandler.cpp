@@ -4,7 +4,6 @@
 #include "model/product/category.h"
 
 #include <algorithm>
-#include <sstream>
 
 int EventHandler::userId() {
     return service.account.getUserId();
@@ -25,23 +24,6 @@ bool EventHandler::hasPurchasedProduct(int productId) {
     return false;
 }
 
-int EventHandler::pageMaxIndex(int totalCount, int pageSize) const {
-    if (pageSize <= 0 || totalCount <= 0) {
-        return 0;
-    }
-    return (totalCount - 1) / pageSize;
-}
-
-void EventHandler::movePageIndex(int& pageIndex, int delta, int maxPageIndex) {
-    pageIndex += delta;
-    if (pageIndex < 0) {
-        pageIndex = 0;
-    }
-    if (pageIndex > maxPageIndex) {
-        pageIndex = maxPageIndex;
-    }
-}
-
 UserInfo EventHandler::getUser() {
     return service.account.getInfo();
 }
@@ -51,13 +33,13 @@ bool EventHandler::setUser(UserAction action, optional<string> name, optional<st
         case UserAction::Signup:
             if (name != nullopt && password != nullopt) {
                 return service.account.signup(name.value(), password.value());
-                break;
             }
+            break;
         case UserAction::Login:
             if (name != nullopt && password != nullopt) {
                 return service.account.login(name.value(), password.value());
-                break;
             }
+            break;
         case UserAction::Logout:
             return service.account.logout();
     }
@@ -87,11 +69,11 @@ bool EventHandler::setProducts(int index, optional<string> keyword, optional<Cat
 }
 
 ProductGridPageContent EventHandler::getProductsContents() {
-    ProductGridPageContent content(PageNavigationContent(service.search.getCurrentIndex(), service.search.getMaxIndex()));
-    for (const auto& product : service.search.getProducts()) {
-        content << product;
-    }
-    return content;
+    return service.ui.makeProductGridPageContent(
+        service.search.getProducts(),
+        service.search.getCurrentIndex(),
+        service.search.getMaxIndex()
+    );
 }
 
 
@@ -99,63 +81,48 @@ ProductGridPageContent EventHandler::getProductsContents() {
 bool EventHandler::setProduct(int productId) {
     return service.search.setCurrentProduct(productId);
 }
-Product EventHandler::getProduct() {
-    return service.search.getCurrentProduct();
+
+int EventHandler::getCurrentProductId() {
+    return service.search.getCurrentProduct().getId();
+}
+
+ProductDetailContent EventHandler::getProductDetailContent() {
+    const auto product = service.search.getCurrentProduct();
+    return service.ui.makeProductDetailContent(product, isWished(product.getId()));
+}
+
+ProductFormContent EventHandler::getProductFormContent() {
+    return service.ui.makeProductFormContent(service.search.getCurrentProduct());
 }
 
 bool EventHandler::canManageProducts() {
-    return getUser().getRole() == UserRole::Admin;
+    return getUser().getRole() == UiUserRole::Admin;
+}
+
+bool EventHandler::canUseCart() {
+    return getUser().getRole() != UiUserRole::Guest;
 }
 
 bool EventHandler::setOrder(int productId) {
-    if (productId == -1) {
-        if (service.order.makeListOrder(userId())) {
-            return true;
-        }
+    if (productId == -1 && !canUseCart()) {
+        return false;
     }
-    else {
-        if (service.order.makeInstantOrder(userId(), productId)) {
-            return true;
-        }
+    const bool success = productId == -1
+        ? service.order.makeListOrder(userId())
+        : service.order.makeInstantOrder(userId(), productId);
+    if (!success) {
+        service.order.getClear();
     }
-    service.order.getClear();
-    return false;
-
-}
-
-Order EventHandler::getOrder() {
-    return service.order.getOrder();
+    return success;
 }
 
 OrderPanelContent EventHandler::getOrderPanelContent(int usedPoint) {
-    OrderPanelContent content;
-    const auto order = getOrder();
-    for (const auto& item : order.getItems()) {
-        content << OrderRowContent(item);
-    }
-    content.totalPrice = getOrderTotalPrice();
-    content.availablePoints = getOrderAvailablePoints();
-    content.maxUsablePoint = getOrderMaxUsablePoint();
-    content.payment = getOrderPayment(usedPoint);
-    return content;
-}
-
-int EventHandler::getOrderTotalPrice() {
-    return getOrder().getTotalPrice();
-}
-
-int EventHandler::getOrderAvailablePoints() {
-    return getOrder().getAvailablePoints();
-}
-
-int EventHandler::getOrderMaxUsablePoint() {
-    const auto order = getOrder();
-    return std::min(order.getAvailablePoints(), order.getTotalPrice());
+    return service.ui.makeOrderPanelContent(service.order.getOrder(), getOrderPayment(usedPoint));
 }
 
 int EventHandler::getOrderPayment(int usedPoint) {
-    const auto order = getOrder();
-    const int maxUsablePoint = getOrderMaxUsablePoint();
+    const auto order = service.order.getOrder();
+    const int maxUsablePoint = std::min(order.getAvailablePoints(), order.getTotalPrice());
     if (usedPoint < 0) {
         usedPoint = 0;
     }
@@ -176,95 +143,74 @@ bool EventHandler::refund(int receiptId) {
 
 
 Cart EventHandler::getCart() {
+    if (!canUseCart()) {
+        return Cart();
+    }
     return service.cart.getCart(userId());
+}
+
+CartWidgetContent EventHandler::getCartWidgetContent() {
+    return service.ui.makeCartWidgetContent(getCart());
 }
 
 CartPageContent EventHandler::getCartPageContent(int pageSize) {
     const Cart fullCart = getCart();
-    const int maxPage = pageMaxIndex(static_cast<int>(fullCart.getItems().size()), pageSize);
-    if (cartPageIndex > maxPage) {
-        cartPageIndex = maxPage;
-    }
-
-    CartPageContent content(PageNavigationContent(cartPageIndex, maxPage));
-    content.totalCount = fullCart.getTotalCount();
-    content.totalPrice = fullCart.getTotalPrice();
-    const int begin = cartPageIndex * pageSize;
-    const int end = std::min(begin + pageSize, static_cast<int>(fullCart.getItems().size()));
-    for (int index = begin; index < end; ++index) {
-        const auto& item = fullCart.getItems()[index];
-        const auto product = service.product.getById(item.id);
-        content << CartRowContent(item, product.getName().empty() ? "Unknown" : product.getName());
-    }
-    return content;
+    const int maxPage = service.ui.pageMaxIndex(static_cast<int>(fullCart.getItems().size()), pageSize);
+    const int cartPageIndex = service.page.getCartPageIndex(maxPage);
+    return service.ui.makeCartPageContent(fullCart, cartPageIndex, pageSize);
 }
 
 CartPageContent EventHandler::moveCartPage(int delta, int pageSize) {
     const Cart fullCart = getCart();
-    movePageIndex(cartPageIndex, delta, pageMaxIndex(static_cast<int>(fullCart.getItems().size()), pageSize));
+    service.page.moveCartPage(delta, service.ui.pageMaxIndex(static_cast<int>(fullCart.getItems().size()), pageSize));
     return getCartPageContent(pageSize);
 }
 
 bool EventHandler::handleCart(CartAction action, int productId, int count, std::optional<bool> isSelected) {
+    if (!canUseCart()) {
+        return false;
+    }
     return service.cart.handleCart(action, userId(), productId, count, isSelected);
 }
 
 
-Receipts EventHandler::getReceipts() {
-    return service.order.getReceipts(userId());
-}
-
 ReceiptPageContent EventHandler::getReceiptPageContent(int pageSize) {
-    const auto receipts = getReceipts();
-    const int maxPage = pageMaxIndex(static_cast<int>(receipts.size()), pageSize);
-    if (receiptPageIndex > maxPage) {
-        receiptPageIndex = maxPage;
-    }
-
-    ReceiptPageContent content(PageNavigationContent(receiptPageIndex, maxPage));
-    const int begin = receiptPageIndex * pageSize;
-    const int end = std::min(begin + pageSize, static_cast<int>(receipts.size()));
-    for (int index = begin; index < end; ++index) {
-        content << ReceiptRowContent(receipts[index], getReceiptItemSummary(receipts[index]));
-    }
-    return content;
+    const auto receipts = service.order.getReceipts(userId());
+    const int maxPage = service.ui.pageMaxIndex(static_cast<int>(receipts.size()), pageSize);
+    const int receiptPageIndex = service.page.getReceiptPageIndex(maxPage);
+    return service.ui.makeReceiptPageContent(receipts, receiptPageIndex, pageSize);
 }
 
 ReceiptPageContent EventHandler::moveReceiptPage(int delta, int pageSize) {
-    const auto receipts = getReceipts();
-    movePageIndex(receiptPageIndex, delta, pageMaxIndex(static_cast<int>(receipts.size()), pageSize));
+    const auto receipts = service.order.getReceipts(userId());
+    service.page.moveReceiptPage(delta, service.ui.pageMaxIndex(static_cast<int>(receipts.size()), pageSize));
     return getReceiptPageContent(pageSize);
 }
 
-
-Products EventHandler::getWishs() {
-    return service.wish.getWishs(userId());
-}
-
 WishPageContent EventHandler::getWishPageContent(int pageSize) {
-    const auto wishs = getWishs();
-    const int maxPage = pageMaxIndex(static_cast<int>(wishs.size()), pageSize);
-    if (wishPageIndex > maxPage) {
-        wishPageIndex = maxPage;
+    if (!canUseCart()) {
+        return service.ui.makeWishPageContent(Products(), 0, pageSize);
     }
-
-    WishPageContent content(PageNavigationContent(wishPageIndex, maxPage));
-    const int begin = wishPageIndex * pageSize;
-    const int end = std::min(begin + pageSize, static_cast<int>(wishs.size()));
-    for (int index = begin; index < end; ++index) {
-        content << wishs[index];
-    }
-    return content;
+    const auto wishs = service.wish.getWishs(userId());
+    const int maxPage = service.ui.pageMaxIndex(static_cast<int>(wishs.size()), pageSize);
+    const int wishPageIndex = service.page.getWishPageIndex(maxPage);
+    return service.ui.makeWishPageContent(wishs, wishPageIndex, pageSize);
 }
 
 WishPageContent EventHandler::moveWishPage(int delta, int pageSize) {
-    const auto wishs = getWishs();
-    movePageIndex(wishPageIndex, delta, pageMaxIndex(static_cast<int>(wishs.size()), pageSize));
+    if (!canUseCart()) {
+        return service.ui.makeWishPageContent(Products(), 0, pageSize);
+    }
+    const auto wishs = service.wish.getWishs(userId());
+    service.page.moveWishPage(delta, service.ui.pageMaxIndex(static_cast<int>(wishs.size()), pageSize));
     return getWishPageContent(pageSize);
 }
 
 bool EventHandler::isWished(int productId) {
-    for (const auto& product : getWishs()) {
+    if (!canUseCart()) {
+        return false;
+    }
+    for (const auto& product : service.wish.getWishs(userId())) {
         if (product.getId() == productId) {
             return true;
         }
@@ -273,25 +219,20 @@ bool EventHandler::isWished(int productId) {
 }
 
 bool EventHandler::setWish(int productId, bool isWished) {
-    if (isWished) {
-        return service.wish.add(userId(), productId);
+    if (!canUseCart()) {
+        return false;
     }
-    else {
-        return service.wish.remove(userId(), productId);
-    }
-}
-
-
-int EventHandler::getUserId() {
-    return userId();
+    return isWished
+        ? service.wish.add(userId(), productId)
+        : service.wish.remove(userId(), productId);
 }
 
 bool EventHandler::canWriteReview(int productId) {
     auto user = getUser();
-    if (user.getRole() == UserRole::Admin) {
+    if (user.getRole() == UiUserRole::Admin) {
         return true;
     }
-    if (user.getRole() == UserRole::Guest) {
+    if (user.getRole() == UiUserRole::Guest) {
         return false;
     }
     return hasPurchasedProduct(productId);
@@ -300,35 +241,16 @@ bool EventHandler::canWriteReview(int productId) {
 std::vector<int> EventHandler::getManageableReviewIds(int productId) {
     std::vector<int> ids;
     auto user = getUser();
-    if (user.getRole() == UserRole::Guest) {
+    if (user.getRole() == UiUserRole::Guest) {
         return ids;
     }
 
     for (const auto& review : getReviews(productId)) {
-        if (user.getRole() == UserRole::Admin || review.getUserId() == userId()) {
+        if (user.getRole() == UiUserRole::Admin || review.getUserId() == userId()) {
             ids.push_back(review.getId());
         }
     }
     return ids;
-}
-
-string EventHandler::getReviewSummary(int productId) {
-    const auto reviews = getReviews(productId);
-    if (reviews.empty()) {
-        return "No reviews yet.";
-    }
-
-    int ratingSum = 0;
-    for (const auto& review : reviews) {
-        ratingSum += review.getRating();
-    }
-    const double average = static_cast<double>(ratingSum) / static_cast<double>(reviews.size());
-
-    std::ostringstream out;
-    out.setf(std::ios::fixed);
-    out.precision(1);
-    out << reviews.size() << " reviews - Average " << average << " / 5";
-    return out.str();
 }
 
 Reviews EventHandler::getReviews(int productId) {
@@ -336,20 +258,12 @@ Reviews EventHandler::getReviews(int productId) {
 }
 
 ReviewContent EventHandler::getReviewContent(int productId) {
-    ReviewContent content;
-    content.canWrite = canWriteReview(productId);
-    content.summary = getReviewSummary(productId);
-    const auto manageableReviewIds = getManageableReviewIds(productId);
-    for (const auto& review : getReviews(productId)) {
-        const bool canManage = std::find(manageableReviewIds.begin(), manageableReviewIds.end(), review.getId()) != manageableReviewIds.end();
-        content << ReviewRow(review, canManage);
-    }
-    return content;
+    return service.ui.makeReviewContent(getReviews(productId), getManageableReviewIds(productId), canWriteReview(productId));
 }
 
 bool EventHandler::saveReview(int reviewId, int productId, int rating, const string& comment) {
     auto user = getUser();
-    if (user.getRole() == UserRole::Guest || rating < 1 || rating > 5) {
+    if (user.getRole() == UiUserRole::Guest || rating < 1 || rating > 5) {
         return false;
     }
 
@@ -364,7 +278,7 @@ bool EventHandler::saveReview(int reviewId, int productId, int rating, const str
     if (!existing.has_value()) {
         return false;
     }
-    const bool canModify = user.getRole() == UserRole::Admin || existing->getUserId() == userId();
+    const bool canModify = user.getRole() == UiUserRole::Admin || existing->getUserId() == userId();
     if (!canModify) {
         return false;
     }
@@ -379,7 +293,7 @@ bool EventHandler::saveReview(int reviewId, int productId, int rating, const str
 
 bool EventHandler::deleteReview(int reviewId) {
     auto user = getUser();
-    if (user.getRole() == UserRole::Guest) {
+    if (user.getRole() == UiUserRole::Guest) {
         return false;
     }
 
@@ -387,17 +301,12 @@ bool EventHandler::deleteReview(int reviewId) {
     if (!existing.has_value()) {
         return false;
     }
-    const bool canDelete = user.getRole() == UserRole::Admin || existing->getUserId() == userId();
+    const bool canDelete = user.getRole() == UiUserRole::Admin || existing->getUserId() == userId();
     if (!canDelete) {
         return false;
     }
     return service.review.remove(reviewId);
 }
-
-bool EventHandler::setReview(Review review) {
-    return saveReview(review.getId(), review.getProductId(), review.getRating(), review.getComment());
-}
-
 
 bool EventHandler::updateProduct(Product product) {
     if (!canManageProducts()) {return false;}
@@ -415,25 +324,4 @@ bool EventHandler::updateProductForm(int productId, const string& name, Category
     );
     product.setDetail(detail);
     return updateProduct(product);
-}
-
-string EventHandler::getReceiptItemSummary(const Receipt& receipt) {
-    const auto items = receipt.getOrderItems();
-    if (items.empty()) {
-        return "No items";
-    }
-
-    int quantity = 0;
-    for (const auto& item : items) {
-        quantity += item.count;
-    }
-
-    const auto& first = items.front();
-    std::ostringstream out;
-    out << "Product #" << first.id << " x" << first.count;
-    if (items.size() > 1) {
-        out << " + " << (items.size() - 1) << " more";
-    }
-    out << " (" << quantity << " total)";
-    return out.str();
 }

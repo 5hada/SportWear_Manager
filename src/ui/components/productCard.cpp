@@ -3,10 +3,27 @@
 #include <QLabel>
 #include <ElaText.h>
 #include <QFontMetrics>
+#include <QPixmap>
 #include <QVBoxLayout>
 
 
 namespace {
+QString productImagePath(const std::string& category) {
+    if (category == "Top") {
+        return ":/images/product_top.png";
+    }
+    if (category == "Bottom") {
+        return ":/images/product_bottom.png";
+    }
+    if (category == "Shoes") {
+        return ":/images/product_shoes.png";
+    }
+    if (category == "Accessory") {
+        return ":/images/product_accessory.png";
+    }
+    return ":/images/product_unknown.png";
+}
+
 void setElidedText(ElaText* label, const QString& text, int width) {
     if (label == nullptr) {
         return;
@@ -37,7 +54,7 @@ ProductCard::ProductCard(QWidget* parent): ElaPushButton(parent) {
     productImage = new QLabel(this);
     productImage->setFixedSize(72, 72);
     productImage->setScaledContents(true);
-    productImage->setPixmap(QPixmap(":/Resource/Image/Cirno.jpg"));
+    productImage->setPixmap(QPixmap(":/images/product_unknown.png"));
 
     nameText = new ElaText("Product Name", this);
     nameText->setTextPixelSize(18);
@@ -85,12 +102,9 @@ ProductCard::ProductCard(QWidget* parent): ElaPushButton(parent) {
     hide();
 }
 
-void ProductCard::setProduct(const Product& product) {
-    setContent(ProductCardContent(product));
-}
-
 void ProductCard::setContent(const ProductCardContent& content) {
     productId = content.id;
+    productImage->setPixmap(QPixmap(productImagePath(content.category)));
     constexpr int textWidth = 190;
     constexpr int metaWidth = 86;
     setElidedText(nameText, QString::fromStdString(content.name), textWidth);

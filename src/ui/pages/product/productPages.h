@@ -3,7 +3,6 @@
 #include <QWidget>
 
 #include "model/product/category.h"
-#include "model/product/product.h"
 #include "model/ui/productPageContent.h"
 #include "model/ui/reviewContent.h"
 
@@ -32,14 +31,16 @@ public:
     void showGrid();
     void showDetail();
     void showAddForm();
-    void showEditForm(const Product& product);
+    void showEditForm(const ProductFormContent& content);
     bool isDetailVisible() const;
 
     void setGridCategory(Category category);
     void setGridContents(const ProductGridPageContent& content);
-    void setProduct(const Product& product, bool wished);
+    void setProductContent(const ProductDetailContent& content);
     void setReviewContent(const ReviewContent& content);
     void setAdminMode(bool isAdmin);
+    void setCartAvailable(bool isAvailable);
+    void setWishAvailable(bool isAvailable);
 
 Q_SIGNALS:
     void productSelected(int productId);

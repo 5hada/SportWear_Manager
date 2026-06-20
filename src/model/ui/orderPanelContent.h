@@ -1,7 +1,5 @@
 #pragma once
 
-#include "model/product/item.h"
-
 #include <vector>
 
 struct OrderRowContent {
@@ -10,11 +8,13 @@ struct OrderRowContent {
     int unitPrice = 0;
     int totalPrice = 0;
 
-    OrderRowContent(const Item& item):
-        productId(item.id),
-        count(item.count),
-        unitPrice(item.price),
-        totalPrice(item.price * item.count) {}
+    OrderRowContent() = default;
+
+    OrderRowContent(int productId, int count, int unitPrice):
+        productId(productId),
+        count(count),
+        unitPrice(unitPrice),
+        totalPrice(unitPrice * count) {}
 };
 
 struct OrderPanelContent {

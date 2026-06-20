@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/images">
+        <file alias="loading.png">images/loading.png</file>
+        <file alias="avatar.png">images/avatar.png</file>
+        <file alias="product_top.png">images/product_top.png</file>
+        <file alias="product_bottom.png">images/product_bottom.png</file>
+        <file alias="product_shoes.png">images/product_shoes.png</file>
+        <file alias="product_accessory.png">images/product_accessory.png</file>
+        <file alias="product_unknown.png">images/product_unknown.png</file>
+    </qresource>
+</RCC>

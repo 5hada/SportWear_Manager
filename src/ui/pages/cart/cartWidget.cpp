@@ -26,15 +26,15 @@ CartWidget::CartWidget(QWidget* parent): ElaDockWidget("Cart", parent) {
     setWidget(cartList);
 }
 
-void CartWidget::setCart(const Cart& cart) {
+void CartWidget::setContent(const CartWidgetContent& content) {
     model->removeRows(0, model->rowCount());
 
-    for (const auto& item : cart.getItems()) {
+    for (const auto& item : content.rows) {
         QList<QStandardItem*> row;
-        row << centeredItem(QString::number(item.id));
+        row << centeredItem(QString::number(item.productId));
         row << centeredItem(QString::number(item.count));
-        row << centeredItem(QString::number(item.price));
-        row << centeredItem(QString::number(item.price * item.count));
+        row << centeredItem(QString::number(item.unitPrice));
+        row << centeredItem(QString::number(item.totalPrice));
         model->appendRow(row);
     }
 }

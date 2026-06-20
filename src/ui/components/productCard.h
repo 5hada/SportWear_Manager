@@ -2,7 +2,6 @@
 
 #include <ElaPushButton.h>
 
-#include "model/product/product.h"
 #include "model/ui/productPageContent.h"
 
 class QLabel;
@@ -22,8 +21,8 @@ class ProductCard: public ElaPushButton {
 public:
     explicit ProductCard(QWidget* parent = nullptr);
 
-    void setProduct(const Product& product);
     void setContent(const ProductCardContent& content);
+    
 Q_SIGNALS:
     void selected(int productId);
 };

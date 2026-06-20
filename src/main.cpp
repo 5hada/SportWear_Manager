@@ -2,6 +2,7 @@
 #include "ui/windows/mainwindow.h"
 
 #include <QApplication>
+#include <QPixmap>
 #include <QSplashScreen>
 
 #include <ElaApplication.h>

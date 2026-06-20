@@ -2,7 +2,7 @@
 
 
 #include <ElaWidgetTools/ElaDockWidget.h>
-#include "model/product/cart.h"
+#include "model/ui/cartWidgetContent.h"
 
 class ElaTableView;
 class QStandardItemModel;
@@ -16,5 +16,5 @@ class CartWidget: public ElaDockWidget {
 public:
     explicit CartWidget(QWidget* parent = nullptr);
 
-    void setCart(const Cart& cart);
+    void setContent(const CartWidgetContent& content);
 };

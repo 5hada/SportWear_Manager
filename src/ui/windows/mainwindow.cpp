@@ -3,8 +3,8 @@
 #include "app/eventHandler.h"
 
 #include "model/actions.h"
-#include "model/user/user.h"
 #include "model/product/category.h"
+#include "model/ui/userInfo.h"
 
 #include "ui/components/dialog.h"
 #include "ui/components/messageBar.h"
@@ -21,6 +21,7 @@
 #include <ElaDef.h>
 #include <ElaIcon.h>
 #include <ElaText.h>
+#include <QPixmap>
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QRect>
@@ -35,6 +36,7 @@ MainWindow::MainWindow(EventHandler& event): event(event) {
 
 void MainWindow::initWindow() {
     setWindowTitle("SportWear Manager");
+    setUserInfoCardPixmap(QPixmap(":/images/avatar.png"));
     resize(1200, 760);
     moveToCenter();
     setFocusPolicy(Qt::StrongFocus);
@@ -102,6 +104,11 @@ void MainWindow::connectNavigation() {
                         refreshWishPageContents();
                     }
                     else if (nodeKey == cartPage->property("ElaPageKey").toString()) {
+                        if (!event.canUseCart()) {
+                            MessageBar::Fail(this);
+                            showProductPage();
+                            return;
+                        }
                         refreshCartPageContents();
                     }
                     else if (nodeKey == receiptPage->property("ElaPageKey").toString()) {
@@ -174,9 +181,9 @@ void MainWindow::connectDetailPage() {
 
     connect(productPages, &ProductPages::wishRequested, this, [this](int productId, bool isWished) {
         handleResult(event.setWish(productId, isWished), [this] {
-            const auto product = event.getProduct();
-            productPages->setProduct(product, event.isWished(product.getId()));
-            refreshProductDetailReviews(product.getId());
+            const auto content = event.getProductDetailContent();
+            productPages->setProductContent(content);
+            refreshProductDetailReviews(content.id);
             refreshWishPageContents();
         });
     });
@@ -194,7 +201,7 @@ void MainWindow::connectDetailPage() {
         });
     });
     connect(productPages, &ProductPages::reviewDeleteRequested, this, [this](int reviewId) {
-        const int productId = event.getProduct().getId();
+        const int productId = event.getCurrentProductId();
         handleResult(event.deleteReview(reviewId), [this, productId] {
             QTimer::singleShot(0, this, [this, productId]() {
                 refreshProductDetailReviews(productId);
@@ -263,7 +270,7 @@ void MainWindow::connectCartPage() {
         MessageBar::Success(this);
         QTimer::singleShot(0, this, [this]() {
             refreshCartPageContents();
-            cartWidget->setCart(event.getCart());
+            cartWidget->setContent(event.getCartWidgetContent());
         });
     });
 }
@@ -276,7 +283,7 @@ void MainWindow::connectWishPage() {
         handleResult(event.handleCart(CartAction::Add, productId, 1), [this] {
             QTimer::singleShot(0, this, [this]() {
                 refreshWishPageContents();
-                cartWidget->setCart(event.getCart());
+                cartWidget->setContent(event.getCartWidgetContent());
                 openCartWidget();
             });
         });
@@ -304,7 +311,7 @@ void MainWindow::connectOrderPanel() {
             showReceiptPage();
             updateUserInfo();
             refreshCartPageContents();
-            cartWidget->setCart(event.getCart());
+            cartWidget->setContent(event.getCartWidgetContent());
             refreshProductPage();
             orderPanel->hide();
         });
@@ -347,7 +354,7 @@ void MainWindow::connectCartWidget() {
     connect(cartWidget, &CartWidget::visibilityChanged, this, [this](bool visible) {
         if (!visible) {
             adjustCartButton();
-            cartButton->show();
+            cartButton->setVisible(event.canUseCart());
         }
     });
 }
@@ -366,9 +373,9 @@ void MainWindow::showProductPage() {
 }
 
 void MainWindow::showDetailPage() {
-    const auto product = event.getProduct();
-    productPages->setProduct(product, event.isWished(product.getId()));
-    refreshProductDetailReviews(product.getId());
+    const auto content = event.getProductDetailContent();
+    productPages->setProductContent(content);
+    refreshProductDetailReviews(content.id);
     updateAdminControls();
     productPages->showDetail();
     if (getCurrentNavigationPageKey() != productsKey){
@@ -394,7 +401,7 @@ void MainWindow::showProductEditPage() {
         return;
     }
     productEditReturnToDetail = true;
-    productPages->showEditForm(event.getProduct());
+    productPages->showEditForm(event.getProductFormContent());
     if (getCurrentNavigationPageKey() != productsKey){
         navigation(productsKey);
     }
@@ -408,6 +415,11 @@ void MainWindow::showReceiptPage() {
 }
 
 void MainWindow::showCartPage() {
+    if (!event.canUseCart()) {
+        MessageBar::Fail(this);
+        showProductPage();
+        return;
+    }
     refreshCartPageContents();
     if (getCurrentNavigationPageKey() != cartPage->property("ElaPageKey").toString()){
         navigation(cartPage->property("ElaPageKey").toString());
@@ -436,28 +448,28 @@ void MainWindow::showSettingPanel() {
 
 void MainWindow::showProfilePanel() {
     movePanelToWindowCenter(profilePanel);
-    profilePanel->show(event.getUser().getRole());
+    profilePanel->show(event.getUser());
 }
 
 void MainWindow::updateUserInfo() {
     UserInfo info = event.getUser();
     setUserInfoCardTitle(QString::fromStdString(info.getName()));
     switch (info.getRole()){
-        case UserRole::User:
+        case UiUserRole::User:
             setUserInfoCardSubTitle(QString("Point %1\nSigned in.").arg(info.getPoint()));
             break;
-        case UserRole::Admin:
+        case UiUserRole::Admin:
             setUserInfoCardSubTitle(QString("Point %1\nSigned in. ADMINSTRATOR").arg(info.getPoint()));
             break;
-        case UserRole::Guest:
+        case UiUserRole::Guest:
             setUserInfoCardSubTitle("Not signed in");   
             break;
     }
     updateAdminControls();
     if (productPages != nullptr && productPages->isDetailVisible()) {
-        const auto product = event.getProduct();
-        if (product.getId() > 0) {
-            refreshProductDetailReviews(product.getId());
+        const int productId = event.getCurrentProductId();
+        if (productId > 0) {
+            refreshProductDetailReviews(productId);
         }
     }
 }
@@ -499,22 +511,37 @@ void MainWindow::movePanelToWindowCenter(QWidget* panel) {
 
 void MainWindow::updateAdminControls() {
     const bool isAdmin = event.canManageProducts();
+    const bool canUseCart = event.canUseCart();
     if (productPages != nullptr) {
         productPages->setAdminMode(isAdmin);
+        productPages->setCartAvailable(canUseCart);
+        productPages->setWishAvailable(canUseCart);
+    }
+    if (cartButton != nullptr) {
+        cartButton->setVisible(canUseCart && (cartWidget == nullptr || !cartWidget->isVisible()));
+    }
+    if (!canUseCart && cartWidget != nullptr) {
+        cartWidget->hide();
     }
 }
 
 
 
 void MainWindow::openCartWidget() {
-    cartWidget->setCart(event.getCart());
+    if (!event.canUseCart()) {
+        MessageBar::Fail(this);
+        cartButton->hide();
+        cartWidget->hide();
+        return;
+    }
+    cartWidget->setContent(event.getCartWidgetContent());
     cartButton->hide();
     cartWidget->showNormal();
 }
 
 void MainWindow::closeCartWidget() {
     adjustCartButton();
-    cartButton->show();
+    cartButton->setVisible(event.canUseCart());
     cartWidget->hide();
 }
 

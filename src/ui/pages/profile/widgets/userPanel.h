@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QWidget>
-#include "model/user/user.h"
+#include "model/ui/userInfo.h"
 
 class ElaPushButton;
 class ElaText;
@@ -17,7 +17,7 @@ class UserPanel: public QWidget {
 
 public:
     explicit UserPanel(QWidget* parent = nullptr);
-    void setRole(const UserRole& role = UserRole::Guest);
+    void setUser(const UserInfo& user = UserInfo());
 
 Q_SIGNALS:
     void signupRequested();

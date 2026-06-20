@@ -1,6 +1,5 @@
 #pragma once
 
-#include "model/product/cartItem.h"
 #include "model/ui/pageNavigationContent.h"
 
 #include <string>
@@ -23,8 +22,6 @@ struct CartRowContent {
         unitPrice(unitPrice),
         totalPrice(unitPrice * count),
         selected(selected) {}
-    CartRowContent(const CartItem& item, std::string name):
-        CartRowContent(item.id, std::move(name), item.count, item.price, item.isSelected()) {}
 };
 
 struct CartPageContent {

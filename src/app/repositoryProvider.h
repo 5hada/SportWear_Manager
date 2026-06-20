@@ -18,6 +18,7 @@ class RepositoryProvider {
 
 
     void seedProducts();
+    void seedReviews();
 
     static string resolveSchemaPath(const string& schemaPath);
 public:

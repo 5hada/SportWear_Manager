@@ -96,9 +96,9 @@ void WishPage::initLayout() {
         auto* actionsLayout = new QHBoxLayout(actions);
         actionsLayout->setContentsMargins(0, 0, 0, 0);
         actionsLayout->setSpacing(6);
-        auto* cartButton = new ElaPushButton("장바구니 추가", actions);
+        auto* cartButton = new ElaPushButton("Add Cart", actions);
         cartButton->setFixedSize(96, 28);
-        auto* removeButton = new ElaPushButton("위시 삭제", actions);
+        auto* removeButton = new ElaPushButton("Remove", actions);
         removeButton->setFixedSize(86, 28);
         actionsLayout->addWidget(cartButton);
         actionsLayout->addWidget(removeButton);

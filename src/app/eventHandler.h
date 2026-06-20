@@ -6,13 +6,13 @@
 
 #include "model/actions.h"
 #include "model/product/cart.h"
-#include "model/product/order.h"
 #include "model/product/receipt.h"
 #include "model/product/product.h"
 #include "model/product/category.h"
 #include "model/ui/userInfo.h"
 #include "model/review.h"
 #include "model/ui/cartPageContent.h"
+#include "model/ui/cartWidgetContent.h"
 #include "model/ui/orderPanelContent.h"
 #include "model/ui/productPageContent.h"
 #include "model/ui/receiptPageContent.h"
@@ -27,14 +27,14 @@ class ServiceProvider;
 
 class EventHandler {
     ServiceProvider& service;
-    int wishPageIndex = 0;
-    int cartPageIndex = 0;
-    int receiptPageIndex = 0;
 
     int userId();
     bool hasPurchasedProduct(int productId);
-    int pageMaxIndex(int totalCount, int pageSize) const;
-    void movePageIndex(int& pageIndex, int delta, int maxPageIndex);
+    bool canWriteReview(int productId);
+    std::vector<int> getManageableReviewIds(int productId);
+    Reviews getReviews(int productId);
+    Cart getCart();
+    bool updateProduct(Product product);
 public:
     EventHandler(ServiceProvider& service): service(service) {}
 
@@ -48,21 +48,20 @@ public:
     ProductGridPageContent getProductsContents();
 
     bool setProduct(int productId);
-    Product getProduct();
+    int getCurrentProductId();
+    ProductDetailContent getProductDetailContent();
+    ProductFormContent getProductFormContent();
     bool canManageProducts();
+    bool canUseCart();
 
     bool setOrder(int productId = -1);
-    Order getOrder();
     OrderPanelContent getOrderPanelContent(int usedPoint = 0);
-    int getOrderTotalPrice();
-    int getOrderAvailablePoints();
-    int getOrderMaxUsablePoint();
     int getOrderPayment(int usedPoint);
     bool confirmOrder(int usedPoint = 0);
     
     bool refund(int receiptId);
 
-    Cart getCart();
+    CartWidgetContent getCartWidgetContent();
     CartPageContent getCartPageContent(int pageSize = 8);
     CartPageContent moveCartPage(int delta, int pageSize = 8);
     bool handleCart(
@@ -73,35 +72,20 @@ public:
     );
 
 
-    Receipts getReceipts();
     ReceiptPageContent getReceiptPageContent(int pageSize = 8);
     ReceiptPageContent moveReceiptPage(int delta, int pageSize = 8);
     
-    Products getWishs();
     WishPageContent getWishPageContent(int pageSize = 8);
     WishPageContent moveWishPage(int delta, int pageSize = 8);
     bool isWished(int productId);
     bool setWish(int productId, bool isWished = true);
 
-    int getUserId();
-    bool canWriteReview(int productId);
-    std::vector<int> getManageableReviewIds(int productId);
-    string getReviewSummary(int productId);
-    Reviews getReviews(int productId);
     ReviewContent getReviewContent(int productId);
     bool saveReview(int reviewId, int productId, int rating, const string& comment);
     bool deleteReview(int reviewId);
-    bool setReview(Review review);
 
-    bool updateProduct(Product product);
     bool updateProductForm(int productId, const string& name, Category category, int price, int stock, const string& detail);
-    string getReceiptItemSummary(const Receipt& receipt);
 };
-
-
-
-
-
 
 
 

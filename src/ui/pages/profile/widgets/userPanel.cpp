@@ -37,21 +37,21 @@ UserPanel::UserPanel(QWidget* parent): QWidget(parent) {
     connect(logoutButton, &ElaPushButton::clicked, this, &UserPanel::logoutRequested);
 }
 
-void UserPanel::setRole(const UserRole& role) {
-    switch (role) {
-        case UserRole::Guest:
+void UserPanel::setUser(const UserInfo& user) {
+    switch (user.getRole()) {
+        case UiUserRole::Guest:
             titleText->setText("Welcome, Guest!");
             signupButton->setVisible(true);
             loginButton->setVisible(true);
             logoutButton->setVisible(false);
             break;
-        case UserRole::User:
+        case UiUserRole::User:
             titleText->setText("Welcome, User!");
             signupButton->setVisible(false);
             loginButton->setVisible(false);
             logoutButton->setVisible(true);
             break;
-        case UserRole::Admin:
+        case UiUserRole::Admin:
             titleText->setText("Welcome, Admin!");
             signupButton->setVisible(false);
             loginButton->setVisible(false);

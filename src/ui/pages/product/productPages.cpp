@@ -63,8 +63,8 @@ void ProductPages::showAddForm() {
     stack->setCurrentWidget(editPage);
 }
 
-void ProductPages::showEditForm(const Product& product) {
-    editPage->setEditMode(product);
+void ProductPages::showEditForm(const ProductFormContent& content) {
+    editPage->setEditMode(content);
     stack->setCurrentWidget(editPage);
 }
 
@@ -85,8 +85,8 @@ void ProductPages::setGridContents(const ProductGridPageContent& content) {
     gridPage->setContents(content);
 }
 
-void ProductPages::setProduct(const Product& product, bool wished) {
-    detailPage->setProduct(product, wished);
+void ProductPages::setProductContent(const ProductDetailContent& content) {
+    detailPage->setContent(content);
 }
 
 void ProductPages::setReviewContent(const ReviewContent& content) {
@@ -96,4 +96,12 @@ void ProductPages::setReviewContent(const ReviewContent& content) {
 void ProductPages::setAdminMode(bool isAdmin) {
     gridPage->setAdminMode(isAdmin);
     detailPage->setAdminMode(isAdmin);
+}
+
+void ProductPages::setCartAvailable(bool isAvailable) {
+    detailPage->setCartAvailable(isAvailable);
+}
+
+void ProductPages::setWishAvailable(bool isAvailable) {
+    detailPage->setWishAvailable(isAvailable);
 }

@@ -2,7 +2,8 @@
 
 #include <ElaScrollPage.h>
 
-#include "model/product/product.h"
+#include "model/product/category.h"
+#include "model/ui/productPageContent.h"
 
 class ElaComboBox;
 class ElaLineEdit;
@@ -32,7 +33,7 @@ public:
     explicit ProductEditPage(QWidget* parent = nullptr);
 
     void setAddMode();
-    void setEditMode(const Product& product);
+    void setEditMode(const ProductFormContent& content);
 
 Q_SIGNALS:
     void saveRequested(int productId, const QString& name, Category category, int price, int stock, const QString& detail);

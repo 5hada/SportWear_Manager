@@ -5,10 +5,12 @@
 #include "service/accountService.h"
 #include "service/cartService.h"
 #include "service/orderService.h"
+#include "service/pageService.h"
 #include "service/pointService.h"
 #include "service/productService.h"
 #include "service/searchService.h"
 #include "service/reviewService.h"
+#include "service/uiService.h"
 #include "service/wishService.h"
 
 class ServiceProvider {
@@ -16,10 +18,12 @@ public:
     AccountService account{nullptr};
     CartService cart;
     OrderService order;
+    PageService page;
     PointService point;
     ProductService product;
     ReviewService review;
     SearchService search;
+    UiService ui;
     WishService wish;
 
     explicit ServiceProvider(RepositoryProvider& repo):
@@ -34,5 +38,6 @@ public:
     {
         order.setPointService(&point);
         search.setProductService(&product);
+        ui.setProductService(&product);
     }
 };

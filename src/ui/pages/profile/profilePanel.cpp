@@ -25,7 +25,7 @@ void ProfilePanel::initPanel() {
 void ProfilePanel::initLayout() {
     layouts = new QStackedWidget(this);
     userPanel = new UserPanel(this);
-    userPanel->setRole(UserRole::Guest);
+    userPanel->setUser(UserInfo());
     signupPanel = new SignupPanel(this);
     loginPanel = new LoginPanel(this);
     logoutPanel = new LogoutPanel(this);
@@ -60,14 +60,14 @@ void ProfilePanel::initLayout() {
     connect(logoutPanel, &LogoutPanel::logoutRequested, this, &ProfilePanel::tryLogout);
 }
 
-void ProfilePanel::show(UserRole role) {
-    currentRole = role;
+void ProfilePanel::show(const UserInfo& user) {
+    currentUser = user;
     setUser();
     ElaDialog::show();
 }
 
 void ProfilePanel::setUser() {
-    userPanel->setRole(currentRole);
+    userPanel->setUser(currentUser);
     layouts->setCurrentWidget(userPanel);
 }
 

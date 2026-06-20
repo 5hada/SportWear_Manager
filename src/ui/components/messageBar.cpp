@@ -1,8 +1,5 @@
 #include "messageBar.h"
-
 #include "ElaMessageBar.h"
-#include <qwidget.h>
-
 
 namespace MessageBar {
     void Success(QWidget* parent){

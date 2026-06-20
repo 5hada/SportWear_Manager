@@ -43,5 +43,17 @@ void AccountService::updateInfo() {
             currentUser = user.value();
         }
     }
-    userInfo = currentUser;
+    switch (currentUser.getRole()) {
+        case UserRole::Admin:
+            userInfo.setRole(UiUserRole::Admin);
+            break;
+        case UserRole::User:
+            userInfo.setRole(UiUserRole::User);
+            break;
+        case UserRole::Guest:
+            userInfo.setRole(UiUserRole::Guest);
+            break;
+    }
+    userInfo.setName(currentUser.getName());
+    userInfo.setPoint(currentUser.getPoint());
 }

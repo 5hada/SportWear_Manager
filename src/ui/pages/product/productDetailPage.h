@@ -2,7 +2,7 @@
 
 #include <ElaScrollPage.h>
 
-#include "model/product/product.h"
+#include "model/ui/productPageContent.h"
 #include "model/ui/reviewContent.h"
 
 #include <string>
@@ -10,6 +10,7 @@
 
 class ElaPlainTextEdit;
 class ElaText;
+class ElaIconButton;
 class ElaPushButton;
 class ElaSpinBox;
 class ElaTableView;
@@ -28,7 +29,7 @@ class ProductDetailPage : public ElaScrollPage {
         ElaPushButton* deleteButton{nullptr};
     };
 
-    Product product;
+    ProductDetailContent product;
     std::vector<ReviewRow> reviews;
 
     ElaText* nameText{nullptr};
@@ -46,10 +47,12 @@ class ProductDetailPage : public ElaScrollPage {
     QStandardItemModel* reviewModel{nullptr};
 
     ElaPushButton* wishButton{nullptr};
+    ElaIconButton* addCartButton{nullptr};
     ElaPushButton* editButton{nullptr};
 
-    bool wished = false;
     bool canWriteReview = false;
+    bool cartAvailable = true;
+    bool wishAvailable = true;
 
     std::string reviewSummary{"No reviews yet."};
     std::vector<ReviewRowWidget> reviewRows;
@@ -68,9 +71,11 @@ class ProductDetailPage : public ElaScrollPage {
 public:
     explicit ProductDetailPage(QWidget* parent);
 
-    void setProduct(const Product& product, bool wished = false);
+    void setContent(const ProductDetailContent& content);
     void setReviewContent(const ReviewContent& content);
     void setAdminMode(bool isAdmin);
+    void setCartAvailable(bool isAvailable);
+    void setWishAvailable(bool isAvailable);
 
 Q_SIGNALS:
     void backRequest();

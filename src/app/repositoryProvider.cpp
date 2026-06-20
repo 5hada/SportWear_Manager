@@ -17,12 +17,13 @@ RepositoryProvider::RepositoryProvider(const string& databasePath, const string&
     {
         databaseReady = database.initialize(databasePath, resolveSchemaPath(schemaPath));
         seedProducts();
+        seedReviews();
     }
 
 
 
 
-string resolveSchemaPath(const string& schemaPath) {
+string RepositoryProvider::resolveSchemaPath(const string& schemaPath) {
         namespace fs = std::filesystem;
         const fs::path requested(schemaPath);
         if (fs::exists(requested)) {
@@ -104,5 +105,67 @@ void RepositoryProvider::seedProducts() {
                 existingNames.insert(name);
                 ++inserted;
             }
+        }
+}
+
+void RepositoryProvider::seedReviews() {
+        if (!databaseReady) {
+            return;
+        }
+
+        constexpr int adminUserId = 1;
+        constexpr int targetReviewCount = 120;
+        const auto existingReviews = review.findAll();
+        if (static_cast<int>(existingReviews.size()) >= targetReviewCount) {
+            return;
+        }
+
+        std::set<string> existingReviewKeys;
+        for (const auto& existingReview : existingReviews) {
+            existingReviewKeys.insert(
+                std::to_string(existingReview.getProductId()) +
+                "|" +
+                existingReview.getComment()
+            );
+        }
+
+        const auto products = product.findAll();
+        if (products.empty()) {
+            return;
+        }
+
+        constexpr std::array<const char*, 6> comments{
+            "Comfortable fit and reliable quality.",
+            "Good value for daily training.",
+            "The material feels light and durable.",
+            "Works well for both workouts and casual wear.",
+            "Clean design with practical details.",
+            "Satisfied with the fit and finish."
+        };
+
+        int inserted = 0;
+        int productIndex = 0;
+        while (static_cast<int>(existingReviews.size()) + inserted < targetReviewCount
+               && productIndex < static_cast<int>(products.size())) {
+            const auto& currentProduct = products[productIndex];
+            const int reviewsForProduct = productIndex < 40 ? 2 : 1;
+            for (int offset = 0;
+                 offset < reviewsForProduct
+                 && static_cast<int>(existingReviews.size()) + inserted < targetReviewCount;
+                 ++offset) {
+                const int commentIndex = (productIndex + offset * 3) % comments.size();
+                const string comment = comments[commentIndex];
+                const string key = std::to_string(currentProduct.getId()) + "|" + comment;
+                if (existingReviewKeys.find(key) != existingReviewKeys.end()) {
+                    continue;
+                }
+
+                const int rating = 3 + ((productIndex + offset) % 3);
+                if (review.insert(Review(adminUserId, currentProduct.getId(), rating, comment))) {
+                    existingReviewKeys.insert(key);
+                    ++inserted;
+                }
+            }
+            ++productIndex;
         }
 }

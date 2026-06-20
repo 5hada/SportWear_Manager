@@ -7,8 +7,6 @@
 #include <optional>
 #include <string>
 
-class Order;
-
 class ElaPushButton;
 class QWidget;
 

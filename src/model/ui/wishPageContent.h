@@ -1,7 +1,6 @@
 #pragma once
 
 #include "model/ui/pageNavigationContent.h"
-#include "model/product/product.h"
 
 #include <string>
 #include <vector>
@@ -16,11 +15,6 @@ struct WishRowContent {
     int stock = 0;
 
     WishRowContent(int id, string name, int price, int stock): id(id), name(std::move(name)), price(price), stock(stock) {}
-   WishRowContent(const Product& product):
-        id(product.getId()),
-        name(product.getName()),
-        price(product.getPrice()),
-        stock(product.getStock()) {}
 };
 
 struct WishPageContent{
@@ -34,8 +28,4 @@ struct WishPageContent{
         return *this;
     }
 
-    WishPageContent& operator<<(const Product& product) {
-        rows.emplace_back(product);
-        return *this;
-    }
 };

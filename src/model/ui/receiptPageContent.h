@@ -1,6 +1,5 @@
 #pragma once
 
-#include "model/product/receipt.h"
 #include "model/ui/pageNavigationContent.h"
 
 #include <string>
@@ -24,8 +23,6 @@ struct ReceiptRowContent {
         paid(paid),
         status(canceled ? "Canceled" : "Paid"),
         refundable(!canceled) {}
-    ReceiptRowContent(const Receipt& receipt, string itemSummary):
-        ReceiptRowContent(receipt.getId(), receipt.getDate(), std::move(itemSummary), receipt.getPaid(), receipt.getIsCanceled()) {}
 };
 
 struct ReceiptPageContent {

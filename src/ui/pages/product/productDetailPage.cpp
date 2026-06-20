@@ -1,6 +1,5 @@
 #include "productDetailPage.h"
 
-#include "model/product/product.h"
 #include "ui/components/tableItem.h"
 
 #include <ElaIconButton.h>
@@ -67,7 +66,7 @@ void ProductDetailPage::initLayout() {
     textLayout->addWidget(stockText);
     textLayout->addWidget(detailText);
 
-    auto* addCartButton = new ElaIconButton(ElaIconType::CartShopping, this);
+    addCartButton = new ElaIconButton(ElaIconType::CartShopping, this);
     wishButton = new ElaPushButton("Add Wish", this);
     auto* buyButton = new ElaPushButton("Buy Now", this);
     auto* buttonLayout = new QHBoxLayout();
@@ -148,21 +147,21 @@ void ProductDetailPage::initLayout() {
 
     connect(backButton, &ElaIconButton::clicked, this, &ProductDetailPage::backRequest);
     connect(editButton, &ElaPushButton::clicked, this, [this]() {
-        emit editRequest(product.getId());
+        emit editRequest(product.id);
     });
     connect(addCartButton, &ElaIconButton::clicked, this, [this]() {
-        emit cartRequest(product.getId());
+        emit cartRequest(product.id);
     });
     connect(wishButton, &ElaPushButton::clicked, this, [this]() {
-        emit wishRequest(product.getId(), !wished);
+        emit wishRequest(product.id, !product.wished);
     });
     connect(buyButton, &ElaPushButton::clicked, this, [this]() {
-        emit orderRequest(product.getId(), 1);
+        emit orderRequest(product.id, 1);
     });
     connect(reviewSubmitButton, &ElaPushButton::clicked, this, [this]() {
         emit reviewSaveRequested(
             editingReviewId,
-            product.getId(),
+            product.id,
             reviewRatingSpin->value(),
             reviewCommentEdit->toPlainText()
         );
@@ -173,9 +172,8 @@ void ProductDetailPage::initLayout() {
     refresh();
 }
 
-void ProductDetailPage::setProduct(const Product& product, bool wished) {
-    this->product = product;
-    this->wished = wished;
+void ProductDetailPage::setContent(const ProductDetailContent& content) {
+    product = content;
     reviews.clear();
     resetReviewEditor();
     refresh();
@@ -195,15 +193,33 @@ void ProductDetailPage::setAdminMode(bool isAdmin) {
     }
 }
 
-void ProductDetailPage::refresh() {
-    nameText->setText(product.getName().empty() ?
-        "Unknown" : QString::fromStdString(product.getName()));
-    priceText->setText(QString("Price: %1").arg(product.getPrice()));
-    stockText->setText(QString("Stock: %1").arg(product.getStock()));
-    detailText->setText(product.getDetail().empty() ?
-        "No detail." : QString::fromStdString(product.getDetail()));
+void ProductDetailPage::setCartAvailable(bool isAvailable) {
+    cartAvailable = isAvailable;
+    if (addCartButton != nullptr) {
+        addCartButton->setVisible(cartAvailable);
+    }
+}
+
+void ProductDetailPage::setWishAvailable(bool isAvailable) {
+    wishAvailable = isAvailable;
     if (wishButton != nullptr) {
-        wishButton->setText(wished ? "Remove Wish" : "Add Wish");
+        wishButton->setVisible(wishAvailable);
+    }
+}
+
+void ProductDetailPage::refresh() {
+    nameText->setText(product.name.empty() ?
+        "Unknown" : QString::fromStdString(product.name));
+    priceText->setText(QString("Price: %1").arg(product.price));
+    stockText->setText(QString("Stock: %1").arg(product.stock));
+    detailText->setText(product.detail.empty() ?
+        "No detail." : QString::fromStdString(product.detail));
+    if (wishButton != nullptr) {
+        wishButton->setText(product.wished ? "Remove Wish" : "Add Wish");
+        wishButton->setVisible(wishAvailable);
+    }
+    if (addCartButton != nullptr) {
+        addCartButton->setVisible(cartAvailable);
     }
     if (reviewEditor != nullptr) {
         reviewEditor->setVisible(canWriteReview);

@@ -1,4 +1,3 @@
-
 #include <QHBoxLayout>
 
 class ElaText;
@@ -20,6 +19,7 @@ public:
     IndexNavigation(QWidget* parent = nullptr);
 
     void setIndex(int maxIndex, int currentIndex = 0);
+
 Q_SIGNALS:
     void indexChanged(int newIndex);
 };
