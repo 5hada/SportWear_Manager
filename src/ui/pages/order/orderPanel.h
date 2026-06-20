@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ElaDialog.h"
-#include "model/product/order.h"
+#include "model/ui/orderPanelContent.h"
 
 class QStandardItemModel;
 class ElaTableView;
@@ -21,7 +21,7 @@ class OrderPanel: public ElaDialog {
 public:
     explicit OrderPanel(QWidget* parent = nullptr);
 
-    void setOrder(Order order, int totalPrice, int availablePoints, int maxUsablePoint, int payment);
+    void setContent(const OrderPanelContent& content);
     void setPayment(int payment);
 
 Q_SIGNALS:

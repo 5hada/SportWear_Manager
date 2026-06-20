@@ -424,13 +424,7 @@ void MainWindow::showWishPage() {
 
 
 void MainWindow::showOrderPanel() {
-    orderPanel->setOrder(
-        event.getOrder(),
-        event.getOrderTotalPrice(),
-        event.getOrderAvailablePoints(),
-        event.getOrderMaxUsablePoint(),
-        event.getOrderPayment(0)
-    );
+    orderPanel->setContent(event.getOrderPanelContent());
     orderPanel->moveToCenter();
     orderPanel->show();
 }
@@ -478,12 +472,7 @@ void MainWindow::refreshProductPage(int pageIndex) {
 }
 
 void MainWindow::refreshProductDetailReviews(int productId) {
-    productPages->setReviewContext(event.canWriteReview(productId));
-    productPages->setReviews(
-        event.getReviews(productId),
-        event.getReviewSummary(productId),
-        event.getManageableReviewIds(productId)
-    );
+    productPages->setReviewContent(event.getProductReviewContent(productId));
 }
 
 void MainWindow::refreshCartPageContents() {

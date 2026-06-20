@@ -1,10 +1,9 @@
 #pragma once
 
 #include <ElaScrollPage.h>
-#include <tuple>
 
 #include "model/product/category.h"
-#include "model/product/product.h"
+#include "model/ui/productPageContent.h"
 
 class ElaFlowLayout;
 class ElaLineEdit;
@@ -33,7 +32,7 @@ class ProductGridPage: public ElaScrollPage {
 public:
     ProductGridPage(int ItemsPerPage, QWidget* parent = nullptr);
 
-    void setContents(std::tuple<Products, int, int>);
+    void setContents(const ProductGridPageContent& content);
     void setCategory(Category category);
     void setAdminMode(bool isAdmin);
 

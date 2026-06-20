@@ -174,16 +174,12 @@ void ProductDetailPage::setProduct(const Product& product, bool wished) {
     refresh();
 }
 
-void ProductDetailPage::setReviewContext(bool canWrite) {
-    canWriteReview = canWrite;
+void ProductDetailPage::setReviewContent(const ProductReviewContent& content) {
+    canWriteReview = content.canWrite;
+    reviews = content.reviews;
+    reviewSummary = content.summary;
+    manageableReviewIds = content.manageableReviewIds;
     resetReviewEditor();
-    refreshReviews();
-}
-
-void ProductDetailPage::setReviews(const Reviews& reviews, const std::string& summary, const std::vector<int>& manageableReviewIds) {
-    this->reviews = reviews;
-    this->reviewSummary = summary;
-    this->manageableReviewIds = manageableReviewIds;
     refreshReviews();
 }
 
@@ -214,42 +210,27 @@ void ProductDetailPage::refreshReviews() {
         return;
     }
 
-    reviewModel->removeRows(0, reviewModel->rowCount());
+    ensureReviewRows(static_cast<int>(reviews.size()));
+    for (int row = 0; row < static_cast<int>(reviewRows.size()); ++row) {
+        clearReviewRow(row);
+    }
+
     if (reviews.empty()) {
         reviewSummaryText->setText(QString::fromStdString(reviewSummary));
     }
     else {
         int rowIndex = 0;
         for (const auto& review : reviews) {
-            QList<QStandardItem*> row;
-            row << centeredItem(QString("%1 / 5").arg(review.getRating()));
-            row << centeredItem(QString("User %1").arg(review.getUserId()));
-            row << centeredItem(QString::fromStdString(review.getComment()));
-            row << centeredItem();
-            reviewModel->appendRow(row);
-
+            reviewTable->setRowHidden(rowIndex, false);
+            reviewModel->item(rowIndex, 0)->setText(QString("%1 / 5").arg(review.getRating()));
+            reviewModel->item(rowIndex, 1)->setText(QString("User %1").arg(review.getUserId()));
+            reviewModel->item(rowIndex, 2)->setText(QString::fromStdString(review.getComment()));
+            reviewRows[rowIndex].review = review;
+            reviewRows[rowIndex].reviewId = review.getId();
             const bool canManage = std::find(manageableReviewIds.begin(), manageableReviewIds.end(), review.getId()) != manageableReviewIds.end();
-            if (canManage) {
-                auto* editReviewButton = new ElaPushButton("Edit", reviewTable);
-                editReviewButton->setFixedSize(68, 28);
-                auto* deleteReviewButton = new ElaPushButton("Delete", reviewTable);
-                deleteReviewButton->setFixedSize(78, 28);
-                auto* actions = new QWidget(reviewTable);
-                auto* actionsLayout = new QHBoxLayout(actions);
-                actionsLayout->setContentsMargins(0, 0, 0, 0);
-                actionsLayout->setSpacing(6);
-                actionsLayout->addStretch();
-                actionsLayout->addWidget(editReviewButton);
-                actionsLayout->addWidget(deleteReviewButton);
-                actionsLayout->addStretch();
-                connect(editReviewButton, &ElaPushButton::clicked, this, [this, review]() {
-                    beginReviewEdit(review);
-                });
-                connect(deleteReviewButton, &ElaPushButton::clicked, this, [this, reviewId = review.getId()]() {
-                    Q_EMIT reviewDeleteRequested(reviewId);
-                });
-                reviewTable->setIndexWidget(reviewModel->index(rowIndex, 3), actions);
-            }
+            reviewRows[rowIndex].actions->setVisible(canManage);
+            reviewRows[rowIndex].editButton->setVisible(canManage);
+            reviewRows[rowIndex].deleteButton->setVisible(canManage);
             ++rowIndex;
         }
         reviewSummaryText->setText(QString::fromStdString(reviewSummary));
@@ -259,6 +240,61 @@ void ProductDetailPage::refreshReviews() {
     reviewTable->setColumnWidth(0, 90);
     reviewTable->setColumnWidth(1, 90);
     reviewTable->setColumnWidth(3, 170);
+}
+
+void ProductDetailPage::ensureReviewRows(int count) {
+    while (reviewModel->rowCount() < count) {
+        QList<QStandardItem*> row;
+        row << centeredItem();
+        row << centeredItem();
+        row << centeredItem();
+        row << centeredItem();
+        reviewModel->appendRow(row);
+
+        const int rowIndex = reviewModel->rowCount() - 1;
+        auto* editReviewButton = new ElaPushButton("Edit", reviewTable);
+        editReviewButton->setFixedSize(68, 28);
+        auto* deleteReviewButton = new ElaPushButton("Delete", reviewTable);
+        deleteReviewButton->setFixedSize(78, 28);
+        auto* actions = new QWidget(reviewTable);
+        auto* actionsLayout = new QHBoxLayout(actions);
+        actionsLayout->setContentsMargins(0, 0, 0, 0);
+        actionsLayout->setSpacing(6);
+        actionsLayout->addStretch();
+        actionsLayout->addWidget(editReviewButton);
+        actionsLayout->addWidget(deleteReviewButton);
+        actionsLayout->addStretch();
+        actions->hide();
+        reviewTable->setIndexWidget(reviewModel->index(rowIndex, 3), actions);
+        editReviewButton->hide();
+        deleteReviewButton->hide();
+        reviewRows.push_back({actions, editReviewButton, deleteReviewButton, Review{}, -1});
+
+        connect(editReviewButton, &ElaPushButton::clicked, this, [this, rowIndex]() {
+            if (reviewRows[rowIndex].reviewId > 0) {
+                beginReviewEdit(reviewRows[rowIndex].review);
+            }
+        });
+        connect(deleteReviewButton, &ElaPushButton::clicked, this, [this, rowIndex]() {
+            if (reviewRows[rowIndex].reviewId > 0) {
+                Q_EMIT reviewDeleteRequested(reviewRows[rowIndex].reviewId);
+            }
+        });
+    }
+}
+
+void ProductDetailPage::clearReviewRow(int row) {
+    if (row < 0 || row >= reviewModel->rowCount()) {
+        return;
+    }
+    for (int column = 0; column < reviewModel->columnCount(); ++column) {
+        reviewModel->item(row, column)->setText("");
+    }
+    reviewRows[row].reviewId = -1;
+    reviewRows[row].actions->hide();
+    reviewRows[row].editButton->hide();
+    reviewRows[row].deleteButton->hide();
+    reviewTable->setRowHidden(row, true);
 }
 
 void ProductDetailPage::resetReviewEditor() {

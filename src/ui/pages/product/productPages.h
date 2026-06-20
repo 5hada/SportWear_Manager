@@ -4,11 +4,10 @@
 
 #include "model/product/category.h"
 #include "model/product/product.h"
-#include "model/review.h"
+#include "model/ui/productPageContent.h"
+#include "model/ui/reviewContent.h"
 
 #include <string>
-#include <tuple>
-#include <vector>
 
 class ProductDetailPage;
 class ProductEditPage;
@@ -33,10 +32,9 @@ public:
     bool isDetailVisible() const;
 
     void setGridCategory(Category category);
-    void setGridContents(std::tuple<Products, int, int> contents);
+    void setGridContents(const ProductGridPageContent& content);
     void setProduct(const Product& product, bool wished);
-    void setReviews(const Reviews& reviews, const std::string& summary, const std::vector<int>& manageableReviewIds);
-    void setReviewContext(bool canWrite);
+    void setReviewContent(const ProductReviewContent& content);
     void setAdminMode(bool isAdmin);
 
 Q_SIGNALS:

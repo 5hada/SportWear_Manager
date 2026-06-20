@@ -4,6 +4,7 @@
 
 #include "model/product/product.h"
 #include "model/review.h"
+#include "model/ui/reviewContent.h"
 
 #include <string>
 #include <vector>
@@ -18,6 +19,14 @@ class QWidget;
 
 class ProductDetailPage : public ElaScrollPage {
     Q_OBJECT
+
+    struct ReviewRowWidgets {
+        QWidget* actions{nullptr};
+        ElaPushButton* editButton{nullptr};
+        ElaPushButton* deleteButton{nullptr};
+        Review review;
+        int reviewId{-1};
+    };
 
     Product product;
     Reviews reviews;
@@ -39,12 +48,15 @@ class ProductDetailPage : public ElaScrollPage {
     bool canWriteReview{false};
     std::string reviewSummary{"No reviews yet."};
     std::vector<int> manageableReviewIds;
+    std::vector<ReviewRowWidgets> reviewRows;
     int editingReviewId{0};
     int selectedCount;
 
     void initPage();
     void refresh();
     void refreshReviews();
+    void ensureReviewRows(int count);
+    void clearReviewRow(int row);
     void resetReviewEditor();
     void beginReviewEdit(const Review& review);
 
@@ -53,8 +65,7 @@ public:
     ~ProductDetailPage() override = default;
 
     void setProduct(const Product& product, bool wished = false);
-    void setReviewContext(bool canWrite);
-    void setReviews(const Reviews& reviews, const std::string& summary, const std::vector<int>& manageableReviewIds);
+    void setReviewContent(const ProductReviewContent& content);
     void setAdminMode(bool isAdmin);
 
 Q_SIGNALS:

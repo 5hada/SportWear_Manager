@@ -29,9 +29,17 @@ OrderPanel::OrderPanel(QWidget* parent): ElaDialog(parent) {
     orderTable->setModel(model);
     orderTable->setAlternatingRowColors(true);
     orderTable->verticalHeader()->setHidden(true);
-    orderTable->horizontalHeader()->setStretchLastSection(true);
+    orderTable->horizontalHeader()->setStretchLastSection(false);
+    orderTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    orderTable->horizontalHeader()->setMinimumSectionSize(1);
     orderTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     orderTable->setFixedHeight(360);
+    connect(orderTable, &ElaTableView::tableViewShow, this, [this]() {
+        orderTable->horizontalHeader()->resizeSection(0, 100);
+        orderTable->horizontalHeader()->resizeSection(1, 100);
+        orderTable->horizontalHeader()->resizeSection(2, 110);
+        orderTable->horizontalHeader()->resizeSection(3, 110);
+    });
 
     totalText = new ElaText("Total: 0", this);
     totalText->setTextPixelSize(18);
@@ -93,10 +101,10 @@ OrderPanel::OrderPanel(QWidget* parent): ElaDialog(parent) {
     });
 }
 
-void OrderPanel::setOrder(Order order, int totalPrice, int availablePoints, int maxUsablePoint, int payment) {
+void OrderPanel::setContent(const OrderPanelContent& content) {
     model->removeRows(0, model->rowCount());
 
-    for (const auto& item : order.getItems()) {
+    for (const auto& item : content.order.getItems()) {
         QList<QStandardItem*> row;
         row << centeredItem(QString::number(item.id));
         row << centeredItem(QString::number(item.count));
@@ -105,12 +113,12 @@ void OrderPanel::setOrder(Order order, int totalPrice, int availablePoints, int 
         model->appendRow(row);
     }
 
-    totalText->setText(QString("Total: %1").arg(totalPrice));
-    pointText->setText(QString("Available point: %1").arg(availablePoints));
+    totalText->setText(QString("Total: %1").arg(content.totalPrice));
+    pointText->setText(QString("Available point: %1").arg(content.availablePoints));
     const QSignalBlocker blocker(pointSpin);
-    pointSpin->setRange(0, maxUsablePoint);
+    pointSpin->setRange(0, content.maxUsablePoint);
     pointSpin->setValue(0);
-    setPayment(payment);
+    setPayment(content.payment);
 }
 
 void OrderPanel::setPayment(int payment) {

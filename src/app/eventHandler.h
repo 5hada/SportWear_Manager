@@ -12,34 +12,16 @@
 #include "model/product/category.h"
 #include "model/user/userInfo.h"
 #include "model/review.h"
+#include "model/ui/cartPageContent.h"
+#include "model/ui/orderPanelContent.h"
+#include "model/ui/productPageContent.h"
+#include "model/ui/receiptPageContent.h"
+#include "model/ui/reviewContent.h"
+#include "model/ui/wishPageContent.h"
 
 using std::string;
 using std::optional;
 using std::nullopt;
-
-struct WishPageContent {
-    Products products;
-    int currentPage{0};
-    int maxPage{0};
-};
-
-struct CartPageContent {
-    Cart cart;
-    std::vector<std::string> productNames;
-    std::vector<int> itemTotals;
-    int totalCount{0};
-    int totalPrice{0};
-    int currentPage{0};
-    int maxPage{0};
-};
-
-struct ReceiptPageContent {
-    Receipts receipts;
-    std::vector<std::string> itemSummaries;
-    std::vector<bool> refundable;
-    int currentPage{0};
-    int maxPage{0};
-};
 
 class ServiceProvider;
 
@@ -63,7 +45,7 @@ public:
 
 
     bool setProducts(int index = -1, optional<string> keyword = nullopt, optional<Category> category = nullopt);
-    std::tuple<Products, int, int> getProductsContents();
+    ProductGridPageContent getProductsContents();
 
     bool setProduct(int productId);
     Product getProduct();
@@ -71,6 +53,7 @@ public:
 
     bool setOrder(int productId = -1);
     Order getOrder();
+    OrderPanelContent getOrderPanelContent(int usedPoint = 0);
     int getOrderTotalPrice();
     int getOrderAvailablePoints();
     int getOrderMaxUsablePoint();
@@ -105,6 +88,7 @@ public:
     std::vector<int> getManageableReviewIds(int productId);
     string getReviewSummary(int productId);
     Reviews getReviews(int productId);
+    ProductReviewContent getProductReviewContent(int productId);
     bool saveReview(int reviewId, int productId, int rating, const string& comment);
     bool deleteReview(int reviewId);
     bool setReview(Review review);

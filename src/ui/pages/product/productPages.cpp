@@ -66,20 +66,16 @@ void ProductPages::setGridCategory(Category category) {
     gridPage->setCategory(category);
 }
 
-void ProductPages::setGridContents(std::tuple<Products, int, int> contents) {
-    gridPage->setContents(std::move(contents));
+void ProductPages::setGridContents(const ProductGridPageContent& content) {
+    gridPage->setContents(content);
 }
 
 void ProductPages::setProduct(const Product& product, bool wished) {
     detailPage->setProduct(product, wished);
 }
 
-void ProductPages::setReviews(const Reviews& reviews, const std::string& summary, const std::vector<int>& manageableReviewIds) {
-    detailPage->setReviews(reviews, summary, manageableReviewIds);
-}
-
-void ProductPages::setReviewContext(bool canWrite) {
-    detailPage->setReviewContext(canWrite);
+void ProductPages::setReviewContent(const ProductReviewContent& content) {
+    detailPage->setReviewContent(content);
 }
 
 void ProductPages::setAdminMode(bool isAdmin) {

@@ -2,15 +2,34 @@
 
 #include "ElaScrollPage.h"
 
-#include "app/eventHandler.h"
+#include "model/actions.h"
+#include "model/ui/cartPageContent.h"
 
+#include <vector>
+
+class ElaCheckBox;
 class ElaIconButton;
+class ElaPushButton;
+class ElaSpinBox;
 class ElaTableView;
 class ElaText;
 class QStandardItemModel;
+class QWidget;
 
 class CartPage: public ElaScrollPage {
     Q_OBJECT
+
+    struct RowWidgets {
+        QWidget* selectedCell{nullptr};
+        ElaCheckBox* selectedCheck{nullptr};
+        QWidget* quantityCell{nullptr};
+        ElaSpinBox* quantitySpin{nullptr};
+        QWidget* actions{nullptr};
+        ElaPushButton* decreaseButton{nullptr};
+        ElaPushButton* increaseButton{nullptr};
+        ElaPushButton* removeButton{nullptr};
+        int productId{-1};
+    };
 
     ElaTableView* cartTable{nullptr};
     QStandardItemModel* model{nullptr};
@@ -19,6 +38,7 @@ class CartPage: public ElaScrollPage {
     ElaIconButton* nextButton{nullptr};
     ElaText* totalCountText{nullptr};
     ElaText* totalPriceText{nullptr};
+    std::vector<RowWidgets> rows;
 
     void clearRow(int row);
     void setPageInfo(int currentPage, int maxPage);

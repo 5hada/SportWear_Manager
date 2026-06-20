@@ -124,10 +124,9 @@ void ProductGridPage::initConnect() {
     }
 }
 
-void ProductGridPage::setContents(std::tuple<Products, int, int> contents) {
-    const auto& [products, pageIndex, maxPageIndex] = contents;
-    indexNavigation->setIndex(maxPageIndex, pageIndex);
-    setProductCards(products);
+void ProductGridPage::setContents(const ProductGridPageContent& content) {
+    indexNavigation->setIndex(content.maxPage, content.currentPage);
+    setProductCards(content.products);
 }
 
 void ProductGridPage::setCategory(Category category) {

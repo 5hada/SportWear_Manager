@@ -9,17 +9,13 @@
 #include <QHBoxLayout>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
+#include <initializer_list>
 
 namespace {
 constexpr int FixedRowCount = 8;
+constexpr int HeaderHeight = 36;
+constexpr int RowHeight = 42;
 constexpr int ActionColumn = 3;
-
-void clearIndexWidget(ElaTableView* table, QStandardItemModel* model, int row, int column) {
-    const auto index = model->index(row, column);
-    if (table->indexWidget(index) != nullptr) {
-        table->setIndexWidget(index, nullptr);
-    }
-}
 
 QWidget* centeredWidget(QWidget* child, QWidget* parent) {
     auto* container = new QWidget(parent);
@@ -30,6 +26,30 @@ QWidget* centeredWidget(QWidget* child, QWidget* parent) {
     layout->addWidget(child);
     layout->addStretch();
     return container;
+}
+
+void applyColumnWidths(ElaTableView* table, std::initializer_list<int> widths) {
+    int column = 0;
+    int totalWidth = table->frameWidth() * 2 + 2;
+    for (int width : widths) {
+        table->horizontalHeader()->resizeSection(column, width);
+        totalWidth += width;
+        ++column;
+    }
+    table->setFixedWidth(totalWidth);
+}
+
+void applyFixedTableLayout(ElaTableView* table, std::initializer_list<int> widths) {
+    table->horizontalHeader()->setStretchLastSection(false);
+    table->horizontalHeader()->setMinimumSectionSize(1);
+    table->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    table->verticalHeader()->setDefaultSectionSize(RowHeight);
+    table->verticalHeader()->setMinimumSectionSize(RowHeight);
+    table->horizontalHeader()->setFixedHeight(HeaderHeight);
+    table->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    table->setFixedHeight(HeaderHeight + (FixedRowCount * RowHeight) + (table->frameWidth() * 2) + 2);
+    applyColumnWidths(table, widths);
 }
 }
 
@@ -60,11 +80,41 @@ WishPage::WishPage(QWidget* parent): ElaScrollPage(parent) {
     wishTable->setSelectionMode(QAbstractItemView::NoSelection);
     wishTable->setTextElideMode(Qt::ElideRight);
     wishTable->verticalHeader()->setVisible(false);
-    wishTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    wishTable->setColumnWidth(0, 320);
-    wishTable->setColumnWidth(1, 120);
-    wishTable->setColumnWidth(2, 100);
-    wishTable->setColumnWidth(3, 220);
+    applyFixedTableLayout(wishTable, {320, 120, 100, 190});
+    connect(wishTable, &ElaTableView::tableViewShow, this, [this]() {
+        applyColumnWidths(wishTable, {320, 120, 100, 190});
+    });
+    rows.reserve(FixedRowCount);
+    for (int row = 0; row < FixedRowCount; ++row) {
+        auto* actions = new QWidget(wishTable);
+        auto* actionsLayout = new QHBoxLayout(actions);
+        actionsLayout->setContentsMargins(0, 0, 0, 0);
+        actionsLayout->setSpacing(6);
+        auto* cartButton = new ElaPushButton("장바구니 추가", actions);
+        cartButton->setFixedSize(96, 28);
+        auto* removeButton = new ElaPushButton("위시 삭제", actions);
+        removeButton->setFixedSize(86, 28);
+        actionsLayout->addWidget(cartButton);
+        actionsLayout->addWidget(removeButton);
+
+        auto* cell = centeredWidget(actions, wishTable);
+        cell->hide();
+        wishTable->setIndexWidget(model->index(row, ActionColumn), cell);
+        cartButton->hide();
+        removeButton->hide();
+        rows.push_back({cell, cartButton, removeButton, -1});
+
+        connect(cartButton, &ElaPushButton::clicked, this, [this, row]() {
+            if (rows[row].productId > 0) {
+                Q_EMIT cartRequested(rows[row].productId);
+            }
+        });
+        connect(removeButton, &ElaPushButton::clicked, this, [this, row]() {
+            if (rows[row].productId > 0) {
+                Q_EMIT removeRequested(rows[row].productId);
+            }
+        });
+    }
 
     previousButton = new ElaIconButton(ElaIconType::AngleLeft, this);
     previousButton->setFixedSize(30, 30);
@@ -109,7 +159,10 @@ void WishPage::clearRow(int row) {
     for (int column = 0; column < model->columnCount(); ++column) {
         model->item(row, column)->setText("");
     }
-    clearIndexWidget(wishTable, model, row, ActionColumn);
+    rows[row].productId = -1;
+    rows[row].actions->hide();
+    rows[row].cartButton->hide();
+    rows[row].removeButton->hide();
 }
 
 void WishPage::setPageInfo(int currentPage, int maxPage) {
@@ -134,25 +187,10 @@ void WishPage::refreshContent(const WishPageContent& content) {
         model->item(row, 0)->setText(product.getName().empty() ? "Sample Product" : QString::fromStdString(product.getName()));
         model->item(row, 1)->setText(QString::number(product.getPrice()));
         model->item(row, 2)->setText(QString::number(product.getStock()));
-
-        auto* actions = new QWidget(wishTable);
-        auto* actionsLayout = new QHBoxLayout(actions);
-        actionsLayout->setContentsMargins(0, 0, 0, 0);
-        actionsLayout->setSpacing(6);
-        auto* cartButton = new ElaPushButton("장바구니 추가", actions);
-        cartButton->setFixedSize(96, 28);
-        auto* removeButton = new ElaPushButton("위시 삭제", actions);
-        removeButton->setFixedSize(86, 28);
-        actionsLayout->addWidget(cartButton);
-        actionsLayout->addWidget(removeButton);
-
-        connect(cartButton, &ElaPushButton::clicked, this, [this, productId = product.getId()]() {
-            Q_EMIT cartRequested(productId);
-        });
-        connect(removeButton, &ElaPushButton::clicked, this, [this, productId = product.getId()]() {
-            Q_EMIT removeRequested(productId);
-        });
-        wishTable->setIndexWidget(model->index(row, ActionColumn), centeredWidget(actions, wishTable));
+        rows[row].productId = product.getId();
+        rows[row].actions->show();
+        rows[row].cartButton->show();
+        rows[row].removeButton->show();
         ++row;
     }
 }

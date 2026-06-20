@@ -13,7 +13,15 @@ CartWidget::CartWidget(QWidget* parent): ElaDockWidget("Cart", parent) {
     cartList = new ElaTableView(this);
     cartList->setModel(model);
     cartList->verticalHeader()->setHidden(true);
-    cartList->horizontalHeader()->setStretchLastSection(true);
+    cartList->horizontalHeader()->setStretchLastSection(false);
+    cartList->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    cartList->horizontalHeader()->setMinimumSectionSize(1);
+    connect(cartList, &ElaTableView::tableViewShow, this, [this]() {
+        cartList->horizontalHeader()->resizeSection(0, 80);
+        cartList->horizontalHeader()->resizeSection(1, 80);
+        cartList->horizontalHeader()->resizeSection(2, 90);
+        cartList->horizontalHeader()->resizeSection(3, 90);
+    });
 
     setWidget(cartList);
 }

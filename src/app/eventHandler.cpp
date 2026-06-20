@@ -86,8 +86,12 @@ bool EventHandler::setProducts(int index, optional<string> keyword, optional<Cat
 
 }
 
-std::tuple<Products, int, int> EventHandler::getProductsContents() {
-    return std::make_tuple(service.search.getProducts(), service.search.getCurrentIndex(), service.search.getMaxIndex());
+ProductGridPageContent EventHandler::getProductsContents() {
+    ProductGridPageContent content;
+    content.products = service.search.getProducts();
+    content.currentPage = service.search.getCurrentIndex();
+    content.maxPage = service.search.getMaxIndex();
+    return content;
 }
 
 
@@ -121,6 +125,16 @@ bool EventHandler::setOrder(int productId) {
 
 Order EventHandler::getOrder() {
     return service.order.getOrder();
+}
+
+OrderPanelContent EventHandler::getOrderPanelContent(int usedPoint) {
+    OrderPanelContent content;
+    content.order = getOrder();
+    content.totalPrice = getOrderTotalPrice();
+    content.availablePoints = getOrderAvailablePoints();
+    content.maxUsablePoint = getOrderMaxUsablePoint();
+    content.payment = getOrderPayment(usedPoint);
+    return content;
 }
 
 int EventHandler::getOrderTotalPrice() {
@@ -333,6 +347,15 @@ string EventHandler::getReviewSummary(int productId) {
 
 Reviews EventHandler::getReviews(int productId) {
     return service.review.getAllFromProduct(productId);
+}
+
+ProductReviewContent EventHandler::getProductReviewContent(int productId) {
+    ProductReviewContent content;
+    content.canWrite = canWriteReview(productId);
+    content.reviews = getReviews(productId);
+    content.summary = getReviewSummary(productId);
+    content.manageableReviewIds = getManageableReviewIds(productId);
+    return content;
 }
 
 bool EventHandler::saveReview(int reviewId, int productId, int rating, const string& comment) {
