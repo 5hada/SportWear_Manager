@@ -1,9 +1,7 @@
 #pragma once
 
-#include "app/appContext.h"
-#include "app/serviceProvider.h"
-#include "app/repositoryProvider.h"
-
+#include "serviceProvider.h"
+#include "repositoryProvider.h"
 #include "eventHandler.h"
 
 
@@ -13,9 +11,5 @@ public:
     ServiceProvider services;
     EventHandler event;
 
-    AppContext():
-        repositories(),
-        services(repositories),
-        event(services)
-    {}
+    AppContext(): repositories(), services(repositories), event(services) {}
 };

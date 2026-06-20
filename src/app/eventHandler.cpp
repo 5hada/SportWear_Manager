@@ -1,9 +1,9 @@
 #include "eventHandler.h"
-#include "model/actions.h"
 #include "serviceProvider.h"
+
 #include "model/product/category.h"
+
 #include <algorithm>
-#include <optional>
 #include <sstream>
 
 int EventHandler::userId() {

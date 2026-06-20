@@ -1,19 +1,22 @@
 #pragma once
 
 #include "repositoryBase.h"
+
 #include "model/review.h"
+
 #include <optional>
-#include <vector>
+
+using std::optional;
 
 class ReviewRepository: public RepositoryBase {
     static Review reviewFromStatement(sqlite3_stmt* statement);
 public:
     ReviewRepository(DatabaseManager* db): RepositoryBase(db){}
 
-    std::vector<Review> findAll() const;
-    std::optional<Review> findById(int id) const;
-    std::vector<Review> findByProductId(int productId) const;
-    std::vector<Review> findByUser(int userId) const;
+    Reviews findAll() const;
+    optional<Review> findById(int id) const;
+    Reviews findByProductId(int productId) const;
+    Reviews findByUser(int userId) const;
 
     bool insert(const Review& review);
     bool update(const Review& review);

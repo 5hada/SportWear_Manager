@@ -1,7 +1,9 @@
 #include "productRepository.h"
 
-std::vector<Product> ProductRepository::findAll() const {
-    std::vector<Product> products;
+using std::nullopt;
+
+vector<Product> ProductRepository::findAll() const {
+    vector<Product> products;
     sqlite3_stmt* statement = nullptr;
     constexpr auto sql = 
         "SELECT id, name, category, price, stock, detail "
@@ -17,8 +19,8 @@ std::vector<Product> ProductRepository::findAll() const {
     return products;
 }
 
-std::optional<Product> ProductRepository::findById(int id) const {
-    std::optional<Product> product;
+optional<Product> ProductRepository::findById(int id) const {
+    optional<Product> product;
     sqlite3_stmt* statement = nullptr;
     constexpr auto sql = 
     "SELECT id, name, category, price, stock, detail "
@@ -26,7 +28,7 @@ std::optional<Product> ProductRepository::findById(int id) const {
     "WHERE id = ? ";
     
     if (!sqlOk(sql, statement)) {
-        return std::nullopt;
+        return nullopt;
     }
 
     sqlite3_bind_int(statement, 1, id);

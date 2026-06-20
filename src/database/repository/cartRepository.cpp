@@ -1,5 +1,4 @@
 #include "cartRepository.h"
-#include "sqlite3.h"
 
 Cart CartRepository::findByUser(int userId) const {
     Cart cart;

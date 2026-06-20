@@ -2,7 +2,6 @@
 
 #include "database/databaseManager.h"
 
-
 class RepositoryBase{
 protected:
     DatabaseManager* db{nullptr};

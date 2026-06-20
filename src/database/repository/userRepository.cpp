@@ -1,8 +1,10 @@
 #include "userRepository.h"
 
+using std::nullopt;
 
-const std::vector<User> UserRepository::findAll() const {
-    std::vector<User> users{};
+
+const vector<User> UserRepository::findAll() const {
+    vector<User> users{};
     if (hasDatabase()) {
         constexpr auto sql = "SELECT id, name, password, point FROM users ORDER BY id";
         sqlite3_stmt* statement = nullptr;
@@ -16,13 +18,13 @@ const std::vector<User> UserRepository::findAll() const {
     return users;
 }
 
-std::optional<User> UserRepository::findById(int id) const {
-    std::optional<User> result;
+optional<User> UserRepository::findById(int id) const {
+    optional<User> result;
     if (hasDatabase()) {
         constexpr auto sql = "SELECT id, name, password, point FROM users WHERE id = ?";
         sqlite3_stmt* statement = nullptr;
         if (!sqlOk(sql, statement)) {
-            return std::nullopt;
+            return nullopt;
         }
 
         sqlite3_bind_int(statement, 1, id);
@@ -34,13 +36,13 @@ std::optional<User> UserRepository::findById(int id) const {
     return result;
 }
 
-std::optional<User> UserRepository::findByName(const std::string& name) const {
-    std::optional<User> result;
+optional<User> UserRepository::findByName(const string& name) const {
+    optional<User> result;
     if (hasDatabase()) {
         constexpr auto sql = "SELECT id, name, password, point FROM users WHERE name = ?";
         sqlite3_stmt* statement = nullptr;
         if (!sqlOk(sql, statement)) {
-            return std::nullopt;
+            return nullopt;
         }
 
         sqlBindText(statement, 1, name);

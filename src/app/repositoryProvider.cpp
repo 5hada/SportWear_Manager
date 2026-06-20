@@ -1,6 +1,4 @@
 #include "repositoryProvider.h"
-#include "database/repository/productRepository.h"
-#include "database/repository/reviewRepository.h"
 
 #include <filesystem>
 #include <array>
@@ -8,7 +6,7 @@
 
 
 
-RepositoryProvider::RepositoryProvider(const std::string& databasePath, const std::string& schemaPath):
+RepositoryProvider::RepositoryProvider(const string& databasePath, const string& schemaPath):
     user(&database),
     order(&database),
     product(&database),
@@ -24,7 +22,7 @@ RepositoryProvider::RepositoryProvider(const std::string& databasePath, const st
 
 
 
-std::string resolveSchemaPath(const std::string& schemaPath) {
+string resolveSchemaPath(const string& schemaPath) {
         namespace fs = std::filesystem;
         const fs::path requested(schemaPath);
         if (fs::exists(requested)) {
@@ -55,7 +53,7 @@ void RepositoryProvider::seedProducts() {
             return;
         }
 
-        std::set<std::string> existingNames;
+        std::set<string> existingNames;
         for (const auto& existingProduct : existingProducts) {
             existingNames.insert(existingProduct.getName());
         }
@@ -87,8 +85,8 @@ void RepositoryProvider::seedProducts() {
             const int nameIndex = (index / static_cast<int>(categorySeeds.size())) % categorySeed.names.size();
             const int variantIndex = (index / static_cast<int>(categorySeeds.size() * categorySeed.names.size())) % variants.size();
 
-            const std::string name =
-                std::string(variants[variantIndex]) + " " + categorySeed.names[nameIndex];
+            const string name =
+                string(variants[variantIndex]) + " " + categorySeed.names[nameIndex];
             if (existingNames.find(name) != existingNames.end()) {
                 continue;
             }

@@ -18,7 +18,7 @@ DatabaseManager& DatabaseManager::operator=(DatabaseManager&& other) noexcept {
     return *this;
 }
 
-bool DatabaseManager::open(const std::string& path) {
+bool DatabaseManager::open(const string& path) {
     close();
 
     const int result = sqlite3_open(path.c_str(), &db);
@@ -38,7 +38,7 @@ void DatabaseManager::close() {
     }
 }
 
-bool DatabaseManager::execute(const std::string& sql) {
+bool DatabaseManager::execute(const string& sql) {
     if (db == nullptr) {
         lastErrorMessage = "database is not open";
         return false;
@@ -56,7 +56,7 @@ bool DatabaseManager::execute(const std::string& sql) {
     return true;
 }
 
-bool DatabaseManager::executeFile(const std::string& path) {
+bool DatabaseManager::executeFile(const string& path) {
     std::ifstream file(path);
     if (!file.is_open()) {
         lastErrorMessage = "failed to open SQL file: " + path;
@@ -68,7 +68,7 @@ bool DatabaseManager::executeFile(const std::string& path) {
     return execute(buffer.str());
 }
 
-bool DatabaseManager::initialize(const std::string& databasePath, const std::string& schemaPath) {
+bool DatabaseManager::initialize(const string& databasePath, const string& schemaPath) {
     if (!open(databasePath)) {
         return false;
     }

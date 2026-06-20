@@ -16,13 +16,13 @@ public:
     AccountService(UserRepository* userRepo): userRepo(userRepo) {}
 
     int getUserId() const {return currentUser.getId();}
-    const std::string getUserName() const {return currentUser.getName();}
+    const string getUserName() const {return currentUser.getName();}
 
     void setUserRepo(UserRepository* userRepo) {this->userRepo = userRepo;}
 
-    bool login(const std::string& name, const std::string& password);
+    bool login(const string& name, const string& password);
     bool logout();
-    bool signup(const std::string& name, const std::string& password);
+    bool signup(const string& name, const string& password);
 
     bool isLoggedIn();
 

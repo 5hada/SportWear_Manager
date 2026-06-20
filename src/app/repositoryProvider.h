@@ -11,13 +11,15 @@
 
 #include <string>
 
+using std::string;
+
 class RepositoryProvider {
     bool databaseReady = false;
 
 
     void seedProducts();
 
-    static std::string resolveSchemaPath(const std::string& schemaPath);
+    static string resolveSchemaPath(const string& schemaPath);
 public:
     DatabaseManager database;
 
@@ -29,7 +31,7 @@ public:
     UserRepository user;
     WishRepository wish;
 
-    RepositoryProvider(const std::string& databasePath = "sportwear.db", const std::string& schemaPath = "schema.sql");
+    RepositoryProvider(const string& databasePath = "sportwear.db", const string& schemaPath = "schema.sql");
 
     bool isDatabaseReady() const {return databaseReady;}
 };

@@ -1,7 +1,6 @@
 #include "cartService.h"
 #include "database/repository/cartRepository.h"
 #include "database/repository/productRepository.h"
-#include <optional>
 
 
 Cart CartService::getCart(int userId) const {
@@ -18,7 +17,7 @@ Cart CartService::getCart(int userId) const {
     return cart;
 }
 
-bool CartService::add(int userId, int productId, int count, std::optional<bool> isSelected) {
+bool CartService::add(int userId, int productId, int count, optional<bool> isSelected) {
     auto product = productRepo->findById(productId);
     if (count <= 0 || !product.has_value()) {return false;}
 
@@ -36,7 +35,7 @@ bool CartService::add(int userId, int productId, int count, std::optional<bool> 
     return cartRepo->update(userId, productId, newCount, isSelected.value());
 }
 
-bool CartService::sub(int userId, int productId, int count, std::optional<bool> isSelected){
+bool CartService::sub(int userId, int productId, int count, optional<bool> isSelected){
     if (count <= 0 || !checkProductExist(productId)) {return false;}
     CartItem existingItem = cartRepo->findByProduct(userId, productId);
     if (existingItem.getId() < 0) {return false;}
@@ -51,7 +50,7 @@ bool CartService::sub(int userId, int productId, int count, std::optional<bool> 
     return cartRepo->update(userId, productId, newCount, isSelected.value());
 }
 
-bool CartService::set(int userId, int productId, int count, std::optional<bool> isSelected) {
+bool CartService::set(int userId, int productId, int count, optional<bool> isSelected) {
     auto product = productRepo->findById(productId);
     if (count <= 0 || !product.has_value() || count > product->getStock()) {return false;}
     if(isSelected == std::nullopt){
@@ -60,7 +59,7 @@ bool CartService::set(int userId, int productId, int count, std::optional<bool> 
     return cartRepo->update(userId, productId, count, isSelected.value());
 }
 
-bool CartService::toggle(int userId, int productId, std::optional<bool> isSelected) {
+bool CartService::toggle(int userId, int productId, optional<bool> isSelected) {
     if (!checkProductExist(productId)) {return false;}
     if (isSelected == std::nullopt) {return false;}
     return cartRepo->updateSelected(userId, productId, isSelected.value());
@@ -87,7 +86,7 @@ bool CartService::checkProductExist(int productId) const{
 
 
 
-bool CartService::handleCart(CartAction action, int userId, int productId, int count, std::optional<bool> isSelected){
+bool CartService::handleCart(CartAction action, int userId, int productId, int count, optional<bool> isSelected){
     if(!checkReposExist()){return false;}
     switch (action) {
         case CartAction::Add:

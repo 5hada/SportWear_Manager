@@ -1,5 +1,4 @@
 #include "orderRepository.h"
-#include "sqlite3.h"
 
 
 Items OrderRepository::findById(int receiptId) const{

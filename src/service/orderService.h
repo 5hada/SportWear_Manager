@@ -1,6 +1,6 @@
-
 #include "model/product/order.h"
 #include "model/product/receipt.h"
+
 class ReceiptRepository;
 class OrderRepository;
 class CartRepository;
@@ -10,13 +10,13 @@ class PointService;
 class OrderService{
     ReceiptRepository* receiptRepo{nullptr};
     OrderRepository* orderRepo{nullptr};
-    CartRepository* cartRepo{nullptr};
+    CartRepository* cartRepo{nullptr}; 
     ProductRepository* productRepo{nullptr};
 
     PointService* pointService{nullptr};
 
     Order currentOrder;
-    bool currentOrderFromCart{false};
+    bool currentOrderFromCart = false;
 
 public:
     OrderService(

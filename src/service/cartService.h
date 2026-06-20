@@ -1,7 +1,9 @@
-
 #include "model/product/cart.h"
 #include "model/actions.h"
+
 #include <optional>
+
+using std::optional;
 
 class CartRepository;
 class ProductRepository;
@@ -12,10 +14,10 @@ class CartService {
     bool checkReposExist() const;
     bool checkProductExist(int productId) const;
 
-    bool add(int userId, int productId, int count, std::optional<bool> isSelected);
-    bool sub(int userId, int productId, int count, std::optional<bool> isSelected);
-    bool set(int userId, int productId, int count, std::optional<bool> isSelected);
-    bool toggle(int userId, int productId, std::optional<bool> isSelected);
+    bool add(int userId, int productId, int count, optional<bool> isSelected);
+    bool sub(int userId, int productId, int count, optional<bool> isSelected);
+    bool set(int userId, int productId, int count, optional<bool> isSelected);
+    bool toggle(int userId, int productId, optional<bool> isSelected);
     bool del(int userId, int productId);
     bool clear(int userId);
 public:
@@ -34,5 +36,5 @@ public:
         int userId,
         int productId = 0,
         int count = 0,
-        std::optional<bool> isSelected = std::nullopt);
+        optional<bool> isSelected = std::nullopt);
 };

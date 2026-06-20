@@ -1,13 +1,14 @@
-
 #include"accountService.h"
+
 #include "database/repository/userRepository.h"
+
 #include <optional>
 
 bool AccountService::isLoggedIn() {
     return !currentUser.isGuest();
 }
 
-bool AccountService::login(const std::string &name, const std::string &password) {
+bool AccountService::login(const string &name, const string &password) {
     if (currentUser.getId() != 0) {return false;}
     auto user = userRepo->findByName(name);
     if (!user.has_value()) {return false;}
@@ -23,7 +24,7 @@ bool AccountService::logout(){
     return true;
 }
 
-bool AccountService::signup(const std::string &name, const std::string &password){
+bool AccountService::signup(const string &name, const string &password){
     if(userRepo == nullptr) {return false;}
     if(userRepo->findByName(name) != std::nullopt){return false;}
     User newUser(name, password);

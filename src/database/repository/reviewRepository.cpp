@@ -1,8 +1,9 @@
 #include "reviewRepository.h"
 
+using std::nullopt;
 
-std::vector<Review> ReviewRepository::findAll() const {
-    std::vector<Review> reviews{};
+Reviews ReviewRepository::findAll() const {
+    Reviews reviews{};
     if (hasDatabase()) {
         constexpr auto sql =
             "SELECT id, user_id, product_id, rating, comment FROM reviews ORDER BY id";
@@ -18,17 +19,17 @@ std::vector<Review> ReviewRepository::findAll() const {
     return reviews;
 }
 
-std::optional<Review> ReviewRepository::findById(int id) const {
-    if (!hasDatabase()) {return std::nullopt;}
+optional<Review> ReviewRepository::findById(int id) const {
+    if (!hasDatabase()) {return nullopt;}
 
     sqlite3_stmt* statement = nullptr;
     constexpr auto sql =
         "SELECT id, user_id, product_id, rating, comment FROM reviews WHERE id = ?";
     if (!sqlOk(sql, statement)) {
-        return std::nullopt;
+        return nullopt;
     }
 
-    std::optional<Review> review = std::nullopt;
+    optional<Review> review = nullopt;
     sqlite3_bind_int(statement, 1, id);
     if (sqlite3_step(statement) == SQLITE_ROW) {
         review = reviewFromStatement(statement);
@@ -37,11 +38,11 @@ std::optional<Review> ReviewRepository::findById(int id) const {
     return review;
 }
 
-std::vector<Review> ReviewRepository::findByProductId(int productId) const {
-    std::vector<Review> reviews{};
+Reviews ReviewRepository::findByProductId(int productId) const {
+    Reviews reviews{};
     if (!hasDatabase()) {return reviews;}
 
-    std::vector<Review> result;
+    Reviews result;
     constexpr auto sql =
         "SELECT id, user_id, product_id, rating, comment FROM reviews WHERE product_id = ? ORDER BY id";
     sqlite3_stmt* statement = nullptr;
@@ -55,11 +56,11 @@ std::vector<Review> ReviewRepository::findByProductId(int productId) const {
     return result;
 }
 
-std::vector<Review> ReviewRepository::findByUser(int userId) const {
-    std::vector<Review> reviews{};
+Reviews ReviewRepository::findByUser(int userId) const {
+    Reviews reviews{};
     if (!hasDatabase()) {return reviews;}
 
-    std::vector<Review> result;
+    Reviews result;
     constexpr auto sql =
         "SELECT id, user_id, product_id, rating, comment FROM reviews WHERE user_id = ? ORDER BY id";
     sqlite3_stmt* statement = nullptr;

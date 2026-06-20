@@ -1,6 +1,7 @@
 #pragma once
 
 #include "repositoryBase.h"
+
 #include "model/product/cart.h"
 
 class CartRepository: public RepositoryBase {

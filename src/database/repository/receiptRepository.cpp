@@ -1,8 +1,9 @@
 #include "receiptRepository.h"
-#include "sqlite3.h"
 
-std::vector<Receipt> ReceiptRepository::findByUser(int userId) const{
-    std::vector<Receipt> receipts{};
+using std::nullopt;
+
+vector<Receipt> ReceiptRepository::findByUser(int userId) const{
+    vector<Receipt> receipts{};
     if (hasDatabase()) {
         constexpr auto sql =
             "SELECT id, user_id, used_point, total_price, ordered_at, is_canceled, canceled_at "
@@ -23,8 +24,8 @@ std::vector<Receipt> ReceiptRepository::findByUser(int userId) const{
     return receipts;
 }
 
-std::optional<Receipt> ReceiptRepository::findById(int id) const{
-    std::optional<Receipt> receipt = std::nullopt;
+optional<Receipt> ReceiptRepository::findById(int id) const{
+    optional<Receipt> receipt = nullopt;
     if (hasDatabase()) {
         constexpr auto sql =
             "SELECT id, user_id, used_point, total_price, ordered_at, is_canceled, canceled_at "

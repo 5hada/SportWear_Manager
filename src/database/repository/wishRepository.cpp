@@ -1,8 +1,8 @@
 #include "wishRepository.h"
 
 
-std::vector<int> WishRepository::findByUser(int userId) const {
-    std::vector<int> productIds{};
+vector<int> WishRepository::findByUser(int userId) const {
+    vector<int> productIds{};
     if (hasDatabase()){
         constexpr auto sql =
             "SELECT product_id FROM wish_items WHERE user_id = ? ORDER BY id";
@@ -19,8 +19,8 @@ std::vector<int> WishRepository::findByUser(int userId) const {
     return productIds;
 }
 
-std::vector<int> WishRepository::findByProduct(int productId) const {
-    std::vector<int> productIds{};
+vector<int> WishRepository::findByProduct(int productId) const {
+    vector<int> productIds{};
     if (hasDatabase()) {
         constexpr auto sql =
             "SELECT user_id FROM wish_items WHERE product_id = ? ORDER BY id";

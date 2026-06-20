@@ -2,15 +2,12 @@
 
 #include "pointService.h"
 
-#include "model/product/cart.h"
-#include "model/product/receipt.h"
-
 #include "database/repository/receiptRepository.h"
 #include "database/repository/orderRepository.h"
 #include "database/repository/cartRepository.h"
 #include "database/repository/productRepository.h"
 
-#include <optional>
+#include "model/product/cart.h"
 
 Receipts OrderService::getReceipts(int userId) {
     if (userId == 0) {
