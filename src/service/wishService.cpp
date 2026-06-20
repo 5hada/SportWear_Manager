@@ -2,15 +2,16 @@
 
 #include "database/repository/productRepository.h"
 #include "database/repository/wishRepository.h"
-#include <optional>
+
+using std::nullopt;
 
 Products WishService::getWishs(int userId){
     Products wishs;
-    std::optional<Product> item;
+    optional<Product> item;
     if (userId > 0 && isRepoValid()){
         for(int id: wishRepo->findByUser(userId)){
             item = productRepo->findById(id);
-            if (item != std::nullopt){
+            if (item != nullopt){
                 wishs.emplace_back(item.value());
             }
         }
@@ -22,7 +23,7 @@ Products WishService::getWishs(int userId){
 bool WishService::add(int userId, int productId) {
     if (!isRepoValid()){return false;}
     if (userId <= 0) {return false;}
-    if (productRepo->findById(productId) == std::nullopt){return false;}
+    if (productRepo->findById(productId) == nullopt){return false;}
     return wishRepo->insert(userId, productId);
 }
 

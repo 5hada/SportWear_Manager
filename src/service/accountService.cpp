@@ -2,8 +2,6 @@
 
 #include "database/repository/userRepository.h"
 
-#include <optional>
-
 bool AccountService::isLoggedIn() {
     return !currentUser.isGuest();
 }

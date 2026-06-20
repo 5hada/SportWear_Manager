@@ -1,4 +1,5 @@
 #include "indexNavigation.h"
+
 #include "ElaText.h"
 #include "ElaLineEdit.h"
 #include "ElaIconButton.h"

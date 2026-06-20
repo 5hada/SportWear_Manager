@@ -1,6 +1,6 @@
 #include "productService.h"
-#include <optional>
 
+using std::nullopt;
 
 Products ProductService::getAll() const {
     if (!isRepoValid()) {
@@ -20,7 +20,7 @@ Products ProductService::getByCategory(Category category) const {
 }
 
 Product ProductService::getById(int id) const {
-   if (getOptById(id) != std::nullopt){
+   if (getOptById(id) != nullopt){
      return getOptById(id).value();
    }
    return Product();
@@ -29,7 +29,7 @@ Product ProductService::getById(int id) const {
 bool ProductService::add(const Product& product) {
     if (!isRepoValid()) {return false;}
     if (product.getPrice() < 0 || product.getStock() < 0 || product.getName().empty()) {return false;}
-    if (product.getId() <= 0 || getOptById(product.getId()) == std::nullopt){
+    if (product.getId() <= 0 || getOptById(product.getId()) == nullopt){
         return productRepo->insert(product);
     }
     return false;
@@ -75,11 +75,11 @@ bool ProductService::setStock(int productId, int stock) {
 
 
 bool ProductService::isExist(const Product& product) {
-    return !(getOptById(product.getId()) == std::nullopt);
+    return !(getOptById(product.getId()) == nullopt);
 }
 
 bool ProductService::isExist(int id) {
-    return getOptById(id) != std::nullopt;
+    return getOptById(id) != nullopt;
 }
 
 bool ProductService::isRepoValid() const{
@@ -88,9 +88,9 @@ bool ProductService::isRepoValid() const{
 
 
 
-std::optional<Product> ProductService::getOptById(int id) const {
+optional<Product> ProductService::getOptById(int id) const {
     if (!isRepoValid()) {
-        return std::nullopt;
+        return nullopt;
     }
     return productRepo->findById(id);
 }

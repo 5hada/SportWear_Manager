@@ -1,5 +1,6 @@
 #include "searchService.h"
 #include "productService.h"
+
 #include <sstream>
 
 
@@ -45,9 +46,9 @@ bool SearchService::searchProducts(const string& keyword) {
     if (productService == nullptr) {return false;}
     setSearchMode(SearchMode::Keyword);
     filteredProducts.clear();
-    std::vector<std::string> keywords;
+    vector<string> keywords;
     std::stringstream ss(keyword);
-    std::string word;
+    string word;
     while (ss >> word) {
         keywords.push_back(word);
     }
@@ -55,7 +56,7 @@ bool SearchService::searchProducts(const string& keyword) {
     for (const auto& product : productsPool) {
         bool matched = true;
         for (const auto& word : keywords) {
-            if (product.getName().find(word) == std::string::npos) {
+            if (product.getName().find(word) == string::npos) {
                 matched = false;
                 break;
             }

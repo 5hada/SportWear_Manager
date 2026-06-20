@@ -1,6 +1,6 @@
 #include "reviewService.h"
 
-bool ReviewService::add(int userId, int productId, int rating, const std::string &comment) {
+bool ReviewService::add(int userId, int productId, int rating, const string &comment) {
     if (!isRepoValid()|| rating < 1 || rating > 5) {
         return false;
     }
@@ -21,12 +21,12 @@ bool ReviewService::remove(int reviewId) {
     return reviewRepo->remove(reviewId);
 }
 
-std::optional<Review> ReviewService::getById(int reviewId) const {
+optional<Review> ReviewService::getById(int reviewId) const {
     if (!isRepoValid()) {return std::nullopt;}
     return reviewRepo->findById(reviewId);
 }
 
-std::vector<Review> ReviewService::getAllFromProduct(int productId) const {
+Reviews ReviewService::getAllFromProduct(int productId) const {
     if (!isRepoValid()) {return {};}
     return reviewRepo->findByProductId(productId);
 }

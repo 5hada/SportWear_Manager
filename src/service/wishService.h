@@ -1,4 +1,3 @@
-
 #include "model/product/product.h"
 
 class WishRepository;

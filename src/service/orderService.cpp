@@ -7,8 +7,6 @@
 #include "database/repository/cartRepository.h"
 #include "database/repository/productRepository.h"
 
-#include "model/product/cart.h"
-
 Receipts OrderService::getReceipts(int userId) {
     if (userId == 0) {
         Receipts receipt;

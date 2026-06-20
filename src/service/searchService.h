@@ -1,6 +1,6 @@
-
 #include "model/product/category.h"
 #include "model/product/product.h"
+
 #include <optional>
 
 using std::optional;
